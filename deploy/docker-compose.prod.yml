@@ -1,0 +1,105 @@
+# Production stack for the VPS.
+#
+# CI builds both images and publishes them to GHCR, so this file never builds
+# anything: it only pulls the tags the deploy job hands it.
+#
+#   API_IMAGE=ghcr.io/abmak/communityhubaddisweg/api:<sha> \
+#   WEB_IMAGE=ghcr.io/abmak/communityhubaddisweg/web:<sha> \
+#     docker compose -f docker-compose.prod.yml --profile tls up -d
+#
+# The real `.env` lives next to this file on the server and is never committed.
+name: community-hub
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-communityhub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is missing from .env}
+      POSTGRES_DB: ${POSTGRES_DB:-communityhub}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-communityhub} -d ${POSTGRES_DB:-communityhub}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    image: ${API_IMAGE:-ghcr.io/abmak/communityhubaddisweg/api:latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "4000"
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is missing from .env}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is missing from .env}
+      JWT_EXPIRES_IN_DAYS: ${JWT_EXPIRES_IN_DAYS:-7}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-}
+      CORS_EXTRA_ORIGINS: ${CORS_EXTRA_ORIGINS:-}
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-}
+      UPLOAD_DIR: ./uploads
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-25}
+      EVENTS_SYNC_MINUTES: ${EVENTS_SYNC_MINUTES:-180}
+      GEMINI_API_KEYS: ${GEMINI_API_KEYS:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash}
+      SMS_PROVIDER: ${SMS_PROVIDER:-console}
+      SMS_FROM: ${SMS_FROM:-CommunityHub}
+      KNOCK_API_KEY: ${KNOCK_API_KEY:-}
+      KNOCK_SMS_WORKFLOW: ${KNOCK_SMS_WORKFLOW:-phone-verification}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_FROM: ${TWILIO_FROM:-}
+    volumes:
+      - uploads:/app/backend/uploads
+    healthcheck:
+      # The API has no bare /health route; a read on a DB-backed collection
+      # proves both Express and PostgreSQL are answering.
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4000/api/categories').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  frontend:
+    image: ${WEB_IMAGE:-ghcr.io/abmak/communityhubaddisweg/web:latest}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      # Loopback by default: Caddy owns 80/443, and the API only sends Secure
+      # cookies in production, so the public entry point has to be HTTPS.
+      - "${WEB_BIND:-127.0.0.1}:${WEB_PORT:-8080}:80"
+
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["tls"]
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN is missing from .env (or run without --profile tls)}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  postgres-data:
+  uploads:
+  caddy-data:
+  caddy-config:

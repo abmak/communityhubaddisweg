@@ -1,0 +1,12 @@
+# Public entry point. Caddy fetches and renews the certificate for DOMAIN
+# automatically; websocket upgrades for /socket.io/ are proxied transparently.
+{$DOMAIN} {
+	encode gzip zstd
+
+	# Uploads can be large (voice notes, photos).
+	request_body {
+		max_size 32MB
+	}
+
+	reverse_proxy frontend:80
+}

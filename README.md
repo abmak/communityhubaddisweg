@@ -169,15 +169,44 @@ With `SMS_PROVIDER=console` (development only), verification and reset codes are
 - **Trending** is a recency-weighted score (`likes + 2 × comments + 3 × bookmarks`, divided by an age decay), not an all-time like count.
 - **Categories** are rows, not enums: admins create rooms from the dashboard, choose an icon and colour, and the category page, composer and filters pick them up automatically.
 
-## Deployment (Ubuntu VPS)
+## Deployment (Ubuntu VPS, Docker CI/CD)
 
-1. Point a DNS record at the VPS and install Docker + Compose.
-2. Clone the repository and create `.env` with `JWT_SECRET`, `CLIENT_ORIGIN=https://your-domain` and SMS credentials if needed.
-3. `docker compose up -d --build` then `docker compose exec backend npm run db:seed` once.
-4. Put Caddy or Nginx with Let's Encrypt in front of `127.0.0.1:8080`, proxying HTTP to HTTPS and forwarding websocket upgrades for `/socket.io/`.
-5. Back up the `postgres-data` and `uploads` volumes. For multi-instance deployments, move media to object storage and run migrations as a release step instead of on container start.
+Every push to `main` runs `.github/workflows/deploy.yml`: it builds both images, publishes
+`ghcr.io/abmak/communityhubaddisweg/api` and `…/web` tagged with the commit, copies the deploy
+files to the server and rolls the stack over SSH. `.github/workflows/ci.yml` still migrates a
+disposable PostgreSQL, seeds, typechecks and builds on every push and pull request.
 
-GitHub Actions (`.github/workflows/ci.yml`) runs migrations against a disposable PostgreSQL service, seeds, typechecks, builds both apps and builds both Docker images on each push and pull request.
+### One-time VPS setup
+
+1. Install Docker Engine + Compose v2 and open ports 80 and 443 (and 22 for the pipeline).
+2. Create the deploy directory (`/opt/communityhub` by default) and point your DNS `A` record at the VPS.
+3. Add these repository secrets under **Settings → Secrets and variables → Actions**:
+
+| Secret | Value |
+| --- | --- |
+| `VPS_HOST` | Server IP or hostname |
+| `VPS_USER` | SSH user with Docker access (`ubuntu`, `root`, or a deploy user) |
+| `VPS_SSH_KEY` | Private key whose public half is in that user's `authorized_keys` |
+| `VPS_PORT` | SSH port (optional, defaults to 22) |
+| `DEPLOY_PATH` | Directory for `.env` and the compose files (optional, defaults to `/opt/communityhub`) |
+
+The first run writes `.env` from `deploy/.env.example`, generates `POSTGRES_PASSWORD`, `DATABASE_URL`
+and `JWT_SECRET`, and starts Caddy on your domain once `DOMAIN` is set. Sign-in needs HTTPS because
+the API issues Secure cookies, so set `DOMAIN=addisweg.et` (or your host) in `$DEPLOY_PATH/.env`
+and run the workflow again — Caddy fetches the certificate automatically and proxies websockets.
+Seed the demo community once with
+`docker compose -f docker-compose.prod.yml exec backend npm run db:seed`.
+
+Run the pipeline by hand from **Actions → Deploy → Run workflow**. `.env` lives only on the server;
+the pipeline ships `deploy/docker-compose.prod.yml`, `deploy/Caddyfile`, `deploy/.env.example` and
+`deploy/deploy.sh` and never overwrites it. Migrations run when the API container starts.
+
+### Manual fallback
+
+`docker compose up -d --build` still works from a clone for a from-source deployment, followed by
+`docker compose exec backend npm run db:seed` once. Back up the `postgres-data` and `uploads`
+volumes; for multi-instance deployments move media to object storage and run migrations as a
+release step instead of on container start.
 
 ## Verification performed
 

@@ -1,0 +1,802 @@
+// አዲስ ወግ (Addis Weg) — PostgreSQL schema
+// Edit this file, then run `npm run db:migrate -- --name <change>`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CategoryKind {
+  DISCUSSION
+  MOVIE
+  BOOK
+  HIKE
+}
+
+enum MediaKind {
+  IMAGE
+  AUDIO
+}
+
+enum Difficulty {
+  EASY
+  MODERATE
+  HARD
+  EXPERT
+}
+
+enum PlaceKind {
+  CINEMA
+  THEATRE
+  HOTEL
+  HIKING
+  CAFE
+  RESTAURANT
+  GYM
+  STADIUM
+  GALLERY
+  LIBRARY
+}
+
+enum ReportTargetType {
+  POST
+  COMMENT
+  USER
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+enum NotificationType {
+  POST_LIKE
+  COMMENT
+  REPLY
+  COMMENT_LIKE
+  FOLLOW
+  MESSAGE
+  ANNOUNCEMENT
+  MOVIE_REVIEW
+  BOOK_REVIEW
+}
+
+enum VerificationType {
+  PHONE_VERIFICATION
+  PASSWORD_RESET
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  username           String    @unique
+  displayName        String
+  passwordHash       String
+  passwordChangedAt  DateTime?
+  bio                String?   @db.Text
+  avatarUrl          String?
+  coverUrl           String?
+  phone              String?   @unique
+  phoneVerifiedAt    DateTime?
+  // Slug of a RoleDefinition row. The three built-in slugs are USER, MODERATOR
+  // and ADMIN; administrators can add more from the dashboard.
+  role               String    @default("USER")
+  interests          String[]  @default([])
+  // "GREGORIAN" or "ETHIOPIAN": which calendar dates are shown in first.
+  calendarPreference String    @default("GREGORIAN")
+  showPresence       Boolean   @default(true)
+  lastSeenAt         DateTime?
+  banned             Boolean   @default(false)
+  suspendedAt        DateTime?
+  suspendedReason    String?   @db.Text
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  posts                 Post[]             @relation("PostAuthor")
+  comments              Comment[]
+  postLikes             PostLike[]
+  commentLikes          CommentLike[]
+  bookmarks             Bookmark[]
+  following             Follow[]           @relation("Follower")
+  followers             Follow[]           @relation("Following")
+  media                 Media[]
+  movieReviews          MovieReview[]
+  bookReviews           BookReview[]
+  messages              Message[]
+  conversationsAsFirst  Conversation[]     @relation("ConversationFirst")
+  conversationsAsSecond Conversation[]     @relation("ConversationSecond")
+  reportsFiled          Report[]           @relation("ReportReporter")
+  reportsResolved       Report[]           @relation("ReportResolver")
+  verificationCodes     VerificationCode[]
+  notifications         Notification[]     @relation("NotificationRecipient")
+  actorNotifications    Notification[]     @relation("NotificationActor")
+  eventsCreated         Event[]            @relation("EventCreator")
+  eventRsvps            EventRsvp[]
+  adminActions          AdminAction[]      @relation("AdminActionActor")
+  quizAttempts          QuizAttempt[]
+  quizSeen              QuizSeen[]
+  pollVotes             PollVote[]
+  jokeSessionsCreated   JokeSession[]      @relation("JokeSessionCreator")
+  jokes                 Joke[]
+  jokeLikes             JokeLike[]
+  jokeComments          JokeComment[]
+
+  @@index([createdAt(sort: Desc)])
+  @@index([role])
+}
+
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followingId, createdAt(sort: Desc)])
+}
+
+model Category {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  name        String       @unique
+  description String       @db.Text
+  icon        String       @default("MessageCircle")
+  color       String       @default("#0f766e")
+  kind        CategoryKind @default(DISCUSSION)
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+
+  posts  Post[]
+  events Event[]
+
+  @@index([sortOrder])
+}
+
+model Post {
+  id            String   @id @default(cuid())
+  authorId      String
+  categoryId    String
+  title         String?
+  body          String   @db.Text
+  likeCount     Int      @default(0)
+  commentCount  Int      @default(0)
+  bookmarkCount Int      @default(0)
+  shareCount    Int      @default(0)
+  viewCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  author        User           @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  category      Category       @relation(fields: [categoryId], references: [id])
+  media         Media[]
+  likes         PostLike[]
+  comments      Comment[]
+  bookmarks     Bookmark[]
+  movie         MovieDetail?
+  book          BookDetail?
+  hike          HikeDetail?
+  movieReviews  MovieReview[]
+  bookReviews   BookReview[]
+  notifications Notification[]
+  poll          Poll?
+
+  @@index([categoryId, createdAt(sort: Desc)])
+  @@index([authorId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+}
+
+// "Joke Time" runs in scheduled windows. While a session is open members share
+// jokes and react to each other; when it closes the day's top joke is ranked by
+// likes plus comments.
+model JokeSession {
+  id          String   @id @default(cuid())
+  title       String   @default("Joke Time")
+  opensAt     DateTime
+  closesAt    DateTime
+  createdAt   DateTime @default(now())
+  createdById String?
+
+  createdBy User?  @relation("JokeSessionCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  jokes     Joke[]
+
+  @@index([opensAt, closesAt])
+}
+
+model Joke {
+  id           String   @id @default(cuid())
+  sessionId    String
+  authorId     String
+  body         String   @db.Text
+  likeCount    Int      @default(0)
+  commentCount Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  session  JokeSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  author   User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes    JokeLike[]
+  comments JokeComment[]
+
+  @@index([sessionId, createdAt(sort: Desc)])
+}
+
+model JokeLike {
+  jokeId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  joke Joke @relation(fields: [jokeId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([jokeId, userId])
+}
+
+model JokeComment {
+  id        String    @id @default(cuid())
+  jokeId    String
+  authorId  String
+  body      String    @db.Text
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  joke   Joke @relation(fields: [jokeId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([jokeId, createdAt])
+}
+
+// A poll attached to a post: room discussion or standalone question. Every
+// vote is a row (one per member per poll), and option counts are denormalised
+// so results and realtime broadcasts stay a single read.
+model Poll {
+  id            String    @id @default(cuid())
+  postId        String    @unique
+  question      String    @db.Text
+  allowMultiple Boolean   @default(false)
+  endsAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  post    Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  options PollOption[]
+  votes   PollVote[]
+
+  @@index([createdAt])
+}
+
+model PollOption {
+  id        String @id @default(cuid())
+  pollId    String
+  label     String
+  sortOrder Int    @default(0)
+  voteCount Int    @default(0)
+
+  poll  Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes PollVote[]
+
+  @@index([pollId, sortOrder])
+}
+
+model PollVote {
+  id        String   @id @default(cuid())
+  pollId    String
+  optionId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  option PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId])
+  @@index([optionId])
+  @@index([userId])
+}
+
+model PostLike {
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model Bookmark {
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model Comment {
+  id         String    @id @default(cuid())
+  postId     String
+  authorId   String
+  parentId   String?
+  body       String    @db.Text
+  likeCount  Int       @default(0)
+  replyCount Int       @default(0)
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  post    Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author  User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent  Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[]     @relation("CommentReplies")
+  likes   CommentLike[]
+
+  @@index([postId, createdAt])
+  @@index([parentId])
+}
+
+model CommentLike {
+  commentId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([commentId, userId])
+}
+
+model Media {
+  id           String    @id @default(cuid())
+  ownerId      String
+  kind         MediaKind
+  url          String
+  thumbnailUrl String?
+  mimeType     String
+  sizeBytes    Int
+  width        Int?
+  height       Int?
+  durationMs   Int?
+  postId       String?
+  messageId    String?
+  createdAt    DateTime  @default(now())
+
+  owner   User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  message Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([messageId])
+  @@index([ownerId, createdAt])
+}
+
+model MovieDetail {
+  id         String  @id @default(cuid())
+  postId     String  @unique
+  movieTitle String
+  director   String?
+  year       Int?
+  genre      String?
+  synopsis   String? @db.Text
+  trailerUrl String?
+  posterUrl  String?
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model MovieReview {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  rating    Int
+  body      String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId, createdAt(sort: Desc)])
+}
+
+model BookDetail {
+  id        String  @id @default(cuid())
+  postId    String  @unique
+  bookTitle String
+  author    String?
+  genre     String?
+  synopsis  String? @db.Text
+  coverUrl  String?
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model BookReview {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  rating    Int
+  body      String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId, createdAt(sort: Desc)])
+}
+
+model HikeDetail {
+  id            String     @id @default(cuid())
+  postId        String     @unique
+  location      String
+  difficulty    Difficulty @default(MODERATE)
+  distanceKm    Float?
+  durationHours Float?
+  tips          String?    @db.Text
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Conversation {
+  id            String   @id @default(cuid())
+  user1Id       String
+  user2Id       String
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user1         User           @relation("ConversationFirst", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2         User           @relation("ConversationSecond", fields: [user2Id], references: [id], onDelete: Cascade)
+  messages      Message[]
+  notifications Notification[]
+
+  @@unique([user1Id, user2Id])
+  @@index([user1Id, lastMessageAt(sort: Desc)])
+  @@index([user2Id, lastMessageAt(sort: Desc)])
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String?   @db.Text
+  replyToId      String?
+  editedAt       DateTime?
+  deletedAt      DateTime?
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  replyTo      Message?     @relation("MessageReply", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies      Message[]    @relation("MessageReply")
+  media        Media[]
+
+  @@index([conversationId, createdAt(sort: Desc)])
+  @@index([conversationId, senderId, readAt])
+}
+
+model Notification {
+  id             String           @id @default(cuid())
+  userId         String
+  actorId        String?
+  type           NotificationType
+  body           String
+  postId         String?
+  conversationId String?
+  readAt         DateTime?
+  createdAt      DateTime         @default(now())
+
+  user         User          @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor        User?         @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  post         Post?         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt(sort: Desc)])
+}
+
+model Report {
+  id           String           @id @default(cuid())
+  reporterId   String
+  targetType   ReportTargetType
+  targetId     String
+  reason       String
+  details      String?          @db.Text
+  status       ReportStatus     @default(OPEN)
+  resolvedAt   DateTime?
+  resolvedById String?
+  createdAt    DateTime         @default(now())
+
+  reporter   User  @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  resolvedBy User? @relation("ReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([targetType, targetId])
+}
+
+// Every consequential action taken from the admin dashboard. Kept append-only
+// so the team can answer "who changed this, and why?" long after the fact.
+model AdminAction {
+  id         String   @id @default(cuid())
+  actorId    String
+  actorRole  String
+  action     String
+  targetType String
+  targetId   String?
+  summary    String   @db.Text
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  actor User @relation("AdminActionActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([actorId, createdAt(sort: Desc)])
+  @@index([targetType, targetId])
+}
+
+// Real-world venues members can discover, rate and talk about: cinemas,
+// theatres, hotels, trailheads, cafés and restaurants.
+model Place {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  kind        PlaceKind
+  city        String
+  area        String?
+  address     String?
+  description String    @db.Text
+  lat         Float
+  lng         Float
+  rating      Float     @default(0)
+  reviewCount Int       @default(0)
+  priceLevel  Int?
+  tags        String[]  @default([])
+  highlight   String?
+  featured    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  events Event[]
+
+  @@index([kind, city])
+  @@index([city, rating(sort: Desc)])
+  @@index([featured])
+}
+
+model VerificationCode {
+  id         String           @id @default(cuid())
+  userId     String
+  phone      String
+  codeHash   String
+  type       VerificationType
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int              @default(0)
+  createdAt  DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type, createdAt(sort: Desc)])
+}
+
+enum RsvpStatus {
+  GOING
+  INTERESTED
+}
+
+/// Two kinds of listing share one table: EVENTS are listings pulled in from an
+/// online source (cinema, theatre, football, concerts), MEETUPS are hosted by
+/// members. `kind` is what splits the Events page into its two tabs.
+enum EventKind {
+  EVENT
+  MEETUP
+}
+
+enum EventTopic {
+  CINEMA
+  THEATRE
+  SPORTS
+  MUSIC
+  FESTIVAL
+  COMMUNITY
+  OTHER
+}
+
+/// How an event source is fetched: a sports fixture API, a public Telegram
+/// channel preview page, or an RSS/Atom feed.
+enum EventSourceAdapter {
+  SPORTS_API
+  TELEGRAM
+  RSS
+  GEMINI
+}
+
+// Community meetups, watch parties, hikes, and group gatherings
+model Event {
+  id           String      @id @default(cuid())
+  slug         String      @unique
+  title        String
+  description  String      @db.Text
+  coverUrl     String?
+  startDate    DateTime
+  endDate      DateTime?
+  location     String?
+  lat          Float?
+  lng          Float?
+  placeId      String?
+  place        Place?      @relation(fields: [placeId], references: [id], onDelete: SetNull)
+  categoryId   String?
+  category     Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  creatorId    String
+  creator      User        @relation("EventCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  maxAttendees Int?
+  rsvps        EventRsvp[]
+  kind         EventKind   @default(MEETUP)
+  topic        EventTopic  @default(COMMUNITY)
+  // The competition a fixture belongs to ("English Premier League"), so the
+  // sports page can group fixtures without parsing the description.
+  competition  String?
+  // Club crests for the two sides, so the schedule reads like a fixture list.
+  homeLogo     String?
+  awayLogo     String?
+  sourceId     String?
+  source       EventSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  externalId   String?
+  sourceUrl    String?
+  importedAt   DateTime?
+  // Gemini wrote this listing's copy. A later regex-only sync must not
+  // overwrite it with the raw post text.
+  aiExtracted  Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([sourceId, externalId])
+  @@index([kind, startDate])
+  @@index([startDate])
+  @@index([competition, startDate])
+  @@index([categoryId])
+  @@index([placeId])
+  @@index([creatorId])
+}
+
+// One row per online feed that automatic event import reads. Admins add rows
+// here (sports league, Telegram channel, RSS feed) and can sync on demand.
+model EventSource {
+  id           String             @id @default(cuid())
+  key          String             @unique
+  name         String
+  adapter      EventSourceAdapter
+  topic        EventTopic         @default(OTHER)
+  config       Json               @default("{}")
+  enabled      Boolean            @default(true)
+  lastSyncAt   DateTime?
+  lastStatus   String?
+  lastError    String?
+  lastImported Int                @default(0)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  events Event[]
+
+  @@index([enabled])
+}
+
+// One row per Gemini key in the pool: how often it was used, how often it hit
+// its quota, and how long we should leave it alone. Written by lib/ai/gemini.ts
+// and read by the admin event-sources page.
+model AiKeyUsage {
+  id            String    @id @default(cuid())
+  keyIndex      Int       @unique
+  maskedKey     String
+  requests      Int       @default(0)
+  successes     Int       @default(0)
+  rateLimited   Int       @default(0)
+  failures      Int       @default(0)
+  tokens        Int       @default(0)
+  lastUsedAt    DateTime?
+  lastStatus    String?
+  lastError     String?   @db.Text
+  cooldownUntil DateTime?
+  // Model name -> ISO time until which that model is capped for this key.
+  // Survives restarts so a spent quota is not retried after every boot.
+  cooldowns     Json      @default("{}")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([lastUsedAt])
+}
+
+model EventRsvp {
+  id        String     @id @default(cuid())
+  eventId   String
+  userId    String
+  status    RsvpStatus @default(GOING)
+  createdAt DateTime   @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId, status])
+  @@index([userId])
+}
+
+// Editable role definitions. Permissions are capability ids from
+// server/src/lib/rbac.ts; the three built-in roles are seeded on boot and can
+// have their capabilities changed, but cannot be deleted.
+model RoleDefinition {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String   @unique
+  description String   @default("") @db.Text
+  permissions String[] @default([])
+  rank        Int      @default(10)
+  system      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([rank])
+}
+
+// "Let's Know Ethiopia" question pool.
+model QuizQuestion {
+  id           String   @id @default(cuid())
+  key          String   @unique
+  prompt       String   @db.Text
+  options      String[]
+  correctIndex Int
+  explanation  String?  @db.Text
+  category     String
+  difficulty   String   @default("MEDIUM")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  seenBy QuizSeen[]
+
+  @@index([category, active])
+}
+
+// One attempt per member per Ethiopian calendar day (Africa/Addis_Ababa).
+model QuizAttempt {
+  id          String    @id @default(cuid())
+  userId      String
+  day         String
+  questionIds String[]
+  answers     Int[]     @default([])
+  score       Int?
+  durationMs  Int?
+  startedAt   DateTime  @default(now())
+  expiresAt   DateTime
+  completedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
+  @@index([day, score(sort: Desc), durationMs])
+  @@index([userId, completedAt(sort: Desc)])
+}
+
+// Questions a member has already been served, so the daily ten stay fresh.
+model QuizSeen {
+  userId     String
+  questionId String
+  seenAt     DateTime @default(now())
+
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, questionId])
+  @@index([userId, seenAt(sort: Desc)])
+}

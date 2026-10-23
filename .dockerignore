@@ -1,0 +1,16 @@
+.git
+.github
+node_modules
+**/node_modules
+**/dist
+.devdb
+.tmp
+screenshots
+backend/uploads
+*.log
+.env
+.env.*
+!.env.example
+.vscode
+.idea
+README.md

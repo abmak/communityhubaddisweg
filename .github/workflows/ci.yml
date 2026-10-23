@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Types, migrations, build
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: communityhub
+          POSTGRES_PASSWORD: communityhub
+          POSTGRES_DB: communityhub
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U communityhub -d communityhub"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://communityhub:communityhub@localhost:5432/communityhub?schema=public
+      JWT_SECRET: ci-only-secret-please-replace-in-production-0123456789
+      CLIENT_ORIGIN: http://localhost:5173
+      SMS_PROVIDER: console
+      UPLOAD_DIR: ./uploads
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Generate Prisma client
+        run: npx prisma generate --schema backend/prisma/schema.prisma
+
+      - name: Apply database migrations
+        run: npx prisma migrate deploy --schema backend/prisma/schema.prisma
+
+      - name: Seed demo data
+        run: npm run db:seed
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+  docker:
+    name: Docker images
+    runs-on: ubuntu-latest
+    needs: verify
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build API image
+        run: docker build -f backend/Dockerfile -t community-hub-api:ci .
+      - name: Build web image
+        run: docker build -f frontend/Dockerfile -t community-hub-web:ci .

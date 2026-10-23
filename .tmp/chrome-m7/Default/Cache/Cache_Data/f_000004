@@ -1,0 +1,459 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/App.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6bac5798"; const Fragment = __vite__cjsImport0_react_jsxDevRuntime["Fragment"]; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+var _s = $RefreshSig$(), _s2 = $RefreshSig$(), _s3 = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6bac5798"; const useEffect = __vite__cjsImport3_react["useEffect"];
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation
+} from "/node_modules/.vite/deps/react-router-dom.js?v=6bac5798";
+import { useAuth } from "/src/store/auth.ts";
+import { AppLayout, ThemeManager } from "/src/components/Layout.tsx?t=1792506808571";
+import { ErrorBoundary } from "/src/components/ErrorBoundary.tsx?t=1792506730457";
+import { ToastViewport } from "/src/components/ToastViewport.tsx?t=1792505106396";
+import { Spinner } from "/src/components/ui.tsx?t=1792505106426";
+import { BrandMark, Wordmark } from "/src/components/Brand.tsx?t=1792506808385";
+import { LandingPage } from "/src/pages/Landing.tsx?t=1792564571350";
+import { LoginPage, RegisterPage } from "/src/pages/AuthPages.tsx?t=1792564571350";
+import { HomePage } from "/src/pages/Home.tsx?t=1792506808385";
+import { CategoriesPage } from "/src/pages/Categories.tsx?t=1792506808385";
+import { CategoryPage } from "/src/pages/CategoryPage.tsx?t=1792506808385";
+import { PostDetailPage } from "/src/pages/PostDetail.tsx?t=1792506809108";
+import { CreatePostPage } from "/src/pages/CreatePost.tsx?t=1792506808385";
+import { EditPostPage } from "/src/pages/EditPost.tsx?t=1792505106426";
+import { CinemaPage, BooksPage, HikingPage } from "/src/pages/Collections.tsx?t=1792505106426";
+import { MovieDetailPage, BookDetailPage, HikeDetailPage } from "/src/pages/ReviewDetails.tsx?t=1792506809146";
+import { ProfilePage } from "/src/pages/Profile.tsx?t=1792506809130";
+import { FollowListPage } from "/src/pages/FollowList.tsx?t=1792505106426";
+import { MessagesPage, ConversationPage } from "/src/pages/Messages.tsx?t=1792505106426";
+import { NotificationsPage } from "/src/pages/Notifications.tsx?t=1792505106426";
+import { ExplorePage } from "/src/pages/Explore.tsx?t=1792506808385";
+import { SearchPage } from "/src/pages/Search.tsx?t=1792506808385";
+import { BookmarksPage } from "/src/pages/Bookmarks.tsx?t=1792506730470";
+import { SettingsPage } from "/src/pages/Settings.tsx?t=1792506730656";
+import { AdminPage } from "/src/pages/Admin.tsx?t=1792505187629";
+import { NotFound } from "/src/pages/NotFound.tsx?t=1792506730639";
+function requireAuthNode(children, roles) {
+  return /* @__PURE__ */ jsxDEV(RequireAuth, { roles, children }, void 0, false, {
+    fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+    lineNumber: 57,
+    columnNumber: 10
+  }, this);
+}
+function RequireAuth({ children, roles }) {
+  _s();
+  const user = useAuth((state) => state.user);
+  const status = useAuth((state) => state.status);
+  const location = useLocation();
+  if (status !== "ready") {
+    return /* @__PURE__ */ jsxDEV("div", { className: "flex min-h-[50vh] items-center justify-center", children: /* @__PURE__ */ jsxDEV(Spinner, { className: "h-7 w-7" }, void 0, false, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+      lineNumber: 68,
+      columnNumber: 9
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+      lineNumber: 67,
+      columnNumber: 7
+    }, this);
+  }
+  if (!user) {
+    return /* @__PURE__ */ jsxDEV(Navigate, { to: "/login", replace: true, state: { from: `${location.pathname}${location.search}` } }, void 0, false, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+      lineNumber: 74,
+      columnNumber: 12
+    }, this);
+  }
+  if (roles && !roles.includes(user.role)) {
+    return /* @__PURE__ */ jsxDEV(Navigate, { to: "/home", replace: true }, void 0, false, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+      lineNumber: 78,
+      columnNumber: 12
+    }, this);
+  }
+  return /* @__PURE__ */ jsxDEV(Fragment, { children }, void 0, false, {
+    fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+    lineNumber: 81,
+    columnNumber: 10
+  }, this);
+}
+_s(RequireAuth, "JhFgrzAFl7ssDRj0P3wBLW3uvLE=", false, function() {
+  return [useAuth, useAuth, useLocation];
+});
+_c = RequireAuth;
+function ScrollToTop() {
+  _s2();
+  const location = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [location.pathname]);
+  return null;
+}
+_s2(ScrollToTop, "BXcZrDMM76mmm4zA8/QV5UbMNXE=", false, function() {
+  return [useLocation];
+});
+_c2 = ScrollToTop;
+function Splash() {
+  return /* @__PURE__ */ jsxDEV("div", { className: "flex min-h-screen flex-col items-center justify-center gap-4 bg-canvas", children: [
+    /* @__PURE__ */ jsxDEV(BrandMark, { className: "h-14 w-14", glow: true }, void 0, false, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+      lineNumber: 97,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Wordmark, {}, void 0, false, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+      lineNumber: 98,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Spinner, { className: "h-5 w-5" }, void 0, false, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+      lineNumber: 99,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+    lineNumber: 96,
+    columnNumber: 5
+  }, this);
+}
+_c3 = Splash;
+export default function App() {
+  _s3();
+  const bootstrap = useAuth((state) => state.bootstrap);
+  const status = useAuth((state) => state.status);
+  useEffect(() => {
+    void bootstrap();
+  }, [bootstrap]);
+  if (status === "idle" || status === "loading") {
+    return /* @__PURE__ */ jsxDEV(Splash, {}, void 0, false, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+      lineNumber: 113,
+      columnNumber: 12
+    }, this);
+  }
+  return /* @__PURE__ */ jsxDEV(ErrorBoundary, { children: /* @__PURE__ */ jsxDEV(BrowserRouter, { children: [
+    /* @__PURE__ */ jsxDEV(ThemeManager, {}, void 0, false, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+      lineNumber: 119,
+      columnNumber: 9
+    }, this),
+    /* @__PURE__ */ jsxDEV(ScrollToTop, {}, void 0, false, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+      lineNumber: 120,
+      columnNumber: 9
+    }, this),
+    /* @__PURE__ */ jsxDEV(Routes, { children: [
+      /* @__PURE__ */ jsxDEV(Route, { path: "/", element: /* @__PURE__ */ jsxDEV(LandingPage, {}, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+        lineNumber: 122,
+        columnNumber: 36
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+        lineNumber: 122,
+        columnNumber: 11
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "/login", element: /* @__PURE__ */ jsxDEV(LoginPage, {}, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+        lineNumber: 123,
+        columnNumber: 41
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+        lineNumber: 123,
+        columnNumber: 11
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "/register", element: /* @__PURE__ */ jsxDEV(RegisterPage, {}, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+        lineNumber: 124,
+        columnNumber: 44
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+        lineNumber: 124,
+        columnNumber: 11
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { element: /* @__PURE__ */ jsxDEV(AppLayout, {}, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+        lineNumber: 126,
+        columnNumber: 27
+      }, this), children: [
+        /* @__PURE__ */ jsxDEV(Route, { path: "/home", element: /* @__PURE__ */ jsxDEV(HomePage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 127,
+          columnNumber: 42
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 127,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/explore", element: /* @__PURE__ */ jsxDEV(ExplorePage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 128,
+          columnNumber: 45
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 128,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/categories", element: /* @__PURE__ */ jsxDEV(CategoriesPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 129,
+          columnNumber: 48
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 129,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/c/:slug", element: /* @__PURE__ */ jsxDEV(CategoryPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 130,
+          columnNumber: 45
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 130,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/posts/:id", element: /* @__PURE__ */ jsxDEV(PostDetailPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 132,
+          columnNumber: 47
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 132,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/posts/:id/edit", element: requireAuthNode(/* @__PURE__ */ jsxDEV(EditPostPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 133,
+          columnNumber: 68
+        }, this)) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 133,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/create", element: requireAuthNode(/* @__PURE__ */ jsxDEV(CreatePostPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 134,
+          columnNumber: 60
+        }, this)) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 134,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/cinema", element: /* @__PURE__ */ jsxDEV(CinemaPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 136,
+          columnNumber: 44
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 136,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/cinema/:postId", element: /* @__PURE__ */ jsxDEV(MovieDetailPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 137,
+          columnNumber: 52
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 137,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/books", element: /* @__PURE__ */ jsxDEV(BooksPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 138,
+          columnNumber: 43
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 138,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/books/:postId", element: /* @__PURE__ */ jsxDEV(BookDetailPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 139,
+          columnNumber: 51
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 139,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/hiking", element: /* @__PURE__ */ jsxDEV(HikingPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 140,
+          columnNumber: 44
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 140,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/hiking/:postId", element: /* @__PURE__ */ jsxDEV(HikeDetailPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 141,
+          columnNumber: 52
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 141,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/u/:username", element: /* @__PURE__ */ jsxDEV(ProfilePage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 143,
+          columnNumber: 49
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 143,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/u/:username/:tab", element: /* @__PURE__ */ jsxDEV(FollowListPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 144,
+          columnNumber: 54
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 144,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/search", element: /* @__PURE__ */ jsxDEV(SearchPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 146,
+          columnNumber: 44
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 146,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/messages", element: requireAuthNode(/* @__PURE__ */ jsxDEV(MessagesPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 147,
+          columnNumber: 62
+        }, this)) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 147,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/messages/:conversationId", element: requireAuthNode(/* @__PURE__ */ jsxDEV(ConversationPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 148,
+          columnNumber: 78
+        }, this)) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 148,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/notifications", element: requireAuthNode(/* @__PURE__ */ jsxDEV(NotificationsPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 149,
+          columnNumber: 67
+        }, this)) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 149,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/bookmarks", element: requireAuthNode(/* @__PURE__ */ jsxDEV(BookmarksPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 150,
+          columnNumber: 63
+        }, this)) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 150,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { path: "/settings", element: requireAuthNode(/* @__PURE__ */ jsxDEV(SettingsPage, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 151,
+          columnNumber: 62
+        }, this)) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 151,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(
+          Route,
+          {
+            path: "/admin",
+            element: requireAuthNode(/* @__PURE__ */ jsxDEV(AdminPage, {}, void 0, false, {
+              fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+              lineNumber: 154,
+              columnNumber: 40
+            }, this), ["ADMIN", "MODERATOR"])
+          },
+          void 0,
+          false,
+          {
+            fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+            lineNumber: 152,
+            columnNumber: 13
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDEV(Route, { path: "*", element: /* @__PURE__ */ jsxDEV(NotFound, {}, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 157,
+          columnNumber: 38
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+          lineNumber: 157,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+        lineNumber: 126,
+        columnNumber: 11
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+      lineNumber: 121,
+      columnNumber: 9
+    }, this),
+    /* @__PURE__ */ jsxDEV(ToastViewport, {}, void 0, false, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+      lineNumber: 160,
+      columnNumber: 9
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+    lineNumber: 118,
+    columnNumber: 7
+  }, this) }, void 0, false, {
+    fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx",
+    lineNumber: 117,
+    columnNumber: 5
+  }, this);
+}
+_s3(App, "D9Z/C0xkhMuZogZbwAy7uAmSbj0=", false, function() {
+  return [useAuth, useAuth];
+});
+_c4 = App;
+var _c, _c2, _c3, _c4;
+$RefreshReg$(_c, "RequireAuth");
+$RefreshReg$(_c2, "ScrollToTop");
+$RefreshReg$(_c3, "Splash");
+$RefreshReg$(_c4, "App");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/App.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJtYXBwaW5ncyI6IkFBcUNTLFNBd0JBLFVBeEJBOzs7Ozs7Ozs7Ozs7Ozs7OztBQXJDVCxTQUFTQSxpQkFBaUM7QUFDMUM7QUFBQSxFQUNFQztBQUFBQSxFQUNBQztBQUFBQSxFQUNBQztBQUFBQSxFQUNBQztBQUFBQSxFQUNBQztBQUFBQSxPQUNLO0FBRVAsU0FBU0MsZUFBZTtBQUN4QixTQUFTQyxXQUFXQyxvQkFBb0I7QUFDeEMsU0FBU0MscUJBQXFCO0FBQzlCLFNBQVNDLHFCQUFxQjtBQUM5QixTQUFTQyxlQUFlO0FBQ3hCLFNBQVNDLFdBQVdDLGdCQUFnQjtBQUNwQyxTQUFTQyxtQkFBbUI7QUFDNUIsU0FBU0MsV0FBV0Msb0JBQW9CO0FBQ3hDLFNBQVNDLGdCQUFnQjtBQUN6QixTQUFTQyxzQkFBc0I7QUFDL0IsU0FBU0Msb0JBQW9CO0FBQzdCLFNBQVNDLHNCQUFzQjtBQUMvQixTQUFTQyxzQkFBc0I7QUFDL0IsU0FBU0Msb0JBQW9CO0FBQzdCLFNBQVNDLFlBQVlDLFdBQVdDLGtCQUFrQjtBQUNsRCxTQUFTQyxpQkFBaUJDLGdCQUFnQkMsc0JBQXNCO0FBQ2hFLFNBQVNDLG1CQUFtQjtBQUM1QixTQUFTQyxzQkFBc0I7QUFDL0IsU0FBU0MsY0FBY0Msd0JBQXdCO0FBQy9DLFNBQVNDLHlCQUF5QjtBQUNsQyxTQUFTQyxtQkFBbUI7QUFDNUIsU0FBU0Msa0JBQWtCO0FBQzNCLFNBQVNDLHFCQUFxQjtBQUM5QixTQUFTQyxvQkFBb0I7QUFDN0IsU0FBU0MsaUJBQWlCO0FBQzFCLFNBQVNDLGdCQUFnQjtBQUV6QixTQUFTQyxnQkFBZ0JDLFVBQXFCQyxPQUFnQjtBQUM1RCxTQUFPLHVCQUFDLGVBQVksT0FBZUQsWUFBNUI7QUFBQTtBQUFBO0FBQUE7QUFBQSxTQUFxQztBQUM5QztBQUVBLFNBQVNFLFlBQVksRUFBRUYsVUFBVUMsTUFBK0MsR0FBRztBQUFBRSxLQUFBO0FBQ2pGLFFBQU1DLE9BQU92QyxRQUFRLENBQUN3QyxVQUFVQSxNQUFNRCxJQUFJO0FBQzFDLFFBQU1FLFNBQVN6QyxRQUFRLENBQUN3QyxVQUFVQSxNQUFNQyxNQUFNO0FBQzlDLFFBQU1DLFdBQVczQyxZQUFZO0FBRTdCLE1BQUkwQyxXQUFXLFNBQVM7QUFDdEIsV0FDRSx1QkFBQyxTQUFJLFdBQVUsaURBQ2IsaUNBQUMsV0FBUSxXQUFVLGFBQW5CO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0FBNEIsS0FEOUI7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQUVBO0FBQUEsRUFFSjtBQUVBLE1BQUksQ0FBQ0YsTUFBTTtBQUNULFdBQU8sdUJBQUMsWUFBUyxJQUFHLFVBQVMsU0FBTyxNQUFDLE9BQU8sRUFBRUksTUFBTSxHQUFHRCxTQUFTRSxRQUFRLEdBQUdGLFNBQVNHLE1BQU0sR0FBRyxLQUF0RjtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBQXdGO0FBQUEsRUFDakc7QUFFQSxNQUFJVCxTQUFTLENBQUNBLE1BQU1VLFNBQVNQLEtBQUtRLElBQUksR0FBRztBQUN2QyxXQUFPLHVCQUFDLFlBQVMsSUFBRyxTQUFRLFNBQU8sUUFBNUI7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQUE0QjtBQUFBLEVBQ3JDO0FBRUEsU0FBTyxtQ0FBR1osWUFBSDtBQUFBO0FBQUE7QUFBQTtBQUFBLFNBQVk7QUFDckI7QUFBQ0csR0F0QlFELGFBQVc7QUFBQSxVQUNMckMsU0FDRUEsU0FDRUQsV0FBVztBQUFBO0FBQUEsS0FIckJzQztBQXdCVCxTQUFTVyxjQUFjO0FBQUFDLE1BQUE7QUFDckIsUUFBTVAsV0FBVzNDLFlBQVk7QUFFN0JMLFlBQVUsTUFBTTtBQUNkd0QsV0FBT0MsU0FBUyxFQUFFQyxLQUFLLEdBQUdDLFVBQVUsVUFBVSxDQUFDO0FBQUEsRUFDakQsR0FBRyxDQUFDWCxTQUFTRSxRQUFRLENBQUM7QUFFdEIsU0FBTztBQUNUO0FBQUNLLElBUlFELGFBQVc7QUFBQSxVQUNEakQsV0FBVztBQUFBO0FBQUEsTUFEckJpRDtBQVVULFNBQVNNLFNBQVM7QUFDaEIsU0FDRSx1QkFBQyxTQUFJLFdBQVUsMEVBQ2I7QUFBQSwyQkFBQyxhQUFVLFdBQVUsYUFBWSxNQUFJLFFBQXJDO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0FBcUM7QUFBQSxJQUNyQyx1QkFBQyxjQUFEO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0FBUztBQUFBLElBQ1QsdUJBQUMsV0FBUSxXQUFVLGFBQW5CO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0FBNEI7QUFBQSxPQUg5QjtBQUFBO0FBQUE7QUFBQTtBQUFBLFNBSUE7QUFFSjtBQUFDQyxNQVJRRDtBQVVULHdCQUF3QkUsTUFBTTtBQUFBQyxNQUFBO0FBQzVCLFFBQU1DLFlBQVkxRCxRQUFRLENBQUN3QyxVQUFVQSxNQUFNa0IsU0FBUztBQUNwRCxRQUFNakIsU0FBU3pDLFFBQVEsQ0FBQ3dDLFVBQVVBLE1BQU1DLE1BQU07QUFFOUMvQyxZQUFVLE1BQU07QUFDZCxTQUFLZ0UsVUFBVTtBQUFBLEVBQ2pCLEdBQUcsQ0FBQ0EsU0FBUyxDQUFDO0FBRWQsTUFBSWpCLFdBQVcsVUFBVUEsV0FBVyxXQUFXO0FBQzdDLFdBQU8sdUJBQUMsWUFBRDtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBQU87QUFBQSxFQUNoQjtBQUVBLFNBQ0UsdUJBQUMsaUJBQ0MsaUNBQUMsaUJBQ0M7QUFBQSwyQkFBQyxrQkFBRDtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBQWE7QUFBQSxJQUNiLHVCQUFDLGlCQUFEO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0FBWTtBQUFBLElBQ1osdUJBQUMsVUFDQztBQUFBLDZCQUFDLFNBQU0sTUFBSyxLQUFJLFNBQVMsdUJBQUMsaUJBQUQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQUFZLEtBQXJDO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFBeUM7QUFBQSxNQUN6Qyx1QkFBQyxTQUFNLE1BQUssVUFBUyxTQUFTLHVCQUFDLGVBQUQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQUFVLEtBQXhDO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFBNEM7QUFBQSxNQUM1Qyx1QkFBQyxTQUFNLE1BQUssYUFBWSxTQUFTLHVCQUFDLGtCQUFEO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFBYSxLQUE5QztBQUFBO0FBQUE7QUFBQTtBQUFBLGFBQWtEO0FBQUEsTUFFbEQsdUJBQUMsU0FBTSxTQUFTLHVCQUFDLGVBQUQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQUFVLEdBQ3hCO0FBQUEsK0JBQUMsU0FBTSxNQUFLLFNBQVEsU0FBUyx1QkFBQyxjQUFEO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBUyxLQUF0QztBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQTBDO0FBQUEsUUFDMUMsdUJBQUMsU0FBTSxNQUFLLFlBQVcsU0FBUyx1QkFBQyxpQkFBRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQVksS0FBNUM7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUFnRDtBQUFBLFFBQ2hELHVCQUFDLFNBQU0sTUFBSyxlQUFjLFNBQVMsdUJBQUMsb0JBQUQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUFlLEtBQWxEO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBc0Q7QUFBQSxRQUN0RCx1QkFBQyxTQUFNLE1BQUssWUFBVyxTQUFTLHVCQUFDLGtCQUFEO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBYSxLQUE3QztBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQWlEO0FBQUEsUUFFakQsdUJBQUMsU0FBTSxNQUFLLGNBQWEsU0FBUyx1QkFBQyxvQkFBRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQWUsS0FBakQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUFxRDtBQUFBLFFBQ3JELHVCQUFDLFNBQU0sTUFBSyxtQkFBa0IsU0FBU1AsZ0JBQWdCLHVCQUFDLGtCQUFEO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBYSxDQUFHLEtBQXZFO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBeUU7QUFBQSxRQUN6RSx1QkFBQyxTQUFNLE1BQUssV0FBVSxTQUFTQSxnQkFBZ0IsdUJBQUMsb0JBQUQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUFlLENBQUcsS0FBakU7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUFtRTtBQUFBLFFBRW5FLHVCQUFDLFNBQU0sTUFBSyxXQUFVLFNBQVMsdUJBQUMsZ0JBQUQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUFXLEtBQTFDO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBOEM7QUFBQSxRQUM5Qyx1QkFBQyxTQUFNLE1BQUssbUJBQWtCLFNBQVMsdUJBQUMscUJBQUQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUFnQixLQUF2RDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQTJEO0FBQUEsUUFDM0QsdUJBQUMsU0FBTSxNQUFLLFVBQVMsU0FBUyx1QkFBQyxlQUFEO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBVSxLQUF4QztBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQTRDO0FBQUEsUUFDNUMsdUJBQUMsU0FBTSxNQUFLLGtCQUFpQixTQUFTLHVCQUFDLG9CQUFEO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBZSxLQUFyRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQXlEO0FBQUEsUUFDekQsdUJBQUMsU0FBTSxNQUFLLFdBQVUsU0FBUyx1QkFBQyxnQkFBRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQVcsS0FBMUM7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUE4QztBQUFBLFFBQzlDLHVCQUFDLFNBQU0sTUFBSyxtQkFBa0IsU0FBUyx1QkFBQyxvQkFBRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQWUsS0FBdEQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUEwRDtBQUFBLFFBRTFELHVCQUFDLFNBQU0sTUFBSyxnQkFBZSxTQUFTLHVCQUFDLGlCQUFEO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBWSxLQUFoRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQW9EO0FBQUEsUUFDcEQsdUJBQUMsU0FBTSxNQUFLLHFCQUFvQixTQUFTLHVCQUFDLG9CQUFEO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBZSxLQUF4RDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQTREO0FBQUEsUUFFNUQsdUJBQUMsU0FBTSxNQUFLLFdBQVUsU0FBUyx1QkFBQyxnQkFBRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQVcsS0FBMUM7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUE4QztBQUFBLFFBQzlDLHVCQUFDLFNBQU0sTUFBSyxhQUFZLFNBQVNBLGdCQUFnQix1QkFBQyxrQkFBRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQWEsQ0FBRyxLQUFqRTtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQW1FO0FBQUEsUUFDbkUsdUJBQUMsU0FBTSxNQUFLLDZCQUE0QixTQUFTQSxnQkFBZ0IsdUJBQUMsc0JBQUQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUFpQixDQUFHLEtBQXJGO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBdUY7QUFBQSxRQUN2Rix1QkFBQyxTQUFNLE1BQUssa0JBQWlCLFNBQVNBLGdCQUFnQix1QkFBQyx1QkFBRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQWtCLENBQUcsS0FBM0U7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUE2RTtBQUFBLFFBQzdFLHVCQUFDLFNBQU0sTUFBSyxjQUFhLFNBQVNBLGdCQUFnQix1QkFBQyxtQkFBRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQWMsQ0FBRyxLQUFuRTtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQXFFO0FBQUEsUUFDckUsdUJBQUMsU0FBTSxNQUFLLGFBQVksU0FBU0EsZ0JBQWdCLHVCQUFDLGtCQUFEO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBYSxDQUFHLEtBQWpFO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBbUU7QUFBQSxRQUNuRTtBQUFBLFVBQUM7QUFBQTtBQUFBLFlBQ0MsTUFBSztBQUFBLFlBQ0wsU0FBU0EsZ0JBQWdCLHVCQUFDLGVBQUQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFBVSxHQUFLLENBQUMsU0FBUyxXQUFXLENBQUM7QUFBQTtBQUFBLFVBRmhFO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxRQUVrRTtBQUFBLFFBR2xFLHVCQUFDLFNBQU0sTUFBSyxLQUFJLFNBQVMsdUJBQUMsY0FBRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQVMsS0FBbEM7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUFzQztBQUFBLFdBL0J4QztBQUFBO0FBQUE7QUFBQTtBQUFBLGFBZ0NBO0FBQUEsU0FyQ0Y7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQXNDQTtBQUFBLElBQ0EsdUJBQUMsbUJBQUQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQUFjO0FBQUEsT0ExQ2hCO0FBQUE7QUFBQTtBQUFBO0FBQUEsU0EyQ0EsS0E1Q0Y7QUFBQTtBQUFBO0FBQUE7QUFBQSxTQTZDQTtBQUVKO0FBQUN1QixJQTVEdUJELEtBQUc7QUFBQSxVQUNQeEQsU0FDSEEsT0FBTztBQUFBO0FBQUEsTUFGQXdEO0FBQUcsSUFBQUcsSUFBQUMsS0FBQUwsS0FBQU07QUFBQSxhQUFBRixJQUFBO0FBQUEsYUFBQUMsS0FBQTtBQUFBLGFBQUFMLEtBQUE7QUFBQSxhQUFBTSxLQUFBIiwibmFtZXMiOlsidXNlRWZmZWN0IiwiQnJvd3NlclJvdXRlciIsIk5hdmlnYXRlIiwiUm91dGUiLCJSb3V0ZXMiLCJ1c2VMb2NhdGlvbiIsInVzZUF1dGgiLCJBcHBMYXlvdXQiLCJUaGVtZU1hbmFnZXIiLCJFcnJvckJvdW5kYXJ5IiwiVG9hc3RWaWV3cG9ydCIsIlNwaW5uZXIiLCJCcmFuZE1hcmsiLCJXb3JkbWFyayIsIkxhbmRpbmdQYWdlIiwiTG9naW5QYWdlIiwiUmVnaXN0ZXJQYWdlIiwiSG9tZVBhZ2UiLCJDYXRlZ29yaWVzUGFnZSIsIkNhdGVnb3J5UGFnZSIsIlBvc3REZXRhaWxQYWdlIiwiQ3JlYXRlUG9zdFBhZ2UiLCJFZGl0UG9zdFBhZ2UiLCJDaW5lbWFQYWdlIiwiQm9va3NQYWdlIiwiSGlraW5nUGFnZSIsIk1vdmllRGV0YWlsUGFnZSIsIkJvb2tEZXRhaWxQYWdlIiwiSGlrZURldGFpbFBhZ2UiLCJQcm9maWxlUGFnZSIsIkZvbGxvd0xpc3RQYWdlIiwiTWVzc2FnZXNQYWdlIiwiQ29udmVyc2F0aW9uUGFnZSIsIk5vdGlmaWNhdGlvbnNQYWdlIiwiRXhwbG9yZVBhZ2UiLCJTZWFyY2hQYWdlIiwiQm9va21hcmtzUGFnZSIsIlNldHRpbmdzUGFnZSIsIkFkbWluUGFnZSIsIk5vdEZvdW5kIiwicmVxdWlyZUF1dGhOb2RlIiwiY2hpbGRyZW4iLCJyb2xlcyIsIlJlcXVpcmVBdXRoIiwiX3MiLCJ1c2VyIiwic3RhdGUiLCJzdGF0dXMiLCJsb2NhdGlvbiIsImZyb20iLCJwYXRobmFtZSIsInNlYXJjaCIsImluY2x1ZGVzIiwicm9sZSIsIlNjcm9sbFRvVG9wIiwiX3MyIiwid2luZG93Iiwic2Nyb2xsVG8iLCJ0b3AiLCJiZWhhdmlvciIsIlNwbGFzaCIsIl9jMyIsIkFwcCIsIl9zMyIsImJvb3RzdHJhcCIsIl9jIiwiX2MyIiwiX2M0Il0sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbIkFwcC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlRWZmZWN0LCB0eXBlIFJlYWN0Tm9kZSB9IGZyb20gXCJyZWFjdFwiO1xuaW1wb3J0IHtcbiAgQnJvd3NlclJvdXRlcixcbiAgTmF2aWdhdGUsXG4gIFJvdXRlLFxuICBSb3V0ZXMsXG4gIHVzZUxvY2F0aW9uLFxufSBmcm9tIFwicmVhY3Qtcm91dGVyLWRvbVwiO1xuaW1wb3J0IHR5cGUgeyBSb2xlIH0gZnJvbSBcIi4vdHlwZXNcIjtcbmltcG9ydCB7IHVzZUF1dGggfSBmcm9tIFwiLi9zdG9yZS9hdXRoXCI7XG5pbXBvcnQgeyBBcHBMYXlvdXQsIFRoZW1lTWFuYWdlciB9IGZyb20gXCIuL2NvbXBvbmVudHMvTGF5b3V0XCI7XG5pbXBvcnQgeyBFcnJvckJvdW5kYXJ5IH0gZnJvbSBcIi4vY29tcG9uZW50cy9FcnJvckJvdW5kYXJ5XCI7XG5pbXBvcnQgeyBUb2FzdFZpZXdwb3J0IH0gZnJvbSBcIi4vY29tcG9uZW50cy9Ub2FzdFZpZXdwb3J0XCI7XG5pbXBvcnQgeyBTcGlubmVyIH0gZnJvbSBcIi4vY29tcG9uZW50cy91aVwiO1xuaW1wb3J0IHsgQnJhbmRNYXJrLCBXb3JkbWFyayB9IGZyb20gXCIuL2NvbXBvbmVudHMvQnJhbmRcIjtcbmltcG9ydCB7IExhbmRpbmdQYWdlIH0gZnJvbSBcIi4vcGFnZXMvTGFuZGluZ1wiO1xuaW1wb3J0IHsgTG9naW5QYWdlLCBSZWdpc3RlclBhZ2UgfSBmcm9tIFwiLi9wYWdlcy9BdXRoUGFnZXNcIjtcbmltcG9ydCB7IEhvbWVQYWdlIH0gZnJvbSBcIi4vcGFnZXMvSG9tZVwiO1xuaW1wb3J0IHsgQ2F0ZWdvcmllc1BhZ2UgfSBmcm9tIFwiLi9wYWdlcy9DYXRlZ29yaWVzXCI7XG5pbXBvcnQgeyBDYXRlZ29yeVBhZ2UgfSBmcm9tIFwiLi9wYWdlcy9DYXRlZ29yeVBhZ2VcIjtcbmltcG9ydCB7IFBvc3REZXRhaWxQYWdlIH0gZnJvbSBcIi4vcGFnZXMvUG9zdERldGFpbFwiO1xuaW1wb3J0IHsgQ3JlYXRlUG9zdFBhZ2UgfSBmcm9tIFwiLi9wYWdlcy9DcmVhdGVQb3N0XCI7XG5pbXBvcnQgeyBFZGl0UG9zdFBhZ2UgfSBmcm9tIFwiLi9wYWdlcy9FZGl0UG9zdFwiO1xuaW1wb3J0IHsgQ2luZW1hUGFnZSwgQm9va3NQYWdlLCBIaWtpbmdQYWdlIH0gZnJvbSBcIi4vcGFnZXMvQ29sbGVjdGlvbnNcIjtcbmltcG9ydCB7IE1vdmllRGV0YWlsUGFnZSwgQm9va0RldGFpbFBhZ2UsIEhpa2VEZXRhaWxQYWdlIH0gZnJvbSBcIi4vcGFnZXMvUmV2aWV3RGV0YWlsc1wiO1xuaW1wb3J0IHsgUHJvZmlsZVBhZ2UgfSBmcm9tIFwiLi9wYWdlcy9Qcm9maWxlXCI7XG5pbXBvcnQgeyBGb2xsb3dMaXN0UGFnZSB9IGZyb20gXCIuL3BhZ2VzL0ZvbGxvd0xpc3RcIjtcbmltcG9ydCB7IE1lc3NhZ2VzUGFnZSwgQ29udmVyc2F0aW9uUGFnZSB9IGZyb20gXCIuL3BhZ2VzL01lc3NhZ2VzXCI7XG5pbXBvcnQgeyBOb3RpZmljYXRpb25zUGFnZSB9IGZyb20gXCIuL3BhZ2VzL05vdGlmaWNhdGlvbnNcIjtcbmltcG9ydCB7IEV4cGxvcmVQYWdlIH0gZnJvbSBcIi4vcGFnZXMvRXhwbG9yZVwiO1xuaW1wb3J0IHsgU2VhcmNoUGFnZSB9IGZyb20gXCIuL3BhZ2VzL1NlYXJjaFwiO1xuaW1wb3J0IHsgQm9va21hcmtzUGFnZSB9IGZyb20gXCIuL3BhZ2VzL0Jvb2ttYXJrc1wiO1xuaW1wb3J0IHsgU2V0dGluZ3NQYWdlIH0gZnJvbSBcIi4vcGFnZXMvU2V0dGluZ3NcIjtcbmltcG9ydCB7IEFkbWluUGFnZSB9IGZyb20gXCIuL3BhZ2VzL0FkbWluXCI7XG5pbXBvcnQgeyBOb3RGb3VuZCB9IGZyb20gXCIuL3BhZ2VzL05vdEZvdW5kXCI7XG5cbmZ1bmN0aW9uIHJlcXVpcmVBdXRoTm9kZShjaGlsZHJlbjogUmVhY3ROb2RlLCByb2xlcz86IFJvbGVbXSkge1xuICByZXR1cm4gPFJlcXVpcmVBdXRoIHJvbGVzPXtyb2xlc30+e2NoaWxkcmVufTwvUmVxdWlyZUF1dGg+O1xufVxuXG5mdW5jdGlvbiBSZXF1aXJlQXV0aCh7IGNoaWxkcmVuLCByb2xlcyB9OiB7IGNoaWxkcmVuOiBSZWFjdE5vZGU7IHJvbGVzPzogUm9sZVtdIH0pIHtcbiAgY29uc3QgdXNlciA9IHVzZUF1dGgoKHN0YXRlKSA9PiBzdGF0ZS51c2VyKTtcbiAgY29uc3Qgc3RhdHVzID0gdXNlQXV0aCgoc3RhdGUpID0+IHN0YXRlLnN0YXR1cyk7XG4gIGNvbnN0IGxvY2F0aW9uID0gdXNlTG9jYXRpb24oKTtcblxuICBpZiAoc3RhdHVzICE9PSBcInJlYWR5XCIpIHtcbiAgICByZXR1cm4gKFxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IG1pbi1oLVs1MHZoXSBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXJcIj5cbiAgICAgICAgPFNwaW5uZXIgY2xhc3NOYW1lPVwiaC03IHctN1wiIC8+XG4gICAgICA8L2Rpdj5cbiAgICApO1xuICB9XG5cbiAgaWYgKCF1c2VyKSB7XG4gICAgcmV0dXJuIDxOYXZpZ2F0ZSB0bz1cIi9sb2dpblwiIHJlcGxhY2Ugc3RhdGU9e3sgZnJvbTogYCR7bG9jYXRpb24ucGF0aG5hbWV9JHtsb2NhdGlvbi5zZWFyY2h9YCB9fSAvPjtcbiAgfVxuXG4gIGlmIChyb2xlcyAmJiAhcm9sZXMuaW5jbHVkZXModXNlci5yb2xlKSkge1xuICAgIHJldHVybiA8TmF2aWdhdGUgdG89XCIvaG9tZVwiIHJlcGxhY2UgLz47XG4gIH1cblxuICByZXR1cm4gPD57Y2hpbGRyZW59PC8+O1xufVxuXG5mdW5jdGlvbiBTY3JvbGxUb1RvcCgpIHtcbiAgY29uc3QgbG9jYXRpb24gPSB1c2VMb2NhdGlvbigpO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgd2luZG93LnNjcm9sbFRvKHsgdG9wOiAwLCBiZWhhdmlvcjogXCJpbnN0YW50XCIgfSk7XG4gIH0sIFtsb2NhdGlvbi5wYXRobmFtZV0pO1xuXG4gIHJldHVybiBudWxsO1xufVxuXG5mdW5jdGlvbiBTcGxhc2goKSB7XG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IG1pbi1oLXNjcmVlbiBmbGV4LWNvbCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgZ2FwLTQgYmctY2FudmFzXCI+XG4gICAgICA8QnJhbmRNYXJrIGNsYXNzTmFtZT1cImgtMTQgdy0xNFwiIGdsb3cgLz5cbiAgICAgIDxXb3JkbWFyayAvPlxuICAgICAgPFNwaW5uZXIgY2xhc3NOYW1lPVwiaC01IHctNVwiIC8+XG4gICAgPC9kaXY+XG4gICk7XG59XG5cbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIEFwcCgpIHtcbiAgY29uc3QgYm9vdHN0cmFwID0gdXNlQXV0aCgoc3RhdGUpID0+IHN0YXRlLmJvb3RzdHJhcCk7XG4gIGNvbnN0IHN0YXR1cyA9IHVzZUF1dGgoKHN0YXRlKSA9PiBzdGF0ZS5zdGF0dXMpO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgdm9pZCBib290c3RyYXAoKTtcbiAgfSwgW2Jvb3RzdHJhcF0pO1xuXG4gIGlmIChzdGF0dXMgPT09IFwiaWRsZVwiIHx8IHN0YXR1cyA9PT0gXCJsb2FkaW5nXCIpIHtcbiAgICByZXR1cm4gPFNwbGFzaCAvPjtcbiAgfVxuXG4gIHJldHVybiAoXG4gICAgPEVycm9yQm91bmRhcnk+XG4gICAgICA8QnJvd3NlclJvdXRlcj5cbiAgICAgICAgPFRoZW1lTWFuYWdlciAvPlxuICAgICAgICA8U2Nyb2xsVG9Ub3AgLz5cbiAgICAgICAgPFJvdXRlcz5cbiAgICAgICAgICA8Um91dGUgcGF0aD1cIi9cIiBlbGVtZW50PXs8TGFuZGluZ1BhZ2UgLz59IC8+XG4gICAgICAgICAgPFJvdXRlIHBhdGg9XCIvbG9naW5cIiBlbGVtZW50PXs8TG9naW5QYWdlIC8+fSAvPlxuICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL3JlZ2lzdGVyXCIgZWxlbWVudD17PFJlZ2lzdGVyUGFnZSAvPn0gLz5cblxuICAgICAgICAgIDxSb3V0ZSBlbGVtZW50PXs8QXBwTGF5b3V0IC8+fT5cbiAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL2hvbWVcIiBlbGVtZW50PXs8SG9tZVBhZ2UgLz59IC8+XG4gICAgICAgICAgICA8Um91dGUgcGF0aD1cIi9leHBsb3JlXCIgZWxlbWVudD17PEV4cGxvcmVQYWdlIC8+fSAvPlxuICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCIvY2F0ZWdvcmllc1wiIGVsZW1lbnQ9ezxDYXRlZ29yaWVzUGFnZSAvPn0gLz5cbiAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL2MvOnNsdWdcIiBlbGVtZW50PXs8Q2F0ZWdvcnlQYWdlIC8+fSAvPlxuXG4gICAgICAgICAgICA8Um91dGUgcGF0aD1cIi9wb3N0cy86aWRcIiBlbGVtZW50PXs8UG9zdERldGFpbFBhZ2UgLz59IC8+XG4gICAgICAgICAgICA8Um91dGUgcGF0aD1cIi9wb3N0cy86aWQvZWRpdFwiIGVsZW1lbnQ9e3JlcXVpcmVBdXRoTm9kZSg8RWRpdFBvc3RQYWdlIC8+KX0gLz5cbiAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL2NyZWF0ZVwiIGVsZW1lbnQ9e3JlcXVpcmVBdXRoTm9kZSg8Q3JlYXRlUG9zdFBhZ2UgLz4pfSAvPlxuXG4gICAgICAgICAgICA8Um91dGUgcGF0aD1cIi9jaW5lbWFcIiBlbGVtZW50PXs8Q2luZW1hUGFnZSAvPn0gLz5cbiAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL2NpbmVtYS86cG9zdElkXCIgZWxlbWVudD17PE1vdmllRGV0YWlsUGFnZSAvPn0gLz5cbiAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL2Jvb2tzXCIgZWxlbWVudD17PEJvb2tzUGFnZSAvPn0gLz5cbiAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL2Jvb2tzLzpwb3N0SWRcIiBlbGVtZW50PXs8Qm9va0RldGFpbFBhZ2UgLz59IC8+XG4gICAgICAgICAgICA8Um91dGUgcGF0aD1cIi9oaWtpbmdcIiBlbGVtZW50PXs8SGlraW5nUGFnZSAvPn0gLz5cbiAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL2hpa2luZy86cG9zdElkXCIgZWxlbWVudD17PEhpa2VEZXRhaWxQYWdlIC8+fSAvPlxuXG4gICAgICAgICAgICA8Um91dGUgcGF0aD1cIi91Lzp1c2VybmFtZVwiIGVsZW1lbnQ9ezxQcm9maWxlUGFnZSAvPn0gLz5cbiAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL3UvOnVzZXJuYW1lLzp0YWJcIiBlbGVtZW50PXs8Rm9sbG93TGlzdFBhZ2UgLz59IC8+XG5cbiAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL3NlYXJjaFwiIGVsZW1lbnQ9ezxTZWFyY2hQYWdlIC8+fSAvPlxuICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCIvbWVzc2FnZXNcIiBlbGVtZW50PXtyZXF1aXJlQXV0aE5vZGUoPE1lc3NhZ2VzUGFnZSAvPil9IC8+XG4gICAgICAgICAgICA8Um91dGUgcGF0aD1cIi9tZXNzYWdlcy86Y29udmVyc2F0aW9uSWRcIiBlbGVtZW50PXtyZXF1aXJlQXV0aE5vZGUoPENvbnZlcnNhdGlvblBhZ2UgLz4pfSAvPlxuICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCIvbm90aWZpY2F0aW9uc1wiIGVsZW1lbnQ9e3JlcXVpcmVBdXRoTm9kZSg8Tm90aWZpY2F0aW9uc1BhZ2UgLz4pfSAvPlxuICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCIvYm9va21hcmtzXCIgZWxlbWVudD17cmVxdWlyZUF1dGhOb2RlKDxCb29rbWFya3NQYWdlIC8+KX0gLz5cbiAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL3NldHRpbmdzXCIgZWxlbWVudD17cmVxdWlyZUF1dGhOb2RlKDxTZXR0aW5nc1BhZ2UgLz4pfSAvPlxuICAgICAgICAgICAgPFJvdXRlXG4gICAgICAgICAgICAgIHBhdGg9XCIvYWRtaW5cIlxuICAgICAgICAgICAgICBlbGVtZW50PXtyZXF1aXJlQXV0aE5vZGUoPEFkbWluUGFnZSAvPiwgW1wiQURNSU5cIiwgXCJNT0RFUkFUT1JcIl0pfVxuICAgICAgICAgICAgLz5cblxuICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCIqXCIgZWxlbWVudD17PE5vdEZvdW5kIC8+fSAvPlxuICAgICAgICAgIDwvUm91dGU+XG4gICAgICAgIDwvUm91dGVzPlxuICAgICAgICA8VG9hc3RWaWV3cG9ydCAvPlxuICAgICAgPC9Ccm93c2VyUm91dGVyPlxuICAgIDwvRXJyb3JCb3VuZGFyeT5cbiAgKTtcbn1cbiJdLCJmaWxlIjoiQzovVXNlcnMvYWJheW5laC5tZWtvbm5lbi9EZXNrdG9wL09MRCBGaWxlL2h0ZG9jcy9yZWFjdHByb2plY3QvY29tbXVuaXR5aHViL2NsaWVudC9zcmMvQXBwLnRzeCJ9

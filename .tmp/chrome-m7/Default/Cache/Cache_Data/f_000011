@@ -1,0 +1,286 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/EditPost.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=6bac5798"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=6bac5798"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useState = __vite__cjsImport3_react["useState"];
+import { Link, useNavigate, useParams } from "/node_modules/.vite/deps/react-router-dom.js?v=6bac5798";
+import { ArrowLeft, Loader2, Save } from "/node_modules/.vite/deps/lucide-react.js?v=6bac5798";
+import { useQuery } from "/src/hooks/useApi.ts";
+import { useAuth } from "/src/store/auth.ts";
+import { useUI } from "/src/store/ui.ts";
+import { api, apiError } from "/src/lib/api.ts";
+import { categoryPath, postPath } from "/src/lib/utils.ts?t=1792505106396";
+import { PageLoader } from "/src/components/ui.tsx?t=1792505106426";
+export function EditPostPage() {
+  _s();
+  const { id = "" } = useParams();
+  const navigate = useNavigate();
+  const user = useAuth((state) => state.user);
+  const pushToast = useUI((state) => state.pushToast);
+  const { data, loading, error } = useQuery(`/api/posts/${id}`);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [formError, setFormError] = useState(null);
+  useEffect(() => {
+    if (data?.post) {
+      setTitle(data.post.title ?? "");
+      setBody(data.post.body);
+    }
+  }, [data?.post]);
+  if (loading) return /* @__PURE__ */ jsxDEV(PageLoader, { label: "Opening the editor…" }, void 0, false, {
+    fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+    lineNumber: 50,
+    columnNumber: 23
+  }, this);
+  if (error || !data) {
+    return /* @__PURE__ */ jsxDEV("div", { className: "card p-8 text-center", children: [
+      /* @__PURE__ */ jsxDEV("p", { className: "font-display text-lg font-semibold text-ink", children: "This post could not be loaded." }, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+        lineNumber: 55,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-sm text-muted", children: error ?? "It may have been deleted." }, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+        lineNumber: 56,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Link, { to: "/home", className: "btn-primary mt-4", children: "Back to the feed" }, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+        lineNumber: 57,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+      lineNumber: 54,
+      columnNumber: 7
+    }, this);
+  }
+  const post = data.post;
+  const canEdit = user && (user.id === post.authorId || user.role === "ADMIN" || user.role === "MODERATOR");
+  if (!canEdit) {
+    return /* @__PURE__ */ jsxDEV("div", { className: "card p-8 text-center", children: [
+      /* @__PURE__ */ jsxDEV("p", { className: "font-display text-lg font-semibold text-ink", children: "You can only edit your own posts." }, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+        lineNumber: 71,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Link, { to: postPath(post), className: "btn-primary mt-4", children: "Back to the post" }, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+        lineNumber: 72,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+      lineNumber: 70,
+      columnNumber: 7
+    }, this);
+  }
+  const submit = async (event) => {
+    event.preventDefault();
+    if (!body.trim()) {
+      setFormError("Posts cannot be empty.");
+      return;
+    }
+    setBusy(true);
+    setFormError(null);
+    try {
+      await api.patch(`/api/posts/${post.id}`, {
+        title: title.trim() || null,
+        body: body.trim()
+      });
+      pushToast("Post updated.", { tone: "success" });
+      navigate(postPath(post));
+    } catch (err) {
+      setFormError(apiError(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return /* @__PURE__ */ jsxDEV("div", { className: "mx-auto max-w-3xl space-y-4", children: [
+    /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between", children: [
+      /* @__PURE__ */ jsxDEV("button", { type: "button", className: "btn-ghost btn-sm", onClick: () => navigate(-1), children: [
+        /* @__PURE__ */ jsxDEV(ArrowLeft, { className: "h-3.5 w-3.5" }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+          lineNumber: 105,
+          columnNumber: 11
+        }, this),
+        " Back"
+      ] }, void 0, true, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+        lineNumber: 104,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Link, { to: categoryPath(post.category), className: "text-xs font-medium text-muted hover:text-ink", children: post.category.name }, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+        lineNumber: 107,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+      lineNumber: 103,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("form", { onSubmit: submit, className: "card p-5 sm:p-6", children: [
+      /* @__PURE__ */ jsxDEV("h1", { className: "font-display text-2xl font-semibold text-ink", children: "Edit your conversation" }, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+        lineNumber: 113,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-sm text-muted", children: "You can update the title and text. Attachments stay as they were." }, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+        lineNumber: 114,
+        columnNumber: 9
+      }, this),
+      formError && /* @__PURE__ */ jsxDEV("div", { className: "mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300", children: formError }, void 0, false, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+        lineNumber: 119,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "mt-5 space-y-4", children: [
+        /* @__PURE__ */ jsxDEV("div", { children: [
+          /* @__PURE__ */ jsxDEV("label", { htmlFor: "edit-title", className: "label", children: "Title" }, void 0, false, {
+            fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+            lineNumber: 126,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV(
+            "input",
+            {
+              id: "edit-title",
+              value: title,
+              onChange: (event) => setTitle(event.target.value),
+              maxLength: 160,
+              className: "input",
+              placeholder: "Optional title"
+            },
+            void 0,
+            false,
+            {
+              fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+              lineNumber: 127,
+              columnNumber: 13
+            },
+            this
+          )
+        ] }, void 0, true, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+          lineNumber: 125,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { children: [
+          /* @__PURE__ */ jsxDEV("label", { htmlFor: "edit-body", className: "label", children: "Post" }, void 0, false, {
+            fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+            lineNumber: 137,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV(
+            "textarea",
+            {
+              id: "edit-body",
+              value: body,
+              onChange: (event) => setBody(event.target.value),
+              rows: 10,
+              maxLength: 1e4,
+              className: "input resize-y leading-7"
+            },
+            void 0,
+            false,
+            {
+              fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+              lineNumber: 138,
+              columnNumber: 13
+            },
+            this
+          ),
+          /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-right text-[10px] text-muted", children: [
+            body.length,
+            "/10000"
+          ] }, void 0, true, {
+            fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+            lineNumber: 146,
+            columnNumber: 13
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+          lineNumber: 136,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+        lineNumber: 124,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "mt-5 flex justify-end gap-2 border-t border-line pt-4", children: [
+        /* @__PURE__ */ jsxDEV("button", { type: "button", className: "btn-secondary", onClick: () => navigate(-1), disabled: busy, children: "Cancel" }, void 0, false, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+          lineNumber: 151,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("button", { type: "submit", className: "btn-primary", disabled: busy || !body.trim(), children: [
+          busy ? /* @__PURE__ */ jsxDEV(Loader2, { className: "h-4 w-4 animate-spin" }, void 0, false, {
+            fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+            lineNumber: 155,
+            columnNumber: 21
+          }, this) : /* @__PURE__ */ jsxDEV(Save, { className: "h-4 w-4" }, void 0, false, {
+            fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+            lineNumber: 155,
+            columnNumber: 68
+          }, this),
+          "Save changes"
+        ] }, void 0, true, {
+          fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+          lineNumber: 154,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+        lineNumber: 150,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+      lineNumber: 112,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx",
+    lineNumber: 102,
+    columnNumber: 5
+  }, this);
+}
+_s(EditPostPage, "LmwXxjk8VoWvKrK/m3WIDb63C3Q=", false, function() {
+  return [useParams, useNavigate, useAuth, useUI, useQuery];
+});
+_c = EditPostPage;
+var _c;
+$RefreshReg$(_c, "EditPostPage");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/abayneh.mekonnen/Desktop/OLD File/htdocs/reactproject/communityhub/client/src/pages/EditPost.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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TUFBSyxzQkFBNUY7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUVBO0FBQUEsUUFDQSx1QkFBQyxZQUFPLE1BQUssVUFBUyxXQUFVLGVBQWMsVUFBVUEsUUFBUSxDQUFDRixLQUFLYSxLQUFLLEdBQ3hFWDtBQUFBQSxpQkFBTyx1QkFBQyxXQUFRLFdBQVUsMEJBQW5CO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBQXlDLElBQU0sdUJBQUMsUUFBSyxXQUFVLGFBQWhCO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBQXlCO0FBQUEsVUFBRztBQUFBLGFBRHJGO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFHQTtBQUFBLFdBUEY7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQVFBO0FBQUEsU0E5Q0Y7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQStDQTtBQUFBLE9BekRGO0FBQUE7QUFBQTtBQUFBO0FBQUEsU0EwREE7QUFFSjtBQUFDYixHQW5JZUQsY0FBWTtBQUFBLFVBQ05aLFdBQ0hELGFBQ0pNLFNBQ0tDLE9BQ2VGLFFBQVE7QUFBQTtBQUFBLEtBTDNCUTtBQUFZLElBQUFrQztBQUFBLGFBQUFBLElBQUEiLCJuYW1lcyI6WyJ1c2VFZmZlY3QiLCJ1c2VTdGF0ZSIsIkxpbmsiLCJ1c2VOYXZpZ2F0ZSIsInVzZVBhcmFtcyIsIkFycm93TGVmdCIsIkxvYWRlcjIiLCJTYXZlIiwidXNlUXVlcnkiLCJ1c2VBdXRoIiwidXNlVUkiLCJhcGkiLCJhcGlFcnJvciIsImNhdGVnb3J5UGF0aCIsInBvc3RQYXRoIiwiUGFnZUxvYWRlciIsIkVkaXRQb3N0UGFnZSIsIl9zIiwiaWQiLCJuYXZpZ2F0ZSIsInVzZXIiLCJzdGF0ZSIsInB1c2hUb2FzdCIsImRhdGEiLCJsb2FkaW5nIiwiZXJyb3IiLCJ0aXRsZSIsInNldFRpdGxlIiwiYm9keSIsInNldEJvZHkiLCJidXN5Iiwic2V0QnVzeSIsImZvcm1FcnJvciIsInNldEZvcm1FcnJvciIsInBvc3QiLCJjYW5FZGl0IiwiYXV0aG9ySWQiLCJyb2xlIiwic3VibWl0IiwiZXZlbnQiLCJwcmV2ZW50RGVmYXVsdCIsInRyaW0iLCJwYXRjaCIsInRvbmUiLCJlcnIiLCJjYXRlZ29yeSIsIm5hbWUiLCJ0YXJnZXQiLCJ2YWx1ZSIsImxlbmd0aCIsIl9jIl0sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbIkVkaXRQb3N0LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyB1c2VFZmZlY3QsIHVzZVN0YXRlLCB0eXBlIEZvcm1FdmVudCB9IGZyb20gXCJyZWFjdFwiO1xuaW1wb3J0IHsgTGluaywgdXNlTmF2aWdhdGUsIHVzZVBhcmFtcyB9IGZyb20gXCJyZWFjdC1yb3V0ZXItZG9tXCI7XG5pbXBvcnQgeyBBcnJvd0xlZnQsIExvYWRlcjIsIFNhdmUgfSBmcm9tIFwibHVjaWRlLXJlYWN0XCI7XG5pbXBvcnQgdHlwZSB7IFBvc3QgfSBmcm9tIFwiLi4vdHlwZXNcIjtcbmltcG9ydCB7IHVzZVF1ZXJ5IH0gZnJvbSBcIi4uL2hvb2tzL3VzZUFwaVwiO1xuaW1wb3J0IHsgdXNlQXV0aCB9IGZyb20gXCIuLi9zdG9yZS9hdXRoXCI7XG5pbXBvcnQgeyB1c2VVSSB9IGZyb20gXCIuLi9zdG9yZS91aVwiO1xuaW1wb3J0IHsgYXBpLCBhcGlFcnJvciB9IGZyb20gXCIuLi9saWIvYXBpXCI7XG5pbXBvcnQgeyBjYXRlZ29yeVBhdGgsIHBvc3RQYXRoIH0gZnJvbSBcIi4uL2xpYi91dGlsc1wiO1xuaW1wb3J0IHsgUGFnZUxvYWRlciB9IGZyb20gXCIuLi9jb21wb25lbnRzL3VpXCI7XG5cbmV4cG9ydCBmdW5jdGlvbiBFZGl0UG9zdFBhZ2UoKSB7XG4gIGNvbnN0IHsgaWQgPSBcIlwiIH0gPSB1c2VQYXJhbXMoKTtcbiAgY29uc3QgbmF2aWdhdGUgPSB1c2VOYXZpZ2F0ZSgpO1xuICBjb25zdCB1c2VyID0gdXNlQXV0aCgoc3RhdGUpID0+IHN0YXRlLnVzZXIpO1xuICBjb25zdCBwdXNoVG9hc3QgPSB1c2VVSSgoc3RhdGUpID0+IHN0YXRlLnB1c2hUb2FzdCk7XG4gIGNvbnN0IHsgZGF0YSwgbG9hZGluZywgZXJyb3IgfSA9IHVzZVF1ZXJ5PHsgcG9zdDogUG9zdCB9PihgL2FwaS9wb3N0cy8ke2lkfWApO1xuXG4gIGNvbnN0IFt0aXRsZSwgc2V0VGl0bGVdID0gdXNlU3RhdGUoXCJcIik7XG4gIGNvbnN0IFtib2R5LCBzZXRCb2R5XSA9IHVzZVN0YXRlKFwiXCIpO1xuICBjb25zdCBbYnVzeSwgc2V0QnVzeV0gPSB1c2VTdGF0ZShmYWxzZSk7XG4gIGNvbnN0IFtmb3JtRXJyb3IsIHNldEZvcm1FcnJvcl0gPSB1c2VTdGF0ZTxzdHJpbmcgfCBudWxsPihudWxsKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGlmIChkYXRhPy5wb3N0KSB7XG4gICAgICBzZXRUaXRsZShkYXRhLnBvc3QudGl0bGUgPz8gXCJcIik7XG4gICAgICBzZXRCb2R5KGRhdGEucG9zdC5ib2R5KTtcbiAgICB9XG4gIH0sIFtkYXRhPy5wb3N0XSk7XG5cbiAgaWYgKGxvYWRpbmcpIHJldHVybiA8UGFnZUxvYWRlciBsYWJlbD1cIk9wZW5pbmcgdGhlIGVkaXRvcuKAplwiIC8+O1xuXG4gIGlmIChlcnJvciB8fCAhZGF0YSkge1xuICAgIHJldHVybiAoXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImNhcmQgcC04IHRleHQtY2VudGVyXCI+XG4gICAgICAgIDxwIGNsYXNzTmFtZT1cImZvbnQtZGlzcGxheSB0ZXh0LWxnIGZvbnQtc2VtaWJvbGQgdGV4dC1pbmtcIj5UaGlzIHBvc3QgY291bGQgbm90IGJlIGxvYWRlZC48L3A+XG4gICAgICAgIDxwIGNsYXNzTmFtZT1cIm10LTEgdGV4dC1zbSB0ZXh0LW11dGVkXCI+e2Vycm9yID8/IFwiSXQgbWF5IGhhdmUgYmVlbiBkZWxldGVkLlwifTwvcD5cbiAgICAgICAgPExpbmsgdG89XCIvaG9tZVwiIGNsYXNzTmFtZT1cImJ0bi1wcmltYXJ5IG10LTRcIj5cbiAgICAgICAgICBCYWNrIHRvIHRoZSBmZWVkXG4gICAgICAgIDwvTGluaz5cbiAgICAgIDwvZGl2PlxuICAgICk7XG4gIH1cblxuICBjb25zdCBwb3N0ID0gZGF0YS5wb3N0O1xuICBjb25zdCBjYW5FZGl0ID1cbiAgICB1c2VyICYmICh1c2VyLmlkID09PSBwb3N0LmF1dGhvcklkIHx8IHVzZXIucm9sZSA9PT0gXCJBRE1JTlwiIHx8IHVzZXIucm9sZSA9PT0gXCJNT0RFUkFUT1JcIik7XG5cbiAgaWYgKCFjYW5FZGl0KSB7XG4gICAgcmV0dXJuIChcbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiY2FyZCBwLTggdGV4dC1jZW50ZXJcIj5cbiAgICAgICAgPHAgY2xhc3NOYW1lPVwiZm9udC1kaXNwbGF5IHRleHQtbGcgZm9udC1zZW1pYm9sZCB0ZXh0LWlua1wiPllvdSBjYW4gb25seSBlZGl0IHlvdXIgb3duIHBvc3RzLjwvcD5cbiAgICAgICAgPExpbmsgdG89e3Bvc3RQYXRoKHBvc3QpfSBjbGFzc05hbWU9XCJidG4tcHJpbWFyeSBtdC00XCI+XG4gICAgICAgICAgQmFjayB0byB0aGUgcG9zdFxuICAgICAgICA8L0xpbms+XG4gICAgICA8L2Rpdj5cbiAgICApO1xuICB9XG5cbiAgY29uc3Qgc3VibWl0ID0gYXN5bmMgKGV2ZW50OiBGb3JtRXZlbnQpID0+IHtcbiAgICBldmVudC5wcmV2ZW50RGVmYXVsdCgpO1xuICAgIGlmICghYm9keS50cmltKCkpIHtcbiAgICAgIHNldEZvcm1FcnJvcihcIlBvc3RzIGNhbm5vdCBiZSBlbXB0eS5cIik7XG4gICAgICByZXR1cm47XG4gICAgfVxuICAgIHNldEJ1c3kodHJ1ZSk7XG4gICAgc2V0Rm9ybUVycm9yKG51bGwpO1xuICAgIHRyeSB7XG4gICAgICBhd2FpdCBhcGkucGF0Y2goYC9hcGkvcG9zdHMvJHtwb3N0LmlkfWAsIHtcbiAgICAgICAgdGl0bGU6IHRpdGxlLnRyaW0oKSB8fCBudWxsLFxuICAgICAgICBib2R5OiBib2R5LnRyaW0oKSxcbiAgICAgIH0pO1xuICAgICAgcHVzaFRvYXN0KFwiUG9zdCB1cGRhdGVkLlwiLCB7IHRvbmU6IFwic3VjY2Vzc1wiIH0pO1xuICAgICAgbmF2aWdhdGUocG9zdFBhdGgocG9zdCkpO1xuICAgIH0gY2F0Y2ggKGVycikge1xuICAgICAgc2V0Rm9ybUVycm9yKGFwaUVycm9yKGVycikpO1xuICAgIH0gZmluYWxseSB7XG4gICAgICBzZXRCdXN5KGZhbHNlKTtcbiAgICB9XG4gIH07XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT1cIm14LWF1dG8gbWF4LXctM3hsIHNwYWNlLXktNFwiPlxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgPGJ1dHRvbiB0eXBlPVwiYnV0dG9uXCIgY2xhc3NOYW1lPVwiYnRuLWdob3N0IGJ0bi1zbVwiIG9uQ2xpY2s9eygpID0+IG5hdmlnYXRlKC0xKX0+XG4gICAgICAgICAgPEFycm93TGVmdCBjbGFzc05hbWU9XCJoLTMuNSB3LTMuNVwiIC8+IEJhY2tcbiAgICAgICAgPC9idXR0b24+XG4gICAgICAgIDxMaW5rIHRvPXtjYXRlZ29yeVBhdGgocG9zdC5jYXRlZ29yeSl9IGNsYXNzTmFtZT1cInRleHQteHMgZm9udC1tZWRpdW0gdGV4dC1tdXRlZCBob3Zlcjp0ZXh0LWlua1wiPlxuICAgICAgICAgIHtwb3N0LmNhdGVnb3J5Lm5hbWV9XG4gICAgICAgIDwvTGluaz5cbiAgICAgIDwvZGl2PlxuXG4gICAgICA8Zm9ybSBvblN1Ym1pdD17c3VibWl0fSBjbGFzc05hbWU9XCJjYXJkIHAtNSBzbTpwLTZcIj5cbiAgICAgICAgPGgxIGNsYXNzTmFtZT1cImZvbnQtZGlzcGxheSB0ZXh0LTJ4bCBmb250LXNlbWlib2xkIHRleHQtaW5rXCI+RWRpdCB5b3VyIGNvbnZlcnNhdGlvbjwvaDE+XG4gICAgICAgIDxwIGNsYXNzTmFtZT1cIm10LTEgdGV4dC1zbSB0ZXh0LW11dGVkXCI+XG4gICAgICAgICAgWW91IGNhbiB1cGRhdGUgdGhlIHRpdGxlIGFuZCB0ZXh0LiBBdHRhY2htZW50cyBzdGF5IGFzIHRoZXkgd2VyZS5cbiAgICAgICAgPC9wPlxuXG4gICAgICAgIHtmb3JtRXJyb3IgJiYgKFxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtNCByb3VuZGVkLXhsIGJvcmRlciBib3JkZXItcm9zZS0yMDAgYmctcm9zZS01MCBweC0zLjUgcHktMi41IHRleHQtc20gdGV4dC1yb3NlLTcwMCBkYXJrOmJvcmRlci1yb3NlLTUwMC8zMCBkYXJrOmJnLXJvc2UtNTAwLzEwIGRhcms6dGV4dC1yb3NlLTMwMFwiPlxuICAgICAgICAgICAge2Zvcm1FcnJvcn1cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgKX1cblxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTUgc3BhY2UteS00XCI+XG4gICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgIDxsYWJlbCBodG1sRm9yPVwiZWRpdC10aXRsZVwiIGNsYXNzTmFtZT1cImxhYmVsXCI+VGl0bGU8L2xhYmVsPlxuICAgICAgICAgICAgPGlucHV0XG4gICAgICAgICAgICAgIGlkPVwiZWRpdC10aXRsZVwiXG4gICAgICAgICAgICAgIHZhbHVlPXt0aXRsZX1cbiAgICAgICAgICAgICAgb25DaGFuZ2U9eyhldmVudCkgPT4gc2V0VGl0bGUoZXZlbnQudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAgICAgbWF4TGVuZ3RoPXsxNjB9XG4gICAgICAgICAgICAgIGNsYXNzTmFtZT1cImlucHV0XCJcbiAgICAgICAgICAgICAgcGxhY2Vob2xkZXI9XCJPcHRpb25hbCB0aXRsZVwiXG4gICAgICAgICAgICAvPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICA8bGFiZWwgaHRtbEZvcj1cImVkaXQtYm9keVwiIGNsYXNzTmFtZT1cImxhYmVsXCI+UG9zdDwvbGFiZWw+XG4gICAgICAgICAgICA8dGV4dGFyZWFcbiAgICAgICAgICAgICAgaWQ9XCJlZGl0LWJvZHlcIlxuICAgICAgICAgICAgICB2YWx1ZT17Ym9keX1cbiAgICAgICAgICAgICAgb25DaGFuZ2U9eyhldmVudCkgPT4gc2V0Qm9keShldmVudC50YXJnZXQudmFsdWUpfVxuICAgICAgICAgICAgICByb3dzPXsxMH1cbiAgICAgICAgICAgICAgbWF4TGVuZ3RoPXsxMDAwMH1cbiAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiaW5wdXQgcmVzaXplLXkgbGVhZGluZy03XCJcbiAgICAgICAgICAgIC8+XG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtdC0xIHRleHQtcmlnaHQgdGV4dC1bMTBweF0gdGV4dC1tdXRlZFwiPntib2R5Lmxlbmd0aH0vMTAwMDA8L3A+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgIDwvZGl2PlxuXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtNSBmbGV4IGp1c3RpZnktZW5kIGdhcC0yIGJvcmRlci10IGJvcmRlci1saW5lIHB0LTRcIj5cbiAgICAgICAgICA8YnV0dG9uIHR5cGU9XCJidXR0b25cIiBjbGFzc05hbWU9XCJidG4tc2Vjb25kYXJ5XCIgb25DbGljaz17KCkgPT4gbmF2aWdhdGUoLTEpfSBkaXNhYmxlZD17YnVzeX0+XG4gICAgICAgICAgICBDYW5jZWxcbiAgICAgICAgICA8L2J1dHRvbj5cbiAgICAgICAgICA8YnV0dG9uIHR5cGU9XCJzdWJtaXRcIiBjbGFzc05hbWU9XCJidG4tcHJpbWFyeVwiIGRpc2FibGVkPXtidXN5IHx8ICFib2R5LnRyaW0oKX0+XG4gICAgICAgICAgICB7YnVzeSA/IDxMb2FkZXIyIGNsYXNzTmFtZT1cImgtNCB3LTQgYW5pbWF0ZS1zcGluXCIgLz4gOiA8U2F2ZSBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz59XG4gICAgICAgICAgICBTYXZlIGNoYW5nZXNcbiAgICAgICAgICA8L2J1dHRvbj5cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L2Zvcm0+XG4gICAgPC9kaXY+XG4gICk7XG59XG4iXSwiZmlsZSI6IkM6L1VzZXJzL2FiYXluZWgubWVrb25uZW4vRGVza3RvcC9PTEQgRmlsZS9odGRvY3MvcmVhY3Rwcm9qZWN0L2NvbW11bml0eWh1Yi9jbGllbnQvc3JjL3BhZ2VzL0VkaXRQb3N0LnRzeCJ9

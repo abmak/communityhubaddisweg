@@ -1,0 +1,22 @@
+node_modules/
+dist/
+build/
+coverage/
+*.log
+
+# Environment (never commit real secrets)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Local PostgreSQL dev cluster + uploaded media
+.devdb/
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

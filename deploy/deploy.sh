@@ -67,6 +67,10 @@ fi
 profile=""
 if [ -n "$(value DOMAIN)" ]; then
   profile="--profile tls"
+else
+  # Without Caddy the web container is the only entry point, so it has to be
+  # reachable from outside instead of the loopback default in .env.
+  export WEB_BIND="${WEB_BIND:-0.0.0.0}"
 fi
 
 # shellcheck disable=SC2086

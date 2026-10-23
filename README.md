@@ -179,7 +179,9 @@ disposable PostgreSQL, seeds, typechecks and builds on every push and pull reque
 ### One-time VPS setup
 
 1. Install Docker Engine + Compose v2 and open ports 80 and 443 (and 22 for the pipeline).
-2. Create the deploy directory (`/opt/communityhub` by default) and point your DNS `A` record at the VPS.
+2. Create the deploy directory the pipeline writes to and make it writable for the SSH user:
+   `sudo mkdir -p /opt/communityhub && sudo chown "$USER" /opt/communityhub`. Point a DNS `A`
+   record at the VPS when you have a domain.
 3. Add these repository secrets under **Settings → Secrets and variables → Actions**:
 
 | Secret | Value |
@@ -191,9 +193,11 @@ disposable PostgreSQL, seeds, typechecks and builds on every push and pull reque
 | `DEPLOY_PATH` | Directory for `.env` and the compose files (optional, defaults to `/opt/communityhub`) |
 
 The first run writes `.env` from `deploy/.env.example`, generates `POSTGRES_PASSWORD`, `DATABASE_URL`
-and `JWT_SECRET`, and starts Caddy on your domain once `DOMAIN` is set. Sign-in needs HTTPS because
-the API issues Secure cookies, so set `DOMAIN=addisweg.et` (or your host) in `$DEPLOY_PATH/.env`
-and run the workflow again — Caddy fetches the certificate automatically and proxies websockets.
+and `JWT_SECRET`, and publishes the web container on port 8080. Sign-in needs HTTPS because the API
+issues Secure cookies, so once DNS points at the server set `DOMAIN=addisweg.et` (or your host) in
+`$DEPLOY_PATH/.env` and run the workflow again: Caddy then takes over ports 80/443, fetches the
+certificate automatically and proxies websocket upgrades, while the web port falls back to loopback.
+Until then the site loads over `http://<server-ip>:8080` but nobody can sign in.
 Seed the demo community once with
 `docker compose -f docker-compose.prod.yml exec backend npm run db:seed`.
 

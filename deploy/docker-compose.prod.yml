@@ -88,7 +88,10 @@ services:
     depends_on:
       - frontend
     environment:
-      DOMAIN: ${DOMAIN:?DOMAIN is missing from .env (or run without --profile tls)}
+      # Only started with the tls profile, which the deploy script enables
+      # solely when DOMAIN is set; the empty default keeps `compose config`
+      # (and the no-domain HTTP path) free of the required-variable error.
+      DOMAIN: ${DOMAIN:-}
     ports:
       - "80:80"
       - "443:443"

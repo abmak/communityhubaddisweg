@@ -214,17 +214,28 @@ apps), do **not** set `DOMAIN` — Caddy would not be able to bind. Run this onc
 sudo sh https-setup.sh            # uses the server's public IP
 ```
 
-It adds an nginx vhost on port 8443 that terminates TLS with a Let's Encrypt certificate for the
-public IP and proxies to the web container, then sets `BEHIND_TLS_PROXY=1`, `TRUST_PROXY=2`,
+It adds an nginx vhost that terminates TLS with a Let's Encrypt certificate for the public IP and
+proxies to the web container, then sets `BEHIND_TLS_PROXY=1`, `TRUST_PROXY=2`,
 `COOKIE_SECURE=true` and `WEB_BIND=127.0.0.1` in `.env`. `update.sh` respects that flag, so the app
 stays on loopback and keeps Secure cookies across roll-outs. The address becomes
-`https://<public-ip>:8443/`.
+`https://<public-ip>/`.
+
+The hub's block is the `default_server` on 443, because a browser sends no SNI for an IP literal and
+would otherwise land on whichever vhost nginx loaded first. The other sites on the host keep their
+own `server_name` blocks. Because only one vhost can answer the bare IP, the script also disables
+the old bare-IP redirect to the VAS tracker (which stays reachable on `https://<public-ip>:5000`)
+and turns the bare-IP port-80 block into a redirect to the hub. The previous `:8443` vhost is kept
+as an alias for older links, and its origin is added to `CORS_EXTRA_ORIGINS` so mutations still pass
+the origin guard.
 
 IP certificates are only issued as six-day "shortlived" certificates, so the script also installs
-`/etc/cron.d/communityhub-ip-cert`, which renews them twice a day with the official certbot image
-(kept in `/etc/letsencrypt-ip`, away from the system certbot that manages the other sites). Port 80
-keeps serving the other apps; only the `/.well-known/acme-challenge/` path of the bare-IP vhost is
-repointed at `/var/www/acme`, which is what the challenge needs.
+`/etc/cron.d/communityhub-ip-cert`, which renews them twice a day with the official certbot image and
+keeps its state in `/etc/letsencrypt-ip`, away from the system certbot that manages the other sites.
+The image is held by a small idle `communityhub-certbot` container: `update.sh` prunes every
+unreferenced image every couple of minutes, and re-pulling it onto a host that runs close to full
+would make renewal fail. The
+`/.well-known/acme-challenge/` path of the bare-IP port-80 vhost is served from `/var/www/acme`,
+which is what the challenge needs.
 
 Run the build by hand from **Actions → Deploy → Run workflow**; the server picks the new images up
 on its next tick. `.env` lives only on the server and is never overwritten. Migrations run when the

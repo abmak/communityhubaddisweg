@@ -67,6 +67,26 @@ export const OSM_KIND_CONFIG: Record<PlaceKind, OsmPlaceKindConfig> = {
     tags: ["library", "books", "reading", "live-osm"],
     defaultDescription: "Public reading space and library discovered live on OpenStreetMap.",
   },
+  HOSPITAL: {
+    queries: ["hospital", "health centre", "clinic"],
+    tags: ["hospital", "health", "clinic", "live-osm"],
+    defaultDescription: "Hospital and clinic discovered live on OpenStreetMap.",
+  },
+  PHARMACY: {
+    queries: ["pharmacy", "drugstore"],
+    tags: ["pharmacy", "medicine", "health", "live-osm"],
+    defaultDescription: "Pharmacy and drugstore discovered live on OpenStreetMap.",
+  },
+  GAS_STATION: {
+    queries: ["petrol station", "fuel", "filling station"],
+    tags: ["fuel", "petrol", "gas-station", "live-osm"],
+    defaultDescription: "Fuel station discovered live on OpenStreetMap.",
+  },
+  SCHOOL: {
+    queries: ["school", "academy"],
+    tags: ["school", "education", "students", "live-osm"],
+    defaultDescription: "School and academy discovered live on OpenStreetMap.",
+  },
 };
 
 function slugify(text: string): string {

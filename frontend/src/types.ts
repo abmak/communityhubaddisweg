@@ -11,7 +11,11 @@ export type PlaceKind =
   | "GYM"
   | "STADIUM"
   | "GALLERY"
-  | "LIBRARY";
+  | "LIBRARY"
+  | "HOSPITAL"
+  | "PHARMACY"
+  | "GAS_STATION"
+  | "SCHOOL";
 
 export interface Place {
   id: string;

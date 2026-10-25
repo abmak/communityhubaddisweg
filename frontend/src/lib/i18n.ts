@@ -59,7 +59,7 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     // Nearby / Places page
     "places.badge": "Nearby",
     "places.title": "Places worth leaving the house for.",
-    "places.subtitle": "Cinemas, stages, hotels, trailheads, gyms, galleries and coffee worth the detour — gathered by members and sorted by what is actually near you.",
+    "places.subtitle": "Cinemas, stages, hotels, trailheads, gyms, galleries and coffee worth the detour — plus the hospitals, pharmacies, fuel stations and schools you actually need — sorted by what is closest to you.",
     "places.everything": "Everything",
     "places.saved": "Saved",
     "places.liveOpenMap": "Live OpenMap",
@@ -141,6 +141,10 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     "kind.stadium": "Stadium",
     "kind.gallery": "Gallery",
     "kind.library": "Library",
+    "kind.hospital": "Hospital",
+    "kind.pharmacy": "Pharmacy",
+    "kind.gas_station": "Fuel station",
+    "kind.school": "School",
 
     // Common / UI
     "common.theme": "Theme",
@@ -184,7 +188,7 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     // Nearby / Places page
     "places.badge": "አቅራቢያ",
     "places.title": "ከቤት ወጥቶ ለመጎብኘት የሚገቡ ቦታዎች።",
-    "places.subtitle": "ሲኒማ ቤቶች፣ ቲያትሮች፣ ሆቴሎች፣ የተራራ መንገዶች፣ ጂሞች፣ ጋለሪዎች እና ማኪያቶ የሚጠጡባቸው ምርጥ ቦታዎች — በአቅራቢያዎ ተለይተው የቀረቡ።",
+    "places.subtitle": "ሲኒማ ቤቶች፣ ቲያትሮች፣ ሆቴሎች፣ ጂሞች፣ ጋለሪዎች እና ማኪያቶ የሚጠጡባቸው ምርጥ ቦታዎች — እንዲሁም ሆስፒታሎች፣ ፋርማሲዎች፣ የነዳጅ ማደያዎች እና ትምህርት ቤቶች — በአቅራቢያዎ ተለይተው የቀረቡ።",
     "places.everything": "ሁሉንም",
     "places.saved": "የተቀመጡ",
     "places.liveOpenMap": "የቀጥታ ካርታ",
@@ -266,6 +270,10 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     "kind.stadium": "ስታዲየም",
     "kind.gallery": "ጋለሪ",
     "kind.library": "ቤተ መጻሕፍት",
+    "kind.hospital": "ሆስፒታል",
+    "kind.pharmacy": "ፋርማሲ",
+    "kind.gas_station": "የነዳጅ ማደያ",
+    "kind.school": "ትምህርት ቤት",
 
     // Common / UI
     "common.theme": "ገጽታ",
@@ -309,7 +317,7 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     // Nearby / Places page
     "places.badge": "Dhiyoo",
     "places.title": "Bakkeewwan manaa ba'anii daawwatamuu qaban.",
-    "places.subtitle": "Sinimaa, tiyaatira, hoteelota, daandiiwwan gaaraa, jimmota, gaaleeriifi buna mi'aawaa — dhiyeenya keessan irratti hundaa'ee qophaa'e.",
+    "places.subtitle": "Sinimaa, tiyaatira, hoteelota, jimmota, gaaleeriifi buna mi'aawaa — akkasumas hospitaalota, faramaasii, buufata boba'aa fi mana barumsaa — dhiyeenya keessan irratti hundaa'ee qophaa'e.",
     "places.everything": "Hundumaa",
     "places.saved": "Kan Olkaa'aman",
     "places.liveOpenMap": "Kaartaa Kallattii",
@@ -392,6 +400,10 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     "kind.stadium": "Istaadiyeemii",
     "kind.gallery": "Gaaleerii",
     "kind.library": "Mana Kitaabaa",
+    "kind.hospital": "Hospitaala",
+    "kind.pharmacy": "Faramaasii",
+    "kind.gas_station": "Buufata Boba'aa",
+    "kind.school": "Mana Barumsaa",
 
     // Common / UI
     "common.theme": "Haala Mul'ataa",

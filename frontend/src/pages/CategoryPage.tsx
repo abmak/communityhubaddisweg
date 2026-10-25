@@ -26,6 +26,7 @@ import { roomArt } from "../lib/roomArt";
 import { PostFeed } from "../components/PostFeed";
 import { PostComposer } from "../components/PostComposer";
 import { Avatar, Badge, PageLoader } from "../components/ui";
+import { KindMedia } from "../components/KindMedia";
 
 const SORTS = ["Latest", "Popular", "Trending"] as const;
 type Sort = (typeof SORTS)[number];
@@ -74,13 +75,10 @@ function RoomPlaces({ slug }: { slug: string }) {
               to={placePath(place)}
               className="group flex items-center gap-3 bg-surface p-3.5 transition hover:bg-raised/60"
             >
-              <img
-                src={meta.photo}
-                alt={meta.photoAlt}
-                loading="lazy"
-                width={160}
-                height={160}
+              <KindMedia
+                kind={place.kind}
                 className="h-14 w-14 shrink-0 rounded-xl object-cover ring-1 ring-black/5 dark:ring-white/10"
+                iconClassName="h-6 w-6"
               />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[13px] font-semibold text-ink">

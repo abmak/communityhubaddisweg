@@ -37,6 +37,7 @@ import type {
 import { Avatar } from "../components/ui";
 import { BrandMark, Wordmark } from "../components/Brand";
 import { CategoryCard } from "../components/CategoryCard";
+import { KindMedia } from "../components/KindMedia";
 import { PostCard } from "../components/PostCard";
 import { cn, formatCount } from "../lib/utils";
 import { KIND_META, PLACE_KINDS, formatDistance, placePath } from "../lib/places";
@@ -304,12 +305,8 @@ function NearbyPreview({ places }: { places: Place[] }) {
                 className="card group flex flex-col overflow-hidden transition duration-200 hover:-translate-y-1 hover:border-brand-600/25 hover:shadow-lift"
               >
                 <div className="relative h-40 overflow-hidden bg-brand-950">
-                  <img
-                    src={meta.photo}
-                    alt={meta.photoAlt}
-                    loading="lazy"
-                    width={1200}
-                    height={800}
+                  <KindMedia
+                    kind={place.kind}
                     className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.06]"
                   />
                   <span

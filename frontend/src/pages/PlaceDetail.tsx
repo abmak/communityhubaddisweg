@@ -16,6 +16,7 @@ import {
 import type { PlaceDetailResponse } from "../types";
 import { useQuery } from "../hooks/useApi";
 import { Badge, EmptyState, Spinner } from "../components/ui";
+import { KindMedia } from "../components/KindMedia";
 import { useUI } from "../store/ui";
 import {
   KIND_META,
@@ -105,12 +106,10 @@ export function PlaceDetailPage() {
 
       {/* Hero */}
       <header className="relative overflow-hidden rounded-3xl border border-line bg-brand-950 shadow-lift">
-        <img
-          src={meta.photo}
-          alt={meta.photoAlt}
-          width={1600}
-          height={720}
+        <KindMedia
+          kind={place.kind}
           className="h-[280px] w-full object-cover opacity-90 sm:h-[360px]"
+          iconClassName="h-24 w-24"
         />
         <span
           aria-hidden="true"

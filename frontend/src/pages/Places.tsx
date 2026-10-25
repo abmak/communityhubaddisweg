@@ -17,6 +17,7 @@ import {
 import type { Place, PlaceKind, PlacesResponse } from "../types";
 import { useDebounced, useQuery } from "../hooks/useApi";
 import { Badge, EmptyState } from "../components/ui";
+import { KindMedia } from "../components/KindMedia";
 import { useUI } from "../store/ui";
 import { KIND_META, PLACE_KINDS, formatDistance, mapsHref, placePath } from "../lib/places";
 import { useSavedPlaces } from "../lib/savedPlaces";
@@ -40,12 +41,8 @@ function PlaceCard({ place }: { place: Place }) {
       <div className="relative">
         <Link to={placePath(place)} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
           <div className="relative h-40 overflow-hidden bg-brand-950">
-            <img
-              src={meta.photo}
-              alt={meta.photoAlt}
-              loading="lazy"
-              width={1200}
-              height={800}
+            <KindMedia
+              kind={place.kind}
               className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.05]"
             />
             <span
@@ -375,7 +372,7 @@ export function PlacesPage() {
             {t("places.title", "Places worth leaving the house for.")}
           </h1>
           <p className="mt-3 max-w-xl text-sm leading-6 text-white/65">
-            {t("places.subtitle", "Cinemas, stages, hotels, trailheads, gyms, galleries and coffee worth the detour — gathered by members and sorted by what is actually near you.")}
+            {t("places.subtitle", "Cinemas, stages, hotels, trailheads, gyms, galleries and coffee worth the detour — plus the hospitals, pharmacies, fuel stations and schools you actually need — sorted by what is closest to you.")}
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-2 text-xs text-white/60">

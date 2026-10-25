@@ -5,8 +5,12 @@ import {
   Coffee,
   Dumbbell,
   Frame,
+  Fuel,
+  Hospital,
   MapPin,
   Mountain,
+  Pill,
+  School,
   Theater,
   Trophy,
   UtensilsCrossed,
@@ -36,8 +40,11 @@ interface KindMeta {
   wash: string;
   text: string;
   iconTone: string;
-  photo: string;
+  /** Kind photography; null for service kinds, which use a gradient tile. */
+  photo: string | null;
   photoAlt: string;
+  /** Tailwind gradient for kinds without a photograph. */
+  tile?: string;
 }
 
 export const KIND_META: Record<PlaceKind, KindMeta> = {
@@ -144,6 +151,55 @@ export const KIND_META: Record<PlaceKind, KindMeta> = {
     iconTone: "text-brand-600 dark:text-brand-300",
     photo: libraryPhoto,
     photoAlt: "Shelves and reading light in a quiet library",
+  },
+  // Everyday services: the list is used for errands, not only for nights out.
+  HOSPITAL: {
+    label: "Hospital",
+    plural: "hospitals",
+    am: "ሆስፒታል",
+    icon: Hospital,
+    wash: "from-red-500/15 via-rose-400/10 to-transparent",
+    text: "text-red-700 dark:text-red-300",
+    iconTone: "text-red-600 dark:text-red-300",
+    photo: null,
+    photoAlt: "Hospital",
+    tile: "from-red-600 via-rose-700 to-brand-950",
+  },
+  PHARMACY: {
+    label: "Pharmacy",
+    plural: "pharmacies",
+    am: "ፋርማሲ",
+    icon: Pill,
+    wash: "from-emerald-500/15 via-teal-400/10 to-transparent",
+    text: "text-emerald-700 dark:text-emerald-300",
+    iconTone: "text-emerald-600 dark:text-emerald-300",
+    photo: null,
+    photoAlt: "Pharmacy",
+    tile: "from-emerald-600 via-teal-700 to-brand-950",
+  },
+  GAS_STATION: {
+    label: "Fuel station",
+    plural: "fuel stations",
+    am: "የነዳጅ ማደያ",
+    icon: Fuel,
+    wash: "from-amber-500/20 via-orange-400/10 to-transparent",
+    text: "text-amber-700 dark:text-amber-300",
+    iconTone: "text-amber-600 dark:text-amber-300",
+    photo: null,
+    photoAlt: "Fuel station",
+    tile: "from-amber-500 via-orange-600 to-brand-950",
+  },
+  SCHOOL: {
+    label: "School",
+    plural: "schools",
+    am: "ትምህርት ቤት",
+    icon: School,
+    wash: "from-sky-500/15 via-indigo-400/10 to-transparent",
+    text: "text-sky-700 dark:text-sky-300",
+    iconTone: "text-sky-600 dark:text-sky-300",
+    photo: null,
+    photoAlt: "School",
+    tile: "from-sky-600 via-indigo-700 to-brand-950",
   },
 };
 

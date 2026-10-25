@@ -40,6 +40,10 @@ enum PlaceKind {
   STADIUM
   GALLERY
   LIBRARY
+  HOSPITAL
+  PHARMACY
+  GAS_STATION
+  SCHOOL
 }
 
 enum ReportTargetType {

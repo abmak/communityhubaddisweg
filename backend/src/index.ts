@@ -7,6 +7,7 @@ import { initSocket } from "./socket";
 import { ensureUploadDir } from "./lib/storage";
 import { ensureSeedEvents, ensureSeedEventSources } from "./lib/seed-events";
 import { ensureSeedJokes } from "./lib/seed-jokes";
+import { ensureSeedPlaces } from "./lib/seed-places";
 import { startEventIngest } from "./lib/events/ingest";
 import { ensureBuiltinRoles } from "./lib/roles";
 import { ensureSeedQuizQuestions } from "./lib/seed-quiz";
@@ -24,6 +25,9 @@ async function main(): Promise<void> {
   });
   await ensureSeedJokes().catch((err) => {
     logger.warn({ err }, "Could not seed Joke Time");
+  });
+  await ensureSeedPlaces().catch((err) => {
+    logger.warn({ err }, "Could not seed the nearby service places");
   });
   await ensureSeedQuizQuestions().catch((err) => {
     logger.warn({ err }, "Could not seed quiz questions");

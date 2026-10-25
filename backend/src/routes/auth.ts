@@ -237,7 +237,7 @@ authRouter.post(
     try {
       await sendSms(
         phone,
-        `Your አዲስ ወግ (Addis Weg) verification code is ${code}. It expires in 10 minutes.`,
+        `Your አዲስ ገበታ (Addis Gebeta) verification code is ${code}. It expires in 10 minutes.`,
       );
     } catch (error) {
       logger.warn({ err: error }, "Could not deliver phone verification SMS");
@@ -322,7 +322,7 @@ authRouter.post(
       logger.info({ phone }, "Password reset code generated");
       await sendSms(
         phone,
-        `Your አዲስ ወግ (Addis Weg) password reset code is ${code}. It expires in 10 minutes. If you did not request this, ignore this message.`,
+        `Your አዲስ ገበታ (Addis Gebeta) password reset code is ${code}. It expires in 10 minutes. If you did not request this, ignore this message.`,
       );
     }
 

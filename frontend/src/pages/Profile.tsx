@@ -32,9 +32,9 @@ export function ProfilePage() {
   const feed = usePaginatedPosts(`/api/users/${username}/posts`, {}, 10);
 
   useEffect(() => {
-    if (data?.user) document.title = `${data.user.displayName} (@${data.user.username}) · አዲስ ወግ`;
+    if (data?.user) document.title = `${data.user.displayName} (@${data.user.username}) · አዲስ ገበታ`;
     return () => {
-      document.title = "አዲስ ወግ · Addis Weg — a new way, shared stories";
+      document.title = "አዲስ ገበታ · Addis Gebeta — a new table, shared stories";
     };
   }, [data?.user]);
 

@@ -28,10 +28,10 @@ export function PostDetailPage() {
 
   useEffect(() => {
     if (data?.post) {
-      document.title = `${data.post.title ?? "Conversation"} · አዲስ ወግ`;
+      document.title = `${data.post.title ?? "Conversation"} · አዲስ ገበታ`;
     }
     return () => {
-      document.title = "አዲስ ወግ · Addis Weg — a new way, shared stories";
+      document.title = "አዲስ ገበታ · Addis Gebeta — a new table, shared stories";
     };
   }, [data?.post]);
 

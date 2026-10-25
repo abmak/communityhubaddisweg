@@ -39,7 +39,7 @@ export function AdminOverview() {
       <AdminPageHeader
         eyebrow="Community health"
         title="The whole picture, one screen."
-        description="Growth, participation and moderation pressure across Addis Weg. Figures compare the selected window with the one before it."
+        description="Growth, participation and moderation pressure across Addis Gebeta. Figures compare the selected window with the one before it."
         actions={
           <div className="flex rounded-lg border border-line bg-surface p-0.5">
             {RANGES.map((option) => (

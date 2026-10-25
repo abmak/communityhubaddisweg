@@ -120,7 +120,7 @@ const ROOM_TILES = [
   },
 ];
 
-function WegScene({ members, posts, rooms }: { members: number; posts: number; rooms: number }) {
+function GebetaScene({ members, posts, rooms }: { members: number; posts: number; rooms: number }) {
   return (
     <div className="relative mx-auto w-full min-w-0 max-w-md">
       <div className="relative overflow-hidden rounded-[2rem] border border-brand-900/20 bg-brand-950 shadow-lift">
@@ -162,7 +162,7 @@ function WegScene({ members, posts, rooms }: { members: number; posts: number; r
             <span className="inline-flex min-w-0 items-center gap-1.5">
               <UtensilsCrossed className="h-3 w-3 shrink-0 text-accent-300" />
               <span lang="am" className="font-ethiopic normal-case tracking-normal text-accent-200">
-                የወግ ጊዜ
+                የገበታ ጊዜ
               </span>
               <span className="text-white/25">·</span>
               <span className="truncate">the shared table</span>
@@ -455,10 +455,10 @@ export function LandingPage() {
 
               <h1 className="mt-5 font-display text-[2.9rem] font-semibold leading-[1.02] tracking-[-0.02em] text-ink sm:text-6xl">
                 <span lang="am" className="font-ethiopic block text-[2.55rem] leading-[1.15] text-brand-800 dark:text-brand-300 sm:text-[3.4rem]">
-                  አዲስ ወግ
+                  አዲስ ገበታ
                 </span>
                 <span className="mt-3 block">
-                  A new way,
+                  A new table,
                   <span className="relative ml-2 inline-block">
                     <span className="relative z-10">shared stories.</span>
                     <span
@@ -506,7 +506,7 @@ export function LandingPage() {
               </div>
             </div>
 
-            <WegScene members={members} posts={posts} rooms={categories.length} />
+            <GebetaScene members={members} posts={posts} rooms={categories.length} />
           </div>
         </section>
 
@@ -624,7 +624,7 @@ export function LandingPage() {
         <section id="why" className="border-y border-line bg-surface/60 py-16">
           <div className="mx-auto max-w-6xl px-5 sm:px-8">
             <div className="mb-8 max-w-2xl">
-              <p className="kicker">ለምን አዲስ ወግ · Thoughtfully built</p>
+              <p className="kicker">ለምን አዲስ ገበታ · Thoughtfully built</p>
               <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-ink">
                 Made for conversation, not performance.
               </h2>
@@ -711,7 +711,7 @@ export function LandingPage() {
             <BrandMark className="h-9 w-9" />
             <div>
               <p className="font-ethiopic text-sm font-semibold text-ink" lang="am">
-                አዲስ ወግ <span className="font-sans text-[10px] font-medium uppercase tracking-[0.16em] text-muted">Addis Weg</span>
+                አዲስ ገበታ <span className="font-sans text-[10px] font-medium uppercase tracking-[0.16em] text-muted">Addis Gebeta</span>
               </p>
               <p className="text-[11px] text-muted">{BRAND.tagline}</p>
             </div>
@@ -735,7 +735,7 @@ export function LandingPage() {
                 onChange={(event) => setTerm(event.target.value)}
                 placeholder="Search…"
                 className="h-8 rounded-full border border-line bg-transparent px-3 pr-8 text-xs focus:outline-none"
-                aria-label="Search Addis Weg"
+                aria-label="Search Addis Gebeta"
               />
               <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted" aria-label="Search">
                 <Search className="h-3.5 w-3.5" />

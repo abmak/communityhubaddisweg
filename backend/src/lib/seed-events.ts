@@ -95,7 +95,7 @@ export async function ensureSeedEvents() {
       title: "Community Cinema Night & Director Discussion",
       slug: "community-cinema-night-addis",
       description:
-        "Special community screening of classic Ethiopian cinema followed by an informal discussion over tea. Gathering 30 minutes before showtime in the lobby. Discounted group tickets arranged by Addis Weg members.",
+        "Special community screening of classic Ethiopian cinema followed by an informal discussion over tea. Gathering 30 minutes before showtime in the lobby. Discounted group tickets arranged by Addis Gebeta members.",
       startDate: new Date(now + 4 * DAY + 17 * 3600 * 1000),
       endDate: new Date(now + 4 * DAY + 21 * 3600 * 1000),
       location: cinemaPlace ? `${cinemaPlace.name}, ${cinemaPlace.area || cinemaPlace.city}` : "Ambassador Cinema, Piassa",

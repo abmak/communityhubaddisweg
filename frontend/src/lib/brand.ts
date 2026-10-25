@@ -1,16 +1,16 @@
 /**
- * Product identity. The platform is "አዲስ ወግ" (Addis Weg) — a community hub for
- * Ethiopian stories, interests and everyday conversation.
+ * Product identity. The platform is "አዲስ ገበታ" (Addis Gebeta) — a community hub
+ * for Ethiopian stories, interests and everyday conversation.
  */
 export const BRAND = {
-  name: "አዲስ ወግ",
-  latin: "Addis Weg",
-  meaning: "new way · shared table",
-  tagline: "አዲስ ወግ — a new way, shared stories.",
+  name: "አዲስ ገበታ",
+  latin: "Addis Gebeta",
+  meaning: "new table · a seat for every story",
+  tagline: "አዲስ ገበታ — a new table, shared stories.",
   description:
-    "አዲስ ወግ (Addis Weg) is an Ethiopian community hub where every story has a seat at the table — coffee, cinema, books, trails, sport and the people who love them.",
-  title: "አዲስ ወግ · Addis Weg",
-  domain: "addisweg.et",
+    "አዲስ ገበታ (Addis Gebeta) is an Ethiopian community hub where every story has a seat at the table — coffee, cinema, books, trails, sport and the people who love them.",
+  title: "አዲስ ገበታ · Addis Gebeta",
+  domain: "addisgebeta.et",
 } as const;
 
 /**

@@ -1,4 +1,4 @@
-// አዲስ ወግ (Addis Weg) — PostgreSQL schema
+// አዲስ ገበታ (Addis Gebeta) — PostgreSQL schema
 // Edit this file, then run `npm run db:migrate -- --name <change>`.
 
 generator client {

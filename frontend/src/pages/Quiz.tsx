@@ -167,10 +167,10 @@ export function QuizPage() {
 
   const handleShare = () => {
     const score = resultReview?.score ?? quizData?.score ?? 0;
-    const shareText = `I scored ${score}/10 in today's 'Lets Know Ethiopia' daily trivia on Addis Weg! Can you beat my score? 🇪🇹`;
+    const shareText = `I scored ${score}/10 in today's 'Lets Know Ethiopia' daily trivia on Addis Gebeta! Can you beat my score? 🇪🇹`;
     if (navigator.share) {
       void navigator.share({
-        title: "Lets Know Ethiopia · Addis Weg",
+        title: "Lets Know Ethiopia · Addis Gebeta",
         text: shareText,
         url: window.location.href,
       });

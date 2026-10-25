@@ -182,7 +182,7 @@ export function CreatePostPage() {
           <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-700 dark:text-brand-300">
             <Sparkles className="h-3.5 w-3.5" /> New story
             <span lang="am" className="font-ethiopic normal-case tracking-normal text-muted">
-              አዲስ ወግ
+              አዲስ ገበታ
             </span>
           </p>
           <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Share something worth talking about.</h1>

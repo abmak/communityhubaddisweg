@@ -59,7 +59,7 @@ function AuthShell({
         <Link to="/" className="relative flex items-center gap-3">
           <BrandMark className="h-11 w-11" glow />
           <span className="[&_span]:text-white">
-            <Wordmark subtitle="Addis Weg · Addis Ababa" />
+            <Wordmark subtitle="Addis Gebeta · Addis Ababa" />
           </span>
         </Link>
         <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 h-2 opacity-40" />
@@ -105,7 +105,7 @@ function AuthShell({
             />
             <figcaption className="absolute inset-x-3 bottom-2.5 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80">
               <span lang="am" className="font-ethiopic normal-case tracking-normal text-accent-200">
-                የወግ ጊዜ
+                የገበታ ጊዜ
               </span>
               <span className="text-white/30">·</span>
               coffee, books & trails
@@ -114,7 +114,7 @@ function AuthShell({
         </div>
 
         <p className="relative text-xs text-white/40">
-          አዲስ ወግ · Addis Weg — built for curious people, with care.
+          አዲስ ገበታ · Addis Gebeta — built for curious people, with care.
         </p>
       </aside>
 
@@ -441,7 +441,7 @@ export function RegisterPage() {
         phone: phone.trim() || undefined,
         password,
       });
-      pushToast("እንኳን ደህና መጡ! Welcome to Addis Weg — say hello in the feed.", { tone: "success" });
+      pushToast("እንኳን ደህና መጡ! Welcome to Addis Gebeta — say hello in the feed.", { tone: "success" });
       navigate("/home", { replace: true });
     } catch (err) {
       setError(apiError(err));
@@ -453,7 +453,7 @@ export function RegisterPage() {
   return (
     <AuthShell
       title="Find your table."
-      subtitle="Join አዲስ ወግ and share the films, books, trails and everyday stories you love — with photos, voice notes and good replies."
+      subtitle="Join አዲስ ገበታ and share the films, books, trails and everyday stories you love — with photos, voice notes and good replies."
       footer={
         <p>
           Already a member?{" "}

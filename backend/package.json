@@ -2,7 +2,7 @@
   "name": "community-hub-server",
   "version": "1.0.0",
   "private": true,
-  "description": "አዲስ ወግ (Addis Weg) REST API, realtime gateway and PostgreSQL data layer",
+  "description": "አዲስ ገበታ (Addis Gebeta) REST API, realtime gateway and PostgreSQL data layer",
   "main": "server.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

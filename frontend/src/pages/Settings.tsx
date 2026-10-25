@@ -523,7 +523,7 @@ export function SettingsPage() {
 
               <section className="card p-5 sm:p-6">
                 <h2 className="font-display text-lg font-semibold text-ink">Appearance</h2>
-                <p className="mt-1 text-sm text-muted">Choose how አዲስ ወግ looks on this device.</p>
+                <p className="mt-1 text-sm text-muted">Choose how አዲስ ገበታ looks on this device.</p>
                 <div className="mt-4 grid grid-cols-3 gap-2">
                   {[
                     { id: "light" as const, label: "Light", icon: Sun },

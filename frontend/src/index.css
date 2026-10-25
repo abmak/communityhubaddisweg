@@ -179,26 +179,10 @@
     scrollbar-width: none;
   }
 
-  /* Animated brand mark. The motion is slow and secondary to the wordmark. */
+  /* Brand mark: a single gold tilet diamond, still and confident. */
   .brand-mark-svg {
     overflow: visible;
-  }
-
-  .brand-orbit {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: brand-orbit 32s linear infinite;
-  }
-
-  .brand-breathe {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: brand-breathe 5.5s ease-in-out infinite;
-  }
-
-  .brand-sheen {
-    transform-box: fill-box;
-    animation: brand-sheen 7.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    transition: transform 300ms ease;
   }
 
   .brand-halo {
@@ -211,52 +195,8 @@
     animation: brand-dot 3.2s ease-in-out infinite;
   }
 
-  .brand-mark:hover .brand-orbit {
-    animation-duration: 9s;
-  }
-
-  .brand-mark:hover .brand-breathe {
-    animation-duration: 2.6s;
-  }
-
   .brand-mark:hover .brand-mark-svg {
     transform: scale(1.035);
-  }
-
-  .brand-mark-svg {
-    transition: transform 300ms ease;
-  }
-}
-
-@keyframes brand-orbit {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes brand-breathe {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.035);
-  }
-}
-
-@keyframes brand-sheen {
-  0%,
-  58% {
-    opacity: 0;
-    transform: translateX(0);
-  }
-  64% {
-    opacity: 0.9;
-  }
-  86%,
-  100% {
-    opacity: 0;
-    transform: translateX(68px);
   }
 }
 

@@ -187,7 +187,7 @@ function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-[272px] flex-col border-r border-line bg-surface/70 px-4 py-5 backdrop-blur-xl lg:flex">
       <Link to="/home" className="mb-6 flex items-center gap-3 px-2">
         <BrandMark className="h-10 w-10" />
-        <Wordmark subtitle="Addis Weg · since 2026" />
+        <Wordmark subtitle="Addis Gebeta · since 2026" />
       </Link>
 
       {user ? (
@@ -200,7 +200,7 @@ function Sidebar() {
         </button>
       ) : (
         <Link to="/register" className="btn-primary mb-5 w-full justify-start px-3.5">
-          <Plus className="h-4 w-4" /> {t("nav.join", "Join Addis Weg")}
+          <Plus className="h-4 w-4" /> {t("nav.join", "Join Addis Gebeta")}
         </Link>
       )}
 
@@ -697,9 +697,9 @@ function RightRail() {
       </section>
 
       <p className="px-2 text-[11px] leading-5 text-muted/70">
-        <span lang="am" className="font-ethiopic text-ink/80">አዲስ ወግ</span> · {BRAND.latin}
+        <span lang="am" className="font-ethiopic text-ink/80">አዲስ ገበታ</span> · {BRAND.latin}
         <br />
-        A new way, shared stories — made in Addis.
+        A new table, shared stories — made in Addis.
       </p>
     </aside>
   );

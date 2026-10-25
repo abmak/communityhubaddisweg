@@ -136,7 +136,7 @@ export function PostCard({ post, onChange, onRemove, detail }: PostCardProps) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: data.title ?? "Post on አዲስ ወግ",
+          title: data.title ?? "Post on አዲስ ገበታ",
           text: data.title ?? undefined,
           url,
         });

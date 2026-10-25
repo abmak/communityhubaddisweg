@@ -32,7 +32,7 @@ export interface SourceConfig {
 }
 
 const FETCH_TIMEOUT_MS = 15_000;
-const USER_AGENT = "AddisWegBot/1.0 (+https://addisweg.local; event import)";
+const USER_AGENT = "AddisGebetaBot/1.0 (+https://addisweg.local; event import)";
 // ESPN's edge rejects obvious bots, so its public scoreboard is read with the
 // header a browser sends. No personal data is involved.
 const ESPN_USER_AGENT =

@@ -272,10 +272,10 @@ export function ReviewDetailPage({ kind }: { kind: "movie" | "book" }) {
   useEffect(() => {
     if (data?.post) {
       const title = kind === "movie" ? data.post.movie?.movieTitle : data.post.book?.bookTitle;
-      document.title = `${title ?? "Review"} · አዲስ ወግ`;
+      document.title = `${title ?? "Review"} · አዲስ ገበታ`;
     }
     return () => {
-      document.title = "አዲስ ወግ · Addis Weg — a new way, shared stories";
+      document.title = "አዲስ ገበታ · Addis Gebeta — a new table, shared stories";
     };
   }, [data?.post, kind]);
 
@@ -514,10 +514,10 @@ export function HikeDetailPage() {
 
   useEffect(() => {
     if (data?.post) {
-      document.title = `${data.post.hike?.location ?? data.post.title ?? "Trail"} · አዲስ ወግ`;
+      document.title = `${data.post.hike?.location ?? data.post.title ?? "Trail"} · አዲስ ገበታ`;
     }
     return () => {
-      document.title = "አዲስ ወግ · Addis Weg — a new way, shared stories";
+      document.title = "አዲስ ገበታ · Addis Gebeta — a new table, shared stories";
     };
   }, [data?.post]);
 

@@ -131,7 +131,7 @@ export function AdminLayout() {
         <div className="flex items-center gap-2.5 px-5 py-5">
           <BrandMark className="h-9 w-9" />
           <div className="leading-tight">
-            <p className="font-display text-sm font-semibold text-ink">Addis Weg</p>
+            <p className="font-display text-sm font-semibold text-ink">Addis Gebeta</p>
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">Operations</p>
           </div>
         </div>

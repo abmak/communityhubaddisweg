@@ -54,7 +54,7 @@ export function HomePage() {
               </span>
               {user && <span className="text-muted">{user.displayName.split(" ")[0]}</span>}
               <span className="text-muted/50">·</span>
-              <span className="text-[11px] uppercase tracking-[0.18em] text-muted">Addis Weg</span>
+              <span className="text-[11px] uppercase tracking-[0.18em] text-muted">Addis Gebeta</span>
             </p>
             <h1 className="mt-2 font-display text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-[1.75rem]">
               እንኳን ደህና መጡ — pull up a chair.

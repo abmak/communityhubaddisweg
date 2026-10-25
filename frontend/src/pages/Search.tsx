@@ -114,7 +114,7 @@ export function SearchPage() {
         <input
           value={term}
           onChange={(event) => setTerm(event.target.value)}
-          placeholder="Search አዲስ ወግ — people, stories, films…"
+          placeholder="Search አዲስ ገበታ — people, stories, films…"
           className="input h-12 rounded-2xl pl-12 pr-28 text-base shadow-card"
           aria-label="Search"
         />

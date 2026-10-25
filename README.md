@@ -1,10 +1,10 @@
-# አዲስ ወግ (Addis Weg)
+# አዲስ ገበታ (Addis Gebeta)
 
 An Ethiopian community hub for the conversations that don't fit in a group chat: coffee-table talk, sports arguments, Ethiopian cinema, book reviews, trail notes, music, painting, travel and life stories — plus private messaging, notifications, voice notes and a moderation dashboard. The interface is built around a warm parchment palette, highland green and gold, tilet-inspired borders and bilingual Amharic/English labels.
 
 **Stack:** React 18 + TypeScript + Vite + Tailwind CSS · Node.js + Express + Prisma · PostgreSQL + Socket.IO
 
-![Addis Weg landing page](screenshots/landing.png)
+![Addis Gebeta landing page](screenshots/landing.png)
 
 ![Community home feed](screenshots/home.png)
 

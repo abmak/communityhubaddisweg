@@ -157,7 +157,7 @@ export function AdminCategories() {
       <AdminPageHeader
         eyebrow="Platform"
         title="Community rooms."
-        description="Rooms are the front doors of Addis Weg: each one owns its feed, its navigation entry and its place-kind artwork. New rooms appear immediately."
+        description="Rooms are the front doors of Addis Gebeta: each one owns its feed, its navigation entry and its place-kind artwork. New rooms appear immediately."
         actions={
           canManage ? (
             <button type="button" className="btn-primary btn-sm" onClick={handleOpenCreate}>

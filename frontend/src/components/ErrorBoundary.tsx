@@ -13,7 +13,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    console.error("Addis Weg render error", error, info.componentStack);
+    console.error("Addis Gebeta render error", error, info.componentStack);
   }
 
   render() {

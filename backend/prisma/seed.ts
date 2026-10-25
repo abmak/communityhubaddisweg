@@ -456,7 +456,7 @@ async function main() {
     {
       author: "admin",
       category: "whats-new",
-      title: "እንኳን ደህና መጡ · Welcome to Addis Weg 🎉",
+      title: "እንኳን ደህና መጡ · Welcome to Addis Gebeta 🎉",
       body: "We built this place for the conversations that do not fit in a group chat: film recommendations, half-finished book reviews, trail notes, and the kind of sports arguments that end with everyone laughing.\n\nA few small house rules: be generous, assume good faith, and report things that feel unsafe. Everything else is yours to shape. Say hello below and tell us what brought you here.",
       daysAgo: 1,
       hoursAgo: 2,
@@ -1046,7 +1046,7 @@ async function main() {
       likes: ["yonas", "selam"],
     },
     {
-      post: "እንኳን ደህና መጡ · Welcome to Addis Weg 🎉",
+      post: "እንኳን ደህና መጡ · Welcome to Addis Gebeta 🎉",
       author: "selam",
       body: "Hello! I came for the film recommendations and stayed for the trail notes. Glad to be here.",
       daysAgo: 1,
@@ -1054,7 +1054,7 @@ async function main() {
       likes: ["admin", "hana", "meron"],
     },
     {
-      post: "እንኳን ደህና መጡ · Welcome to Addis Weg 🎉",
+      post: "እንኳን ደህና መጡ · Welcome to Addis Gebeta 🎉",
       author: "kalkidan",
       body: "Here for the design and tech conversations. Also happy to help anyone who wants to talk about making this place more accessible.",
       daysAgo: 1,
@@ -1290,7 +1290,7 @@ async function main() {
   ]);
 
   console.log("• Creating notifications and reports");
-  const welcomePostId = postByTitle.get("እንኳን ደህና መጡ · Welcome to Addis Weg 🎉")!;
+  const welcomePostId = postByTitle.get("እንኳን ደህና መጡ · Welcome to Addis Gebeta 🎉")!;
   const coffeePostId = postByTitle.get("The Ethiopian coffee ceremony is not really about coffee.")!;
   const spamPostId = postByTitle.get("CHEAP PHONE SALE!!! DM FOR PRICE")!;
   const spamComment = await prisma.comment.findFirst({ where: { postId: spamPostId }, select: { id: true } });
@@ -1335,7 +1335,7 @@ async function main() {
       userId: byName.get("selam")!.id,
       actorId: byName.get("admin")!.id,
       type: "ANNOUNCEMENT" as const,
-      body: "እንኳን ደህና መጡ · Welcome to Addis Weg 🎉",
+      body: "እንኳን ደህና መጡ · Welcome to Addis Gebeta 🎉",
       postId: welcomePostId,
       createdAt: ago(1, 2),
       readAt: ago(1, 0),

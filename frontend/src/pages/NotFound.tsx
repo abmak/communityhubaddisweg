@@ -5,7 +5,7 @@ import { Compass, Coffee, Home, Search } from "lucide-react";
 export function NotFound() {
   useEffect(() => {
     const previous = document.title;
-    document.title = "Page not found · አዲስ ወግ";
+    document.title = "Page not found · አዲስ ገበታ";
     return () => {
       document.title = previous;
     };

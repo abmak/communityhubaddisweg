@@ -2,7 +2,7 @@
   "name": "community-hub",
   "version": "1.0.0",
   "private": true,
-  "description": "አዲስ ወግ (Addis Weg) — Ethiopian social discussion and interest-sharing platform",
+  "description": "አዲስ ገበታ (Addis Gebeta) — Ethiopian social discussion and interest-sharing platform",
   "workspaces": [
     "backend",
     "frontend"

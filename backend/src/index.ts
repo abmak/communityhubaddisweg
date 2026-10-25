@@ -40,7 +40,7 @@ async function main(): Promise<void> {
   server.listen(env.PORT, () => {
     logger.info(
       { port: env.PORT, env: env.NODE_ENV, client: env.CLIENT_ORIGIN },
-      "Addis Weg API + realtime gateway listening",
+      "Addis Gebeta API + realtime gateway listening",
     );
     // Fire-and-forget: the first import pulls fixtures and listings in without
     // delaying the API coming up, then the timer keeps them fresh.
@@ -48,7 +48,7 @@ async function main(): Promise<void> {
   });
 
   const shutdown = async (signal: string) => {
-    logger.info({ signal }, "Shutting down Addis Weg API");
+    logger.info({ signal }, "Shutting down Addis Gebeta API");
     server.close();
     await prisma.$disconnect().catch(() => undefined);
     process.exit(0);
@@ -62,6 +62,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((error) => {
-  logger.error({ err: error }, "Failed to start Addis Weg API");
+  logger.error({ err: error }, "Failed to start Addis Gebeta API");
   process.exit(1);
 });

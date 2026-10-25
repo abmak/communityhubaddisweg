@@ -9,6 +9,13 @@ set -eu
 
 cd "$(dirname "$0")"
 
+# Pulls can outlast the two-minute cron interval; two copies would fight over
+# the same images and containers, so a later tick steps aside.
+if command -v flock >/dev/null 2>&1; then
+  exec 9>.update.lock
+  flock -n 9 || exit 0
+fi
+
 RAW="https://raw.githubusercontent.com/abmak/communityhubaddisweg/main/deploy"
 COMPOSE="docker compose -f docker-compose.prod.yml"
 API_IMAGE="ghcr.io/abmak/communityhubaddisweg/api:latest"

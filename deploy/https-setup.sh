@@ -65,8 +65,24 @@ else
 fi
 
 # --- 2. Issue the IP certificate -------------------------------------------
-echo "• Fetching certbot"
-docker pull -q "$IMAGE" >/dev/null
+echo "• Preparing certbot"
+if docker image inspect "$IMAGE" >/dev/null 2>&1; then
+  echo "  using the image already on the host"
+else
+  free_mb="$(df -Pm / | awk 'NR==2 {print $4}')"
+  if [ "${free_mb:-0}" -lt 600 ]; then
+    echo "Only ${free_mb} MB free on /; the certbot image needs about 600 MB." >&2
+    echo "Free some space first, e.g.: sudo journalctl --vacuum-size=200M" >&2
+    exit 1
+  fi
+  docker pull -q "$IMAGE" >/dev/null
+fi
+
+# update.sh prunes unused images every couple of minutes; a stopped container
+# keeps this one referenced so the renewal job never has to pull it again.
+docker rm -f communityhub-certbot >/dev/null 2>&1 || true
+docker create --name communityhub-certbot "$IMAGE" >/dev/null
+
 CB="$(docker run --rm "$IMAGE" --version | awk '{print $2}')"
 CB_MAJOR="${CB%%.*}"
 CB_MINOR="${CB#*.}"
@@ -161,7 +177,7 @@ cat > /etc/cron.d/communityhub-ip-cert <<EOF
 # Let's Encrypt IP certificates are only valid for ~6 days.
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-17 3,15 * * * root docker run --rm -v $CERTDIR:/etc/letsencrypt -v $WEBROOT:/var/www/acme $IMAGE renew --quiet && systemctl reload nginx
+17 3,15 * * * root docker run --rm -v $CERTDIR:/etc/letsencrypt -v $WEBROOT:/var/www/acme $IMAGE renew --quiet >> /var/log/communityhub-cert.log 2>&1 && systemctl reload nginx
 EOF
 chmod 644 /etc/cron.d/communityhub-ip-cert
 

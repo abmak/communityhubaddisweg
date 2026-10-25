@@ -38,6 +38,7 @@ import { Avatar } from "../components/ui";
 import { BrandMark, Wordmark } from "../components/Brand";
 import { CategoryCard } from "../components/CategoryCard";
 import { KindMedia } from "../components/KindMedia";
+import { locationBlock, requestPosition } from "../lib/geo";
 import { PostCard } from "../components/PostCard";
 import { cn, formatCount } from "../lib/utils";
 import { KIND_META, PLACE_KINDS, formatDistance, placePath } from "../lib/places";
@@ -206,42 +207,23 @@ function NearbyPreview({ places }: { places: Place[] }) {
 
   if (places.length === 0) return null;
 
-  const locate = () => {
-    if (!("geolocation" in navigator)) {
-      navigate("/places");
+  const locate = async () => {
+    // A phone on plain HTTP cannot ask for GPS at all, so go straight to the
+    // neighbourhood picker rather than a button that can only fail.
+    if (locationBlock()) {
+      navigate("/places?pickArea=1");
       return;
     }
+
     setLocating(true);
-    // A dismissed or ignored permission prompt never fires a callback in some
-    // browsers, so the directory stays reachable either way.
-    let settled = false;
-    const fallback = window.setTimeout(() => {
-      if (settled) return;
-      settled = true;
+    try {
+      const { lat, lng } = await requestPosition();
+      navigate(`/places?lat=${lat.toFixed(5)}&lng=${lng.toFixed(5)}&sort=distance`);
+    } catch {
+      navigate("/places?pickArea=1");
+    } finally {
       setLocating(false);
-      navigate("/places");
-    }, 9000);
-
-    const done = () => {
-      settled = true;
-      window.clearTimeout(fallback);
-    };
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        if (settled) return;
-        done();
-        const { latitude, longitude } = position.coords;
-        navigate(`/places?lat=${latitude.toFixed(5)}&lng=${longitude.toFixed(5)}&sort=distance`);
-      },
-      () => {
-        if (settled) return;
-        done();
-        setLocating(false);
-        navigate("/places");
-      },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 120000 },
-    );
+    }
   };
 
   return (
@@ -261,7 +243,7 @@ function NearbyPreview({ places }: { places: Place[] }) {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              onClick={locate}
+              onClick={() => void locate()}
               disabled={locating}
               className="btn-secondary btn-sm"
             >

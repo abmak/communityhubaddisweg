@@ -14,8 +14,9 @@ import {
   Star,
   X,
 } from "lucide-react";
-import type { Place, PlaceKind, PlacesResponse } from "../types";
+import type { Place, PlaceArea, PlaceAreasResponse, PlaceKind, PlacesResponse } from "../types";
 import { useDebounced, useQuery } from "../hooks/useApi";
+import { locationBlock, locationMessage, requestPosition, type LocationFailure } from "../lib/geo";
 import { Badge, EmptyState } from "../components/ui";
 import { KindMedia } from "../components/KindMedia";
 import { useUI } from "../store/ui";
@@ -198,10 +199,16 @@ export function PlacesPage() {
       ? { lat: latParam, lng: lngParam }
       : null;
 
+  // A GPS fix and a picked area both live in the URL; the label only exists
+  // for the latter, so the button can say where the distances start from.
+  const areaParam = searchParams.get("area");
+
   const setCoords = (next: { lat: number; lng: number } | null) => {
     setSearchParams(
       (current) => {
         const params = new URLSearchParams(current);
+        params.delete("area");
+        params.delete("pickArea");
         if (next) {
           params.set("lat", String(next.lat));
           params.set("lng", String(next.lng));
@@ -225,6 +232,30 @@ export function PlacesPage() {
   const [geoState, setGeoState] = useState<"idle" | "locating" | "ready" | "error">(
     coords ? "ready" : "idle",
   );
+  const [areaPicker, setAreaPicker] = useState(searchParams.has("pickArea"));
+  // Phones refuse the Geolocation API on plain HTTP, so the page has to offer
+  // the neighbourhood picker instead of a button that can only fail.
+  const insecureOrigin = typeof window !== "undefined" && !window.isSecureContext;
+
+  const chooseArea = (entry: PlaceArea) => {
+    setSearchParams(
+      (current) => {
+        const params = new URLSearchParams(current);
+        params.set("lat", String(entry.lat));
+        params.set("lng", String(entry.lng));
+        params.set("area", entry.area);
+        params.delete("pickArea");
+        return params;
+      },
+      { replace: true },
+    );
+    setSort("distance");
+    setGeoState("ready");
+    setAreaPicker(false);
+    pushToast(`Sorting from ${entry.area} — approximate, from the middle of that area.`, {
+      tone: "success",
+    });
+  };
 
   const debouncedTerm = useDebounced(term, 320);
 
@@ -276,6 +307,15 @@ export function PlacesPage() {
   }, [kind, city, debouncedTerm, coords, sort, liveOsm]);
 
   const { data, loading } = useQuery<PlacesResponse>(url);
+  const { data: areasData } = useQuery<PlaceAreasResponse>(
+    areaPicker ? "/api/places/areas" : null,
+  );
+  const areas = useMemo(() => areasData?.areas ?? [], [areasData]);
+  const selectedAreaKey = useMemo(() => {
+    if (!areaParam) return "";
+    const match = areas.find((entry) => entry.area === areaParam);
+    return match ? `${match.city}::${match.area}` : "";
+  }, [areaParam, areas]);
 
   const counts = useMemo(() => {
     const map = new Map<PlaceKind, number>();
@@ -291,42 +331,29 @@ export function PlacesPage() {
   const total = savedOnly ? places.length : data?.filters.total ?? 0;
 
   const locate = () => {
-    if (!("geolocation" in navigator)) {
+    const blocked = locationBlock();
+    if (blocked) {
       setGeoState("error");
-      pushToast("This browser can't share a location.", { tone: "error" });
+      setAreaPicker(true);
+      pushToast(locationMessage(blocked), { tone: "error" });
       return;
     }
+
     setGeoState("locating");
-
-    // An ignored permission prompt can hang without ever calling back, so stop
-    // pretending to search after a few seconds.
-    let settled = false;
-    const fail = () => {
-      if (settled) return;
-      settled = true;
-      setGeoState("error");
-      pushToast("We couldn't reach your location — showing the whole map instead.", {
-        tone: "error",
-      });
-    };
-    const watchdog = window.setTimeout(fail, 9000);
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        if (settled) return;
-        settled = true;
-        window.clearTimeout(watchdog);
-        setCoords({ lat: position.coords.latitude, lng: position.coords.longitude });
+    void requestPosition()
+      .then(({ lat, lng }) => {
+        setCoords({ lat, lng });
         setSort("distance");
         setGeoState("ready");
+        setAreaPicker(false);
         pushToast("Sorted by what's closest to you.", { tone: "success" });
-      },
-      () => {
-        window.clearTimeout(watchdog);
-        fail();
-      },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 120000 },
-    );
+      })
+      .catch((failure: LocationFailure) => {
+        setGeoState("error");
+        // A phone that cannot answer still deserves a way to sort by distance.
+        setAreaPicker(true);
+        pushToast(locationMessage(failure), { tone: "error" });
+      });
   };
 
   const clearLocation = () => {
@@ -536,7 +563,12 @@ export function PlacesPage() {
 
           {coords ? (
             <button type="button" onClick={clearLocation} className="btn-secondary h-10 shrink-0">
-              <MapPin className="h-4 w-4 text-brand-700" /> {t("places.nearMe", "Near me")}
+              <MapPin className="h-4 w-4 text-brand-700" />
+              <span className="max-w-[10rem] truncate">
+                {areaParam
+                  ? `${areaParam} · ${t("places.approx", "approx.")}`
+                  : t("places.nearMe", "Near me")}
+              </span>
               <X className="h-3.5 w-3.5 text-muted" />
             </button>
           ) : (
@@ -550,7 +582,72 @@ export function PlacesPage() {
               {geoState === "locating" ? t("places.findingYou", "Finding you…") : t("places.useMyLocation", "Use my location")}
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={() => setAreaPicker((open) => !open)}
+            aria-expanded={areaPicker}
+            className={cn(
+              "btn-secondary h-10 shrink-0",
+              areaPicker && "border-brand-500/60 text-ink",
+            )}
+            title={t("places.areaHelp", "No GPS? Pick the area you're in.")}
+          >
+            <Compass className="h-4 w-4 text-brand-700 dark:text-brand-300" />
+            {t("places.pickArea", "Pick area")}
+          </button>
         </div>
+
+        {insecureOrigin && !coords && (
+          <button
+            type="button"
+            onClick={() => setAreaPicker(true)}
+            className="flex w-full items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-left text-[11px] leading-5 text-amber-800 transition hover:bg-amber-500/15 dark:text-amber-200"
+          >
+            <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            {t(
+              "places.insecureLocation",
+              "Phones only share GPS over HTTPS. Pick your area and we'll sort by distance from there.",
+            )}
+          </button>
+        )}
+
+        {areaPicker && (
+          <div className="rounded-xl border border-line bg-raised/50 p-3">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <p className="max-w-lg text-[11px] leading-5 text-muted">
+                {t(
+                  "places.areaHelp",
+                  "No GPS? Pick the area you're in — distances are measured from the middle of it.",
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={() => setAreaPicker(false)}
+                className="text-[11px] font-semibold text-muted transition hover:text-ink"
+              >
+                {t("places.close", "Close")}
+              </button>
+            </div>
+            <select
+              className="input mt-2 h-10 w-full"
+              value={selectedAreaKey}
+              onChange={(event) => {
+                const entry = areas.find(
+                  (item) => `${item.city}::${item.area}` === event.target.value,
+                );
+                if (entry) chooseArea(entry);
+              }}
+            >
+              <option value="">{t("places.chooseArea", "Choose your area…")}</option>
+              {areas.map((entry) => (
+                <option key={`${entry.city}::${entry.area}`} value={`${entry.city}::${entry.area}`}>
+                  {entry.area} · {entry.city} ({entry.count})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {hasFilters && (
           <div className="flex items-center justify-between gap-3 text-[11px] text-muted">

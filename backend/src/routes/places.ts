@@ -127,6 +127,44 @@ placesRouter.get(
 );
 
 placesRouter.get(
+  "/areas",
+  asyncHandler(async (_req, res) => {
+    // A coordinate per neighbourhood, averaged over the places already in the
+    // directory. Phones refuse to share GPS over plain HTTP, so this is how a
+    // "near me" sort still works there: pick an area instead.
+    const groups = await prisma.place.groupBy({
+      by: ["city", "area"],
+      where: { area: { not: null } },
+      _avg: { lat: true, lng: true },
+      _count: { _all: true },
+    });
+
+    const areas = groups
+      .filter(
+        (group) =>
+          group.area &&
+          // A single place with an odd OSM label ("4", "foot path") is noise in
+          // a picker; two or more means people actually know the area.
+          group._count._all >= 2 &&
+          group.area.trim().length >= 3 &&
+          group._avg.lat !== null &&
+          group._avg.lng !== null,
+      )
+      .map((group) => ({
+        city: group.city,
+        area: group.area as string,
+        lat: Number(group._avg.lat!.toFixed(5)),
+        lng: Number(group._avg.lng!.toFixed(5)),
+        count: group._count._all,
+      }))
+      .sort((a, b) => b.count - a.count || a.area.localeCompare(b.area))
+      .slice(0, 60);
+
+    res.json({ areas });
+  }),
+);
+
+placesRouter.get(
   "/:slug",
   validate(z.object({ slug: z.string().min(1).max(120) }), "params"),
   asyncHandler(async (req, res) => {

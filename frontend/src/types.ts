@@ -52,6 +52,19 @@ export interface PlacesResponse {
   };
 }
 
+/** A neighbourhood centroid used when the device cannot share GPS. */
+export interface PlaceArea {
+  city: string;
+  area: string;
+  lat: number;
+  lng: number;
+  count: number;
+}
+
+export interface PlaceAreasResponse {
+  areas: PlaceArea[];
+}
+
 export interface User {
   id: string;
   username: string;

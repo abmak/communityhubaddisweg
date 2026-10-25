@@ -71,6 +71,9 @@ else
   # Without Caddy the web container is the only entry point, so it has to be
   # reachable from outside instead of the loopback default in .env.
   export WEB_BIND="${WEB_BIND:-0.0.0.0}"
+  # No TLS means a Secure cookie is silently dropped by the browser and every
+  # like or comment would look signed out.
+  set_value COOKIE_SECURE false
 fi
 
 # shellcheck disable=SC2086
@@ -98,8 +101,8 @@ if ! command -v curl >/dev/null 2>&1; then
 fi
 
 if [ -z "$(value DOMAIN)" ]; then
-  echo "Warning: DOMAIN is empty, so the stack runs over HTTP only. Sign-in needs" >&2
-  echo "HTTPS because the API sets Secure cookies — set DOMAIN in $(pwd)/.env." >&2
+  echo "Warning: DOMAIN is empty, so the stack runs over HTTP only and session" >&2
+  echo "cookies are not marked Secure. Set DOMAIN in $(pwd)/.env for HTTPS." >&2
 fi
 
 attempt=1

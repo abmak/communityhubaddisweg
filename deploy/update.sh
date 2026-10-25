@@ -44,9 +44,12 @@ fi
 [ "$(value WEB_IMAGE)" = "$WEB_IMAGE" ] || set_value WEB_IMAGE "$WEB_IMAGE"
 
 # Without a domain Caddy is off and the web container is the public entry
-# point, so it has to bind beyond loopback.
+# point, so it has to bind beyond loopback. Plain HTTP also means the session
+# cookie must not be Secure, or the browser drops it and every like or comment
+# looks signed out.
 if [ -z "$(value DOMAIN)" ]; then
   export WEB_BIND=0.0.0.0
+  [ "$(value COOKIE_SECURE)" = "false" ] || set_value COOKIE_SECURE false
 fi
 
 $COMPOSE pull -q

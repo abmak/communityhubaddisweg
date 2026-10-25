@@ -10,6 +10,9 @@ const envSchema = z.object({
   CLIENT_ORIGIN: z.string().default("http://localhost:5173"),
   CORS_EXTRA_ORIGINS: z.string().optional().default(""),
   PUBLIC_API_URL: z.string().optional().default(""),
+  // Secure cookie flag. Left empty it follows NODE_ENV; set `false` only while
+  // the site is served over plain HTTP, where browsers discard Secure cookies.
+  COOKIE_SECURE: z.enum(["true", "false"]).or(z.literal("")).optional(),
   UPLOAD_DIR: z.string().default("./uploads"),
   MAX_UPLOAD_MB: z.coerce.number().positive().default(25),
   SMS_PROVIDER: z.enum(["console", "knock", "twilio"]).default("console"),
@@ -53,7 +56,10 @@ export const allowedOrigins = Array.from(
   new Set([env.CLIENT_ORIGIN, ...extraOrigins]),
 );
 
-export const cookieSecure = isProduction;
+export const cookieSecure =
+  env.COOKIE_SECURE === undefined || env.COOKIE_SECURE === ""
+    ? isProduction
+    : env.COOKIE_SECURE === "true";
 export const isConsoleSms = env.SMS_PROVIDER === "console";
 /** Only expose OTP codes to the client in local development with the console provider. */
 export const exposeDevCodes = !isProduction && isConsoleSms;

@@ -199,12 +199,13 @@ them anonymously.
 4. Seed the demo community once:
    `docker compose -f docker-compose.prod.yml exec backend npm run db:seed`
 
-Without `DOMAIN` in `.env` the web container publishes on port 8080 and `update.sh` binds it to
-`0.0.0.0`. Sign-in needs HTTPS because the API issues Secure cookies, so once DNS points at the
-server set `DOMAIN=addisweg.et` (or your host) in `.env`: the next roll-out starts Caddy, which takes
-over ports 80/443, fetches the certificate automatically and proxies websocket upgrades, and the web
-port falls back to loopback. Until then the site loads over `http://<server-ip>:8080` but nobody can
-sign in.
+Without `DOMAIN` in `.env` the web container publishes on port 8080, `update.sh` binds it to
+`0.0.0.0` and sets `COOKIE_SECURE=false` — over plain HTTP a browser discards Secure cookies, so
+without that the session never sticks and every like or comment answers "Authentication required".
+The cookie is therefore unencrypted in transit, which is fine for a trial host and not for real
+members: once DNS points at the server set `DOMAIN=addisweg.et` (or your host) in `.env`, set
+`COOKIE_SECURE=true` and the next roll-out starts Caddy, which takes over ports 80/443, fetches the
+certificate automatically, proxies websocket upgrades, and the web port falls back to loopback.
 
 Run the build by hand from **Actions → Deploy → Run workflow**; the server picks the new images up
 on its next tick. `.env` lives only on the server and is never overwritten. Migrations run when the

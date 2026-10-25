@@ -207,6 +207,19 @@ members: once DNS points at the server set `DOMAIN=addisweg.et` (or your host) i
 `COOKIE_SECURE=true` and the next roll-out starts Caddy, which takes over ports 80/443, fetches the
 certificate automatically, proxies websocket upgrades, and the web port falls back to loopback.
 
+If another site already owns ports 80/443 on the host (as on this VPS, where nginx serves other
+apps), do **not** set `DOMAIN` — Caddy would not be able to bind. Run the vhost variant once as
+root instead:
+
+```sh
+sudo sh https-setup.sh addisweg.jobsethiopia.et
+```
+
+It adds an nginx vhost that answers the ACME challenge on port 80, obtains or reuses the
+certificate with the system certbot, terminates TLS on port 443 and proxies to the web container,
+then sets `BEHIND_TLS_PROXY=1`, `COOKIE_SECURE=true` and `WEB_BIND=127.0.0.1` in `.env`. `update.sh`
+respects that flag, so the app stays on loopback and keeps Secure cookies across roll-outs.
+
 Run the build by hand from **Actions → Deploy → Run workflow**; the server picks the new images up
 on its next tick. `.env` lives only on the server and is never overwritten. Migrations run when the
 API container starts. `deploy/deploy.sh` and the `VPS_*` repository secrets are only needed for a

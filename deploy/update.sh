@@ -55,8 +55,15 @@ fi
 # cookie must not be Secure, or the browser drops it and every like or comment
 # looks signed out.
 if [ -z "$(value DOMAIN)" ]; then
-  export WEB_BIND=0.0.0.0
-  [ "$(value COOKIE_SECURE)" = "false" ] || set_value COOKIE_SECURE false
+  if [ "$(value BEHIND_TLS_PROXY)" = "1" ]; then
+    # TLS is terminated by the host's nginx (see https-setup.sh): keep the web
+    # container on loopback and its session cookie Secure.
+    [ "$(value WEB_BIND)" = "127.0.0.1" ] || set_value WEB_BIND 127.0.0.1
+    [ "$(value COOKIE_SECURE)" = "true" ] || set_value COOKIE_SECURE true
+  else
+    export WEB_BIND=0.0.0.0
+    [ "$(value COOKIE_SECURE)" = "false" ] || set_value COOKIE_SECURE false
+  fi
 fi
 
 $COMPOSE pull -q

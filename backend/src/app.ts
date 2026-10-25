@@ -3,7 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
-import { allowedOrigins } from "./config/env";
+import { allowedOrigins, env } from "./config/env";
 import { logger } from "./lib/logger";
 import { authenticate } from "./middleware/auth";
 import { csrfProtection, originGuard } from "./middleware/csrf";
@@ -17,7 +17,10 @@ export function createApp() {
   const app = express();
 
   app.disable("x-powered-by");
-  app.set("trust proxy", 1);
+  // One proxy (the web container's nginx), plus a second when a TLS proxy such
+  // as the host's nginx sits in front. Without the right depth, every member
+  // looks like the proxy and shares one rate-limit bucket.
+  app.set("trust proxy", env.TRUST_PROXY);
 
   app.use(
     helmet({

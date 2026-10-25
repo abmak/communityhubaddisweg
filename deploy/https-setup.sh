@@ -1,106 +1,123 @@
 #!/bin/sh
-# One-time HTTPS for the community hub, using the host's own nginx and the
-# Let's Encrypt certificate already managed by certbot on this machine.
+# HTTPS for the community hub on this server's public IP.
 #
-# Run on the VPS as root, with a hostname whose DNS points at the server:
+#   sudo sh ~/communityhub/https-setup.sh
 #
-#   sudo sh https-setup.sh addisweg.jobsethiopia.et
+# Ports 80 and 443 already belong to the host's nginx (other sites live
+# there), so the compose Caddy can never bind them and this app has been on
+# plain HTTP — where phones refuse to share their location. This script adds a
+# TLS vhost on port 8443 in front of the web container:
 #
-# Ports 80 and 443 are owned by the host's nginx (another site runs there), so
-# this adds a virtual host instead of starting the compose Caddy: port 80
-# answers the ACME challenge and redirects to HTTPS, port 443 terminates TLS
-# and proxies to the web container on 127.0.0.1:8080.
+#   https://<public-ip>:8443
 #
-# It is safe to re-run: the vhost is rewritten, certbot reuses the existing
-# certificate, and the .env edits are idempotent.
+# The certificate is a Let's Encrypt IP certificate. Let's Encrypt only issues
+# those as six-day "shortlived" certificates, so a root cron entry renews it
+# twice a day and reloads nginx. certbot needs 5.4+ for --ip-address with
+# --webroot, hence the official image; it keeps its state in
+# /etc/letsencrypt-ip so the system certbot (which manages the other sites)
+# is left untouched.
+#
+# Safe to re-run: the vhost and cron entry are rewritten, and certbot reuses
+# the existing certificate until it is due.
 set -eu
 
-NAME="${1:-}"
-if [ -z "$NAME" ]; then
-  echo "usage: sudo sh https-setup.sh <hostname>   e.g. addisweg.jobsethiopia.et" >&2
-  exit 1
-fi
-if [ "$(id -u)" -ne 0 ]; then
-  echo "run this with root privileges:  sudo sh $0 $NAME" >&2
-  exit 1
-fi
+[ "$(id -u)" -eq 0 ] || { echo "run this with root privileges: sudo sh $0" >&2; exit 1; }
+command -v docker >/dev/null || { echo "docker is required" >&2; exit 1; }
+command -v nginx >/dev/null || { echo "nginx is required" >&2; exit 1; }
 
 cd "$(dirname "$0")"
-WEBROOT=/var/www/acme
-SITE=/etc/nginx/sites-available/communityhub
-ENABLED=/etc/nginx/sites-enabled/communityhub
 
-# --- 1. Does the name actually point here? ---------------------------------
-resolved="$(getent hosts "$NAME" | awk '{print $1; exit}' || true)"
-public="$(curl -fsS --max-time 10 https://api.ipify.org || true)"
-if [ -z "$resolved" ]; then
-  echo "DNS: $NAME does not resolve yet. Add an A record first." >&2
+IP="${1:-$(curl -fsS --max-time 10 https://api.ipify.org || true)}"
+case "$IP" in
+  "" | *[!0-9.]* | *..* | .* | *.)
+    echo "could not determine a public IPv4 address (got '$IP'); pass it: sudo sh $0 203.0.113.5" >&2
+    exit 1
+    ;;
+esac
+
+PORT=8443
+APP=127.0.0.1:8080
+WEBROOT=/var/www/acme
+VAS80=/etc/nginx/sites-available/vas-ip-redirect.conf
+SITE=/etc/nginx/sites-available/communityhub-tls
+ENABLED=/etc/nginx/sites-enabled/communityhub-tls
+CERTDIR=/etc/letsencrypt-ip
+IMAGE=certbot/certbot:latest
+
+echo "• Certificate for $IP will be served on port $PORT"
+
+# --- 1. Let the bare-IP port-80 block answer the ACME challenge -------------
+# That block currently proxies /.well-known/acme-challenge/ to the VAS app on
+# :5001, which cannot hand out our token. Everything else keeps its redirect.
+install -d -m 755 "$WEBROOT/.well-known/acme-challenge"
+if [ -f "$VAS80" ] && grep -q "proxy_pass http://127.0.0.1:5001;" "$VAS80"; then
+  cp "$VAS80" "$VAS80.bak-communityhub-$(date +%Y%m%d%H%M%S)"
+  sed -i '\#location /.well-known/acme-challenge/#,\#}# s|proxy_pass http://127.0.0.1:5001;|root /var/www/acme;|' "$VAS80"
+  if ! grep -q "root /var/www/acme;" "$VAS80"; then
+    echo "could not repoint the ACME challenge in $VAS80" >&2
+    exit 1
+  fi
+  nginx -t
+  systemctl reload nginx
+  echo "  port 80 now serves ACME challenges from $WEBROOT"
+else
+  echo "  $VAS80 already serves ACME challenges from disk (or is absent)"
+fi
+
+# --- 2. Issue the IP certificate -------------------------------------------
+echo "• Fetching certbot"
+docker pull -q "$IMAGE" >/dev/null
+CB="$(docker run --rm "$IMAGE" --version | awk '{print $2}')"
+CB_MAJOR="${CB%%.*}"
+CB_MINOR="${CB#*.}"
+CB_MINOR="${CB_MINOR%%.*}"
+if [ "$CB_MAJOR" -lt 5 ] || { [ "$CB_MAJOR" -eq 5 ] && [ "$CB_MINOR" -lt 4 ]; }; then
+  echo "certbot 5.4+ is required for IP certificates, the image has $CB" >&2
   exit 1
 fi
-if [ -n "$public" ] && [ "$resolved" != "$public" ]; then
-  echo "Warning: $NAME resolves to $resolved, but this host answers as $public." >&2
-fi
+echo "  certbot $CB"
 
-# --- 2. Serve the ACME challenge on port 80 --------------------------------
-mkdir -p "$WEBROOT/.well-known/acme-challenge"
-cat > "$SITE" <<EOF
-server {
-    listen 80;
-    server_name $NAME;
+echo "• Requesting the certificate (HTTP-01 on port 80)"
+docker run --rm \
+  -v "$CERTDIR":/etc/letsencrypt \
+  -v "$WEBROOT":/var/www/acme \
+  "$IMAGE" certonly \
+  --webroot -w /var/www/acme \
+  --ip-address "$IP" \
+  --preferred-profile shortlived \
+  --cert-name "$IP" \
+  --non-interactive --agree-tos --register-unsafely-without-email
 
-    location /.well-known/acme-challenge/ {
-        root $WEBROOT;
-    }
+CERT="$CERTDIR/live/$IP/fullchain.pem"
+KEY="$CERTDIR/live/$IP/privkey.pem"
+[ -s "$CERT" ] && [ -s "$KEY" ] || { echo "certificate files are missing under $CERTDIR/live/$IP" >&2; exit 1; }
 
-    location / {
-        return 301 https://\$host\$request_uri;
-    }
-}
-EOF
-ln -sfn "$SITE" "$ENABLED"
-nginx -t
-systemctl reload nginx
-
-# --- 3. Certificate (renewals are automatic via the certbot timer) ----------
-certbot certonly --webroot -w "$WEBROOT" -d "$NAME" \
-  --non-interactive --agree-tos --register-unsafely-without-email \
-  --deploy-hook "systemctl reload nginx"
-
-# --- 4. Terminate TLS here and proxy to the app ----------------------------
+# --- 3. Terminate TLS on the host nginx and proxy to the app ----------------
+echo "• Writing the nginx vhost"
 cat > "$SITE" <<EOF
 # Managed by communityhub https-setup.sh — re-runs rewrite this file.
+# HTTPS entry point for the community hub on the host's public IP.
 server {
-    listen 80;
-    server_name $NAME;
+    listen $PORT ssl;
+    server_name $IP;
 
-    location /.well-known/acme-challenge/ {
-        root $WEBROOT;
-    }
+    ssl_certificate     $CERT;
+    ssl_certificate_key $KEY;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:communityhub-tls:10m;
+    ssl_session_timeout 1d;
 
-    location / {
-        return 301 https://\$host\$request_uri;
-    }
-}
-
-server {
-    listen 443 ssl;
-    server_name $NAME;
-
-    ssl_certificate     /etc/letsencrypt/live/$NAME/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$NAME/privkey.pem;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
     client_max_body_size 30m;
 
     location / {
-        proxy_pass http://127.0.0.1:8080;
+        proxy_pass http://$APP;
         proxy_http_version 1.1;
-        proxy_set_header Host \$host;
+        proxy_set_header Host \$http_host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto https;
 
-        # Socket.IO upgrades and long-lived polling.
+        # Socket.IO upgrades and long polling.
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
         proxy_read_timeout 600s;
@@ -108,37 +125,49 @@ server {
 }
 EOF
 
-nginx -t
+ln -sfn "$SITE" "$ENABLED"
+if ! nginx -t; then
+  echo "nginx rejected the new vhost; removing it and leaving the app as it was" >&2
+  rm -f "$ENABLED"
+  exit 1
+fi
 systemctl reload nginx
 
-# --- 5. Let the app know it is behind TLS ----------------------------------
-value() { sed -n "s|^$1=||p" .env | tail -n 1; }
-set_value() {
-  if grep -q "^$1=" .env; then
-    sed -i "s|^$1=.*|$1=$2|" .env
-  else
-    printf '%s=%s\n' "$1" "$2" >>.env
-  fi
-}
+# --- 4. The app is now behind TLS ------------------------------------------
+if [ -f .env ]; then
+  value() { sed -n "s|^$1=||p" .env | tail -n 1; }
+  set_value() {
+    if grep -q "^$1=" .env; then
+      sed -i "s|^$1=.*|$1=$2|" .env
+    else
+      printf '%s=%s\n' "$1" "$2" >>.env
+    fi
+  }
 
-if [ ! -f .env ]; then
-  echo "No .env in $(pwd); skipping the app settings. Set CLIENT_ORIGIN=https://$NAME" >&2
-else
-  set_value CLIENT_ORIGIN "https://$NAME"
+  set_value CLIENT_ORIGIN "https://$IP:$PORT"
   set_value COOKIE_SECURE "true"
   set_value WEB_BIND "127.0.0.1"
   set_value BEHIND_TLS_PROXY "1"
-  echo "App settings updated; the next roll-out (<= 2 min) recreates the web container."
+  # The API now sits behind two proxies, so it has to look two hops back for
+  # the member's address instead of putting everyone in one rate-limit bucket.
+  set_value TRUST_PROXY "2"
+  echo "• .env updated; the next roll-out (<= 2 min) recreates the web container on loopback"
+else
+  echo "• No .env in $(pwd); set CLIENT_ORIGIN=https://$IP:$PORT and COOKIE_SECURE=true yourself" >&2
 fi
 
-# The puller must stop forcing the plain-HTTP settings from now on.
-PULLER="$(pwd)/update.sh"
-if [ -f "$PULLER" ] && ! grep -q "BEHIND_TLS_PROXY" "$PULLER"; then
-  curl -fsS --max-time 30 \
-    https://raw.githubusercontent.com/abmak/communityhubaddisweg/main/deploy/update.sh \
-    -o "$PULLER.new" && mv "$PULLER.new" "$PULLER" && chmod +x "$PULLER"
-fi
+# --- 5. Renew the short-lived certificate -----------------------------------
+cat > /etc/cron.d/communityhub-ip-cert <<EOF
+# Let's Encrypt IP certificates are only valid for ~6 days.
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+17 3,15 * * * root docker run --rm -v $CERTDIR:/etc/letsencrypt -v $WEBROOT:/var/www/acme $IMAGE renew --quiet && systemctl reload nginx
+EOF
+chmod 644 /etc/cron.d/communityhub-ip-cert
 
+# --- 6. Smoke test ----------------------------------------------------------
+sleep 2
+code="$(curl -sSk --max-time 15 -o /dev/null -w '%{http_code}' "https://127.0.0.1:$PORT/api/categories" || true)"
 echo
-echo "Done: https://$NAME/"
-echo "The API and websocket traffic follow the same origin."
+echo "Done: https://$IP:$PORT/  (local API check: ${code:-no response})"
+echo "Old http://$IP:8080 closes once the puller applies the new .env."

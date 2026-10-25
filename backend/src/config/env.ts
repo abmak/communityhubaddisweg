@@ -8,6 +8,9 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
   JWT_EXPIRES_IN_DAYS: z.coerce.number().positive().default(7),
   CLIENT_ORIGIN: z.string().default("http://localhost:5173"),
+  // Number of reverse proxies in front of the API. 1 = the web container's
+  // nginx; 2 = plus a TLS proxy on the host.
+  TRUST_PROXY: z.coerce.number().int().min(1).max(10).default(1),
   CORS_EXTRA_ORIGINS: z.string().optional().default(""),
   PUBLIC_API_URL: z.string().optional().default(""),
   // Secure cookie flag. Left empty it follows NODE_ENV; set `false` only while

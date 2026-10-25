@@ -171,39 +171,45 @@ With `SMS_PROVIDER=console` (development only), verification and reset codes are
 
 ## Deployment (Ubuntu VPS, Docker CI/CD)
 
-Every push to `main` runs `.github/workflows/deploy.yml`: it builds both images, publishes
-`ghcr.io/abmak/communityhubaddisweg/api` and `…/web` tagged with the commit, copies the deploy
-files to the server and rolls the stack over SSH. `.github/workflows/ci.yml` still migrates a
-disposable PostgreSQL, seeds, typechecks and builds on every push and pull request.
+Every push to `main` runs `.github/workflows/deploy.yml`: it builds both images and publishes
+`ghcr.io/abmak/communityhubaddisweg/api` and `…/web`, tagged with the commit and as `latest`.
+`.github/workflows/ci.yml` still migrates a disposable PostgreSQL, seeds, typechecks and builds on
+every push and pull request.
+
+The roll-out is pull-based. GitHub's runners cannot open SSH to this server, so the server watches
+`main` itself: `deploy/update.sh` runs from cron every two minutes, copies
+`deploy/docker-compose.prod.yml` from the repository, pulls the `:latest` images and recreates only
+the containers whose image changed. A push is live about two minutes after its build finishes, and
+the pipeline needs no credentials to the machine. The GHCR packages are public, so the server pulls
+them anonymously.
 
 ### One-time VPS setup
 
-1. Install Docker Engine + Compose v2 and open ports 80 and 443 (and 22 for the pipeline).
-2. Create the deploy directory the pipeline writes to and make it writable for the SSH user:
-   `sudo mkdir -p /opt/communityhub && sudo chown "$USER" /opt/communityhub`. Point a DNS `A`
-   record at the VPS when you have a domain.
-3. Add these repository secrets under **Settings → Secrets and variables → Actions**:
+1. Install Docker Engine + Compose v2 and open port 8080 (plus 80/443 once a domain is set).
+2. Create the deploy directory and put the deploy files in it:
+   ```sh
+   mkdir -p ~/communityhub && cd ~/communityhub
+   # copy deploy/docker-compose.prod.yml, deploy/.env.example, deploy/Caddyfile and deploy/update.sh here
+   sh deploy.sh          # writes .env, generates POSTGRES_PASSWORD, DATABASE_URL and JWT_SECRET
+   ```
+3. Install the puller for the current user:
+   ```sh
+   (crontab -l 2>/dev/null; echo "*/2 * * * * $HOME/communityhub/update.sh >> $HOME/communityhub/update.log 2>&1") | crontab -
+   ```
+4. Seed the demo community once:
+   `docker compose -f docker-compose.prod.yml exec backend npm run db:seed`
 
-| Secret | Value |
-| --- | --- |
-| `VPS_HOST` | Server IP or hostname |
-| `VPS_USER` | SSH user with Docker access (`ubuntu`, `root`, or a deploy user) |
-| `VPS_SSH_KEY` | Private key whose public half is in that user's `authorized_keys` |
-| `VPS_PORT` | SSH port (optional, defaults to 22) |
-| `DEPLOY_PATH` | Directory for `.env` and the compose files (optional, defaults to `/opt/communityhub`) |
+Without `DOMAIN` in `.env` the web container publishes on port 8080 and `update.sh` binds it to
+`0.0.0.0`. Sign-in needs HTTPS because the API issues Secure cookies, so once DNS points at the
+server set `DOMAIN=addisweg.et` (or your host) in `.env`: the next roll-out starts Caddy, which takes
+over ports 80/443, fetches the certificate automatically and proxies websocket upgrades, and the web
+port falls back to loopback. Until then the site loads over `http://<server-ip>:8080` but nobody can
+sign in.
 
-The first run writes `.env` from `deploy/.env.example`, generates `POSTGRES_PASSWORD`, `DATABASE_URL`
-and `JWT_SECRET`, and publishes the web container on port 8080. Sign-in needs HTTPS because the API
-issues Secure cookies, so once DNS points at the server set `DOMAIN=addisweg.et` (or your host) in
-`$DEPLOY_PATH/.env` and run the workflow again: Caddy then takes over ports 80/443, fetches the
-certificate automatically and proxies websocket upgrades, while the web port falls back to loopback.
-Until then the site loads over `http://<server-ip>:8080` but nobody can sign in.
-Seed the demo community once with
-`docker compose -f docker-compose.prod.yml exec backend npm run db:seed`.
-
-Run the pipeline by hand from **Actions → Deploy → Run workflow**. `.env` lives only on the server;
-the pipeline ships `deploy/docker-compose.prod.yml`, `deploy/Caddyfile`, `deploy/.env.example` and
-`deploy/deploy.sh` and never overwrites it. Migrations run when the API container starts.
+Run the build by hand from **Actions → Deploy → Run workflow**; the server picks the new images up
+on its next tick. `.env` lives only on the server and is never overwritten. Migrations run when the
+API container starts. `deploy/deploy.sh` and the `VPS_*` repository secrets are only needed for a
+push-based roll-out from CI over SSH; this host does not accept SSH from GitHub's runners.
 
 ### Manual fallback
 
@@ -224,6 +230,7 @@ release step instead of on container start.
 - Sports & cinema verification: the international feed imported 293 ESPN fixtures in one sync, and `/api/events/sports` returned 30 Premier League, 30 La Liga, 40 Serie A and 27 Bundesliga matches inside the 21-day window. `/sports` rendered all 127 with GMT+3 kick-off times and both club crests per fixture, the La Liga chip filtered to its 30, and a fixture opened its event page. `/api/events/cinemas` returned six popular halls with the curated venues first and grouped the Century Cinema screening; the Cinema page showed both sections, and the Film reviews tab still loaded its posts. The sidebar nested Sport, Cinema and Theatre under Events on desktop and in the mobile menu; `/theatre` opened the events list with the Theatre filter active. No console errors were observed on any of these pages.
 - Gemini verification: all five keys answered a model listing; a Telegram batch was extracted into clean rows ("Halloween Scream 1996 Screening" at Century Cinema, topic CINEMA, `aiExtracted` set) with the token count recorded; quota exhaustion was observed key by key, rotated around, parked with Google's own retry delay and persisted per model so a restart spends nothing on a capped key; when the primary model's daily cap ran out on every key the pool switched to the lighter fallback and kept extracting for one request per sync; the per-key panel rendered calls, successes, quota hits, tokens, cooldown state and the last error; with both models parked a sync fell back to regex and the AI desk reported a readable error while the other sources kept importing.
 - Calendar verification: the Settings toggle round-tripped `calendarPreference` through `PATCH /api/users/me` and `/api/auth/me`, and the UI rendered `ጥቅምት 13, 2019 · 23 Oct 2026` on the settings preview, feed and event dates.
+- Deployment verification: the Deploy workflow built and published both images for the release commit, the cron puller on the VPS moved the stack from the previous pinned tag to the new `:latest` digest within a tick, `docker compose exec backend npm run db:seed` populated the production database, `/api/categories` returned the seeded rooms and the SPA answered 200 over `http://196.189.155.179:8080`.
 
 ## Image credits
 

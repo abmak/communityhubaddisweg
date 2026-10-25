@@ -1,8 +1,13 @@
 name: Deploy
 
-# Builds both images, publishes them to GHCR and rolls the VPS onto the new
-# commit. CI (.github/workflows/ci.yml) still runs separately to typecheck,
+# Builds both images and publishes them to GHCR, tagged with the commit and as
+# `latest`. CI (.github/workflows/ci.yml) still runs separately to typecheck,
 # migrate against a disposable database and build.
+#
+# The roll-out is pull-based: GitHub's runners cannot reach this server over
+# SSH, so the VPS runs deploy/update.sh from cron, follows `main`'s compose
+# file and recreates the containers whose image changed within a couple of
+# minutes of a successful build. Nothing here touches the server directly.
 on:
   push:
     branches: [main]
@@ -20,8 +25,6 @@ env:
   REGISTRY: ghcr.io
   API_IMAGE: ghcr.io/${{ github.repository }}/api
   WEB_IMAGE: ghcr.io/${{ github.repository }}/web
-  # Directory on the VPS that holds docker-compose.prod.yml, Caddyfile and .env.
-  DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/opt/communityhub' }}
 
 jobs:
   images:
@@ -70,44 +73,3 @@ jobs:
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web
 
-  deploy:
-    name: Roll out to the VPS
-    needs: images
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment: production
-    permissions:
-      contents: read
-      packages: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Copy deploy files to the VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          source: "deploy/docker-compose.prod.yml,deploy/Caddyfile,deploy/.env.example,deploy/deploy.sh"
-          target: ${{ env.DEPLOY_PATH }}
-          strip_components: 1
-          overwrite: true
-
-      - name: Deploy over SSH
-        uses: appleboy/ssh-action@v1.2.0
-        env:
-          API_IMAGE: ${{ env.API_IMAGE }}:${{ needs.images.outputs.tag }}
-          WEB_IMAGE: ${{ env.WEB_IMAGE }}:${{ needs.images.outputs.tag }}
-          GHCR_USER: ${{ github.actor }}
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          script_stop: true
-          envs: API_IMAGE,WEB_IMAGE,GHCR_USER,GHCR_TOKEN
-          script: |
-            cd "${{ env.DEPLOY_PATH }}"
-            sh deploy.sh

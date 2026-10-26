@@ -10,6 +10,7 @@ import { EVENT_TOPIC_VALUES } from "../lib/event-topics";
 import { parseLimit, parsePage } from "../lib/pagination";
 import { publicUserSelect, selfUserSelect } from "../lib/serialize";
 import { emitToAll } from "../lib/realtime";
+import { pushAnnouncement, pushNewEvent } from "../lib/push";
 import {
   PERMISSIONS,
   PERMISSION_SET,
@@ -1493,6 +1494,7 @@ adminRouter.post(
     });
 
     emitToAll("announcement:new", { postId: post.id, title });
+    void pushAnnouncement({ postId: post.id, title, excludeUserId: req.userId! });
     res.status(201).json({ post, notified: recipients.length });
   }),
 );
@@ -1875,6 +1877,7 @@ adminRouter.post(
       kind: event.kind,
       creatorId: event.creatorId,
     });
+    void pushNewEvent(event);
 
     res.status(201).json({ event: adminEventView(event) });
   }),

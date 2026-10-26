@@ -34,6 +34,12 @@ const envSchema = z.object({
   GEMINI_MODEL: z.string().default("gemini-3.5-flash"),
   // Tried once the primary model's daily quota is spent on every key.
   GEMINI_MODEL_FALLBACK: z.string().default("gemini-3.5-flash-lite"),
+  // Web Push. With no key pair the API generates one on first use and keeps it
+  // in AppSetting; setting both here overrides that for an externally managed
+  // pair. The subject must be a mailto: or https: URL.
+  VAPID_SUBJECT: z.string().default("mailto:admin@communityhub.et"),
+  VAPID_PUBLIC_KEY: z.string().optional().default(""),
+  VAPID_PRIVATE_KEY: z.string().optional().default(""),
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -117,8 +117,9 @@ model User {
   reportsFiled          Report[]           @relation("ReportReporter")
   reportsResolved       Report[]           @relation("ReportResolver")
   verificationCodes     VerificationCode[]
-  notifications         Notification[]     @relation("NotificationRecipient")
-  actorNotifications    Notification[]     @relation("NotificationActor")
+  notifications         Notification[]      @relation("NotificationRecipient")
+  actorNotifications    Notification[]      @relation("NotificationActor")
+  pushSubscriptions     PushSubscription[]
   eventsCreated         Event[]            @relation("EventCreator")
   eventRsvps            EventRsvp[]
   adminActions          AdminAction[]      @relation("AdminActionActor")
@@ -509,6 +510,34 @@ model Notification {
   conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([userId, readAt, createdAt(sort: Desc)])
+}
+
+// One row per browser/device that opted into Web Push. The endpoint is the
+// push service URL; p256dh and auth are the browser's encryption keys. A 404
+// or 410 from the push service means the subscription is gone and the row is
+// deleted on the next send.
+model PushSubscription {
+  id         String   @id @default(cuid())
+  userId     String
+  endpoint   String   @unique
+  p256dh     String
+  auth       String
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Server-owned configuration that must survive restarts. The VAPID key pair
+// is generated on first use and stored here unless the operator supplied a
+// pair through the environment.
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 model Report {

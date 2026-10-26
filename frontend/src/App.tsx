@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { useAuth } from "./store/auth";
 import { useUI } from "./store/ui";
+import { listenForPushMessages, syncPushSubscription } from "./lib/browserNotifications";
 import { AppLayout, ThemeManager } from "./components/Layout";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ToastViewport } from "./components/ToastViewport";
@@ -96,6 +97,32 @@ function Splash() {
   );
 }
 
+/** Keeps this device subscribed on every shell, including the admin workspace. */
+function PushNotificationBridge() {
+  const user = useAuth((state) => state.user);
+  const pushToast = useUI((state) => state.pushToast);
+
+  useEffect(() => {
+    if (!user) return;
+    // Repairs a missing server row after a database restore and creates the
+    // subscription on the first signed-in visit after permission is granted.
+    void syncPushSubscription();
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user) return;
+    return listenForPushMessages((payload) => {
+      // The conversation or post is already on screen; no toast is needed.
+      if (payload.url === window.location.pathname) return;
+      pushToast(payload.body ? `${payload.title} · ${payload.body}` : payload.title, {
+        href: payload.url,
+      });
+    });
+  }, [user?.id, pushToast]);
+
+  return null;
+}
+
 export default function App() {
   const bootstrap = useAuth((state) => state.bootstrap);
   const status = useAuth((state) => state.status);
@@ -129,6 +156,7 @@ export default function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <ThemeManager />
+        <PushNotificationBridge />
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<LandingPage />} />

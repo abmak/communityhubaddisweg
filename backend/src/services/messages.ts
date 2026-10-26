@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import { ApiError } from "../lib/errors";
 import { emitToUser, isUserOnline } from "../lib/realtime";
 import { createNotification } from "../lib/notifications";
+import { pushMessage } from "../lib/push";
 
 export const conversationUserSelect = {
   id: true,
@@ -209,6 +210,24 @@ export async function createMessage({
   emitToUser(senderId, "message:new", message);
   emitToUser(recipientId, "message:new", message);
   emitToUser(recipientId, "conversation:updated", { conversationId, lastMessageAt: message.createdAt });
+
+  // Web Push reaches devices whose tab is closed. A focused tab receives the
+  // payload through the service worker and shows an in-app toast instead.
+  const preview = trimmedBody
+    ? trimmedBody.length > 160
+      ? `${trimmedBody.slice(0, 157)}…`
+      : trimmedBody
+    : message.media.some((item) => item.kind === "AUDIO")
+      ? "Sent you a voice message."
+      : message.media.length > 0
+        ? "Sent you a photo."
+        : "Sent you a message.";
+  void pushMessage({
+    recipientId,
+    senderName: message.sender.displayName,
+    preview,
+    conversationId,
+  });
 
   if (!isUserOnline(recipientId)) {
     await createNotification({

@@ -11,6 +11,7 @@ import { validate } from "../middleware/validate";
 import { EVENT_TOPIC_VALUES } from "../lib/event-topics";
 import { syncAllSources, syncSource } from "../lib/events/ingest";
 import { emitToAll } from "../lib/realtime";
+import { pushNewEvent } from "../lib/push";
 import { aiKeySnapshot, geminiKeyCount, geminiModel, geminiModels } from "../lib/ai/gemini";
 
 export const eventsRouter = Router();
@@ -805,6 +806,7 @@ eventsRouter.post(
       kind: event.kind,
       creatorId: event.creatorId,
     });
+    void pushNewEvent(event);
 
     res.status(201).json({ event });
   }),

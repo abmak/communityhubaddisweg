@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { api } from "../lib/api";
+import { unsubscribeFromPush } from "../lib/browserNotifications";
 import type { UnreadCounts, User } from "../types";
 
 interface AuthResponse {
@@ -67,6 +68,14 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
+    // Remove this browser's push subscription while the session can still
+    // authenticate the DELETE, so a shared device stops receiving the member's
+    // messages after sign-out.
+    try {
+      await unsubscribeFromPush({ removeServer: true });
+    } catch {
+      // Sign-out must still complete if the subscription cannot be removed.
+    }
     try {
       await api.post("/api/auth/logout");
     } finally {

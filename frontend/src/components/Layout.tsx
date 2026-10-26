@@ -34,6 +34,7 @@ import { useAuth } from "../store/auth";
 import { useUI } from "../store/ui";
 import { connectSocket, disconnectSocket } from "../lib/socket";
 import {
+  isPushActive,
   requestBrowserNotifications,
   shouldOfferBrowserNotifications,
   showBrowserNotification,
@@ -114,7 +115,11 @@ function useRealtime() {
       setPresence(payload.userId, payload.online);
     };
     const onAnnouncement = (payload: { postId: string; title: string }) => {
-      pushToast(`New announcement: ${payload.title}`, { href: `/posts/${payload.postId}` });
+      // With Web Push active the service worker hands a focused tab the same
+      // payload; showing both would duplicate the toast.
+      if (!isPushActive()) {
+        pushToast(`New announcement: ${payload.title}`, { href: `/posts/${payload.postId}` });
+      }
       void showBrowserNotification({
         title: "Addis Gebeta · Service update",
         body: payload.title,
@@ -971,7 +976,7 @@ function NotificationPrompt() {
         <p className="text-sm font-semibold text-ink">Never miss a message or a new event</p>
         <p className="mt-0.5 text-xs leading-5 text-muted">
           Allow browser notifications for chat replies, newly published events and service
-          announcements. You can pause them any time in Settings.
+          announcements — even when the tab is closed. You can pause them any time in Settings.
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-2">

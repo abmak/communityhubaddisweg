@@ -32,6 +32,7 @@ import {
   requestBrowserNotifications,
   resumeBrowserNotifications,
   showBrowserNotification,
+  unsubscribeFromPush,
   useBrowserNotifications,
 } from "../lib/browserNotifications";
 
@@ -45,7 +46,7 @@ const TABS: Array<{ id: Tab; label: string; icon: typeof UserRound }> = [
 ];
 
 function BrowserNotificationsCard() {
-  const { supported, permission, enabled } = useBrowserNotifications();
+  const { supported, pushSupported, permission, enabled } = useBrowserNotifications();
   const pushToast = useUI((state) => state.pushToast);
   const [busy, setBusy] = useState(false);
 
@@ -137,8 +138,9 @@ function BrowserNotificationsCard() {
                 Send notifications on this device
               </span>
               <span className="mt-0.5 block text-xs leading-5 text-muted">
-                They appear while Addis Gebeta is open in a tab. You can pause them here at any
-                time.
+                {pushSupported
+                  ? "They arrive even when Addis Gebeta is closed. You can pause them here at any time."
+                  : "This browser only shows them while Addis Gebeta is open. You can pause them here at any time."}
               </span>
             </span>
           </label>
@@ -339,6 +341,9 @@ export function SettingsPage() {
     setDeleteBusy(true);
     try {
       await api.delete("/api/users/me", { data: { password: deletePassword } });
+      // The account cascade already removed the server row; drop the local
+      // subscription too so this browser cannot be woken for the deleted user.
+      await unsubscribeFromPush({ removeServer: false });
       setUser(null);
       setDeleteOpen(false);
       navigate("/");

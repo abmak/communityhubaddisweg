@@ -1864,6 +1864,18 @@ adminRouter.post(
       summary: `Published “${event.title}” (${event.topic}) on ${event.startDate.toISOString()}.`,
     });
 
+    // A newly published listing reaches open tabs immediately; the browser
+    // notification is raised by the client when the tab is in the background.
+    emitToAll("event:new", {
+      id: event.id,
+      slug: event.slug,
+      title: event.title,
+      startDate: event.startDate.toISOString(),
+      location: event.location,
+      kind: event.kind,
+      creatorId: event.creatorId,
+    });
+
     res.status(201).json({ event: adminEventView(event) });
   }),
 );

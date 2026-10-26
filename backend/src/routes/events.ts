@@ -10,6 +10,7 @@ import { requirePermission } from "../lib/rbac";
 import { validate } from "../middleware/validate";
 import { EVENT_TOPIC_VALUES } from "../lib/event-topics";
 import { syncAllSources, syncSource } from "../lib/events/ingest";
+import { emitToAll } from "../lib/realtime";
 import { aiKeySnapshot, geminiKeyCount, geminiModel, geminiModels } from "../lib/ai/gemini";
 
 export const eventsRouter = Router();
@@ -791,6 +792,18 @@ eventsRouter.post(
           },
         },
       },
+    });
+
+    // Live tabs show a notification for a new meetup or event. Imported feed
+    // rows stay quiet; a sync can publish dozens at once.
+    emitToAll("event:new", {
+      id: event.id,
+      slug: event.slug,
+      title: event.title,
+      startDate: event.startDate.toISOString(),
+      location: event.location,
+      kind: event.kind,
+      creatorId: event.creatorId,
     });
 
     res.status(201).json({ event });

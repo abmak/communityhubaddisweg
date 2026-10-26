@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Award,
   Bell,
+  BellRing,
   Bookmark,
   CalendarDays,
   Compass,
@@ -32,6 +33,13 @@ import {
 import { useAuth } from "../store/auth";
 import { useUI } from "../store/ui";
 import { connectSocket, disconnectSocket } from "../lib/socket";
+import {
+  requestBrowserNotifications,
+  shouldOfferBrowserNotifications,
+  showBrowserNotification,
+  snoozeBrowserNotificationPrompt,
+  useBrowserNotifications,
+} from "../lib/browserNotifications";
 import type { AppNotification, ExploreData, Message, PlacesResponse, User } from "../types";
 import { useQuery } from "../hooks/useApi";
 import { cn, formatCount, notificationLink, postPath, timeAgo } from "../lib/utils";
@@ -44,6 +52,24 @@ import { KIND_META, placePath } from "../lib/places";
 import type { Category } from "../types";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useTranslation } from "../store/i18n";
+
+interface RealtimeEvent {
+  id: string;
+  slug: string;
+  title: string;
+  startDate: string;
+  location: string | null;
+  kind: "EVENT" | "MEETUP";
+  creatorId: string;
+}
+
+function messagePreview(message: Message): string {
+  const body = message.body?.trim();
+  if (body) return body.length > 160 ? `${body.slice(0, 157)}…` : body;
+  if (message.media.some((item) => item.kind === "AUDIO")) return "Sent you a voice message.";
+  if (message.media.length > 0) return "Sent you a photo.";
+  return "Sent you a message.";
+}
 
 function useRealtime() {
   const user = useAuth((state) => state.user);
@@ -76,12 +102,41 @@ function useRealtime() {
       if (message.senderId === user.id) return;
       const state = useAuth.getState();
       setUnread({ messages: state.unread.messages + 1 });
+
+      void showBrowserNotification({
+        title: message.sender.displayName,
+        body: messagePreview(message),
+        url: `/messages/${message.conversationId}`,
+        tag: `message:${message.conversationId}`,
+      });
     };
     const onPresence = (payload: { userId: string; online: boolean }) => {
       setPresence(payload.userId, payload.online);
     };
     const onAnnouncement = (payload: { postId: string; title: string }) => {
       pushToast(`New announcement: ${payload.title}`, { href: `/posts/${payload.postId}` });
+      void showBrowserNotification({
+        title: "Addis Gebeta · Service update",
+        body: payload.title,
+        url: `/posts/${payload.postId}`,
+        tag: `announcement:${payload.postId}`,
+      });
+    };
+    const onEvent = (event: RealtimeEvent) => {
+      if (event.creatorId === user.id) return;
+      const when = new Date(event.startDate).toLocaleString(undefined, {
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const place = event.location?.trim();
+      void showBrowserNotification({
+        title: "New event on Addis Gebeta",
+        body: `${event.title} · ${when}${place ? ` · ${place}` : ""}`,
+        url: `/events/${event.slug}`,
+        tag: `event:${event.id}`,
+      });
     };
     const onReconnect = () => {
       void refreshUnread();
@@ -93,6 +148,7 @@ function useRealtime() {
     socket.on("message:new", onMessage);
     socket.on("presence:update", onPresence);
     socket.on("announcement:new", onAnnouncement);
+    socket.on("event:new", onEvent);
     socket.on("connect", onReconnect);
 
     if (socket.connected) void refreshUnread();
@@ -104,6 +160,7 @@ function useRealtime() {
       socket.off("message:new", onMessage);
       socket.off("presence:update", onPresence);
       socket.off("announcement:new", onAnnouncement);
+      socket.off("event:new", onEvent);
       socket.off("connect", onReconnect);
     };
   }, [user?.id, pushToast, refreshUnread, setPresence, setUnread]);
@@ -874,6 +931,62 @@ function MobileNav() {
   );
 }
 
+function NotificationPrompt() {
+  const user = useAuth((state) => state.user);
+  const pushToast = useUI((state) => state.pushToast);
+  const { supported, permission } = useBrowserNotifications();
+  const [dismissed, setDismissed] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  if (!user || !supported || permission !== "default" || dismissed) return null;
+  if (!shouldOfferBrowserNotifications()) return null;
+
+  const enable = async () => {
+    setBusy(true);
+    try {
+      const result = await requestBrowserNotifications();
+      if (result === "granted") {
+        pushToast("Browser notifications enabled.", { tone: "success" });
+      } else if (result === "denied") {
+        pushToast("Notifications are blocked. Allow them in your browser's site settings.", {
+          tone: "error",
+        });
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const dismiss = () => {
+    snoozeBrowserNotificationPrompt();
+    setDismissed(true);
+  };
+
+  return (
+    <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-brand-200/80 bg-brand-50/70 p-3.5 shadow-sm sm:flex-row sm:items-center sm:p-4 dark:border-brand-500/20 dark:bg-brand-500/5">
+      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-700 shadow-sm dark:bg-brand-500/15 dark:text-brand-300">
+        <BellRing className="h-5 w-5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-ink">Never miss a message or a new event</p>
+        <p className="mt-0.5 text-xs leading-5 text-muted">
+          Allow browser notifications for chat replies, newly published events and service
+          announcements. You can pause them any time in Settings.
+        </p>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <button type="button" onClick={() => void enable()} className="btn-primary btn-sm" disabled={busy}>
+          {busy ? <Spinner className="h-3.5 w-3.5" /> : <BellRing className="h-3.5 w-3.5" />} Allow
+          notifications
+        </button>
+        <button type="button" onClick={dismiss} className="btn-ghost btn-sm">
+          Not now
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function AppLayout() {
   const location = useLocation();
   const user = useAuth((state) => state.user);
@@ -891,6 +1004,7 @@ export function AppLayout() {
           )}
         >
           <main className={cn("min-w-0 flex-1", isMessages && "h-[calc(100dvh-7.5rem)]")}>
+            <NotificationPrompt />
             <Outlet />
           </main>
           {!isMessages && <RightRail />}

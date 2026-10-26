@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
+  BellRing,
   CalendarDays,
   CheckCircle2,
   Eye,
@@ -26,6 +27,13 @@ import { api, apiError } from "../lib/api";
 import { cn, formatDate } from "../lib/utils";
 import { Avatar, Badge, Modal } from "../components/ui";
 import { ImageUploader } from "../components/ImageUploader";
+import {
+  pauseBrowserNotifications,
+  requestBrowserNotifications,
+  resumeBrowserNotifications,
+  showBrowserNotification,
+  useBrowserNotifications,
+} from "../lib/browserNotifications";
 
 type Tab = "profile" | "account" | "privacy" | "danger";
 
@@ -35,6 +43,137 @@ const TABS: Array<{ id: Tab; label: string; icon: typeof UserRound }> = [
   { id: "privacy", label: "Privacy", icon: Eye },
   { id: "danger", label: "Danger zone", icon: AlertTriangle },
 ];
+
+function BrowserNotificationsCard() {
+  const { supported, permission, enabled } = useBrowserNotifications();
+  const pushToast = useUI((state) => state.pushToast);
+  const [busy, setBusy] = useState(false);
+
+  const request = async () => {
+    setBusy(true);
+    try {
+      const result = await requestBrowserNotifications();
+      if (result === "granted") {
+        pushToast("Browser notifications enabled.", { tone: "success" });
+      } else if (result === "denied") {
+        pushToast("Notifications are blocked. Allow them in your browser's site settings.", {
+          tone: "error",
+        });
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const toggle = (next: boolean) => {
+    if (!next) {
+      pauseBrowserNotifications();
+      pushToast("Browser notifications paused.");
+      return;
+    }
+    if (permission === "granted") {
+      resumeBrowserNotifications();
+      pushToast("Browser notifications enabled.", { tone: "success" });
+      return;
+    }
+    void request();
+  };
+
+  const test = async () => {
+    setBusy(true);
+    try {
+      const shown = await showBrowserNotification({
+        title: "Addis Gebeta",
+        body: "Notifications are working. We'll ping you about messages, new events and service updates.",
+        url: "/home",
+        tag: "notification-test",
+        force: true,
+      });
+      pushToast(shown ? "Test notification sent." : "The browser blocked the test notification.", {
+        tone: shown ? "success" : "error",
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="card p-5 sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-ink">
+            <BellRing className="h-4 w-4 text-brand-700 dark:text-brand-300" /> Browser notifications
+          </h2>
+          <p className="mt-1 max-w-xl text-sm leading-6 text-muted">
+            Get a desktop or phone notification when a message arrives, a new event is published or
+            the community team posts a service update.
+          </p>
+        </div>
+        {supported && permission === "granted" && (
+          <Badge tone="brand">{enabled ? "On" : "Paused"}</Badge>
+        )}
+      </div>
+
+      {!supported ? (
+        <p className="mt-4 rounded-xl border border-line bg-raised/40 px-3.5 py-3 text-sm text-muted">
+          This browser does not support notifications.
+        </p>
+      ) : permission === "denied" ? (
+        <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-sm leading-6 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+          Notifications are blocked for this site. Open your browser's site settings for Addis
+          Gebeta, allow notifications, then reload this page.
+        </p>
+      ) : permission === "granted" ? (
+        <div className="mt-4 space-y-3">
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-raised/40 p-4">
+            <input
+              type="checkbox"
+              checked={enabled}
+              onChange={(event) => toggle(event.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-line text-brand-700 focus:ring-brand-500"
+            />
+            <span>
+              <span className="block text-sm font-medium text-ink">
+                Send notifications on this device
+              </span>
+              <span className="mt-0.5 block text-xs leading-5 text-muted">
+                They appear while Addis Gebeta is open in a tab. You can pause them here at any
+                time.
+              </span>
+            </span>
+          </label>
+          <button
+            type="button"
+            onClick={() => void test()}
+            className="btn-secondary btn-sm"
+            disabled={busy || !enabled}
+          >
+            {busy ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <BellRing className="h-3.5 w-3.5" />
+            )}
+            Send a test notification
+          </button>
+        </div>
+      ) : (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button type="button" onClick={() => void request()} className="btn-primary" disabled={busy}>
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <BellRing className="h-4 w-4" />
+            )}
+            Allow notifications
+          </button>
+          <p className="text-xs text-muted">
+            Your browser will ask for permission. Nothing is sent until you allow it.
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
 
 export function SettingsPage() {
   const user = useAuth((state) => state.user);
@@ -520,6 +659,8 @@ export function SettingsPage() {
                   </span>
                 </label>
               </section>
+
+              <BrowserNotificationsCard />
 
               <section className="card p-5 sm:p-6">
                 <h2 className="font-display text-lg font-semibold text-ink">Appearance</h2>

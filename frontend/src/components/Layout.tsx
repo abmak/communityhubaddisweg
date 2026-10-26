@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -6,9 +6,7 @@ import {
   Bell,
   Bookmark,
   CalendarDays,
-  ChevronDown,
   Compass,
-  Film,
   Home,
   Laugh,
   LayoutGrid,
@@ -26,10 +24,8 @@ import {
   Shield,
   Star,
   Sun,
-  Theater,
   User as UserIcon,
   TrendingUp,
-  Trophy,
   Users,
   X,
 } from "lucide-react";
@@ -147,14 +143,6 @@ const navItemClass = ({ isActive }: { isActive: boolean }) =>
       : "text-muted hover:bg-raised hover:text-ink",
   );
 
-const subNavItemClass = ({ isActive }: { isActive: boolean }) =>
-  cn(
-    "flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition",
-    isActive
-      ? "bg-brand-50 text-brand-800 dark:bg-brand-500/10 dark:text-brand-200"
-      : "text-muted hover:bg-raised hover:text-ink",
-  );
-
 function Sidebar() {
   const user = useAuth((state) => state.user);
   const unread = useAuth((state) => state.unread);
@@ -163,18 +151,6 @@ function Sidebar() {
   const setTheme = useUI((state) => state.setTheme);
   const { t, lang } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // The three event categories fold away when members are browsing elsewhere.
-  const onEventsRoute =
-    location.pathname.startsWith("/events") ||
-    location.pathname.startsWith("/sports") ||
-    location.pathname.startsWith("/cinema") ||
-    location.pathname.startsWith("/theatre");
-  const [eventsOpen, setEventsOpen] = useState(onEventsRoute);
-
-  // Entering the section unfolds the categories; leaving it folds them away.
-  useEffect(() => setEventsOpen(onEventsRoute), [onEventsRoute]);
 
   const isModerator = user?.role === "ADMIN" || user?.role === "MODERATOR";
 
@@ -232,58 +208,14 @@ function Sidebar() {
             </span>
           )}
         </NavLink>
-        <div>
-          <div className="flex items-center gap-0.5">
-            <NavLink to="/events" className={(state) => cn(navItemClass(state), "min-w-0 flex-1")}>
-              <CalendarDays className="h-[18px] w-[18px]" /> {t("nav.events", "Events")}
-              {lang === "en" && (
-                <span lang="am" className="ml-auto font-ethiopic text-[9px] text-muted/60">
-                  ዝግጅቶች
-                </span>
-              )}
-            </NavLink>
-            <button
-              type="button"
-              onClick={() => setEventsOpen((open) => !open)}
-              aria-expanded={eventsOpen}
-              aria-controls="sidebar-event-categories"
-              aria-label={eventsOpen ? "Collapse event categories" : "Expand event categories"}
-              title={eventsOpen ? "Collapse categories" : "Expand categories"}
-              className="rounded-lg p-2 text-muted transition hover:bg-raised hover:text-ink"
-            >
-              <ChevronDown
-                className={cn("h-4 w-4 transition-transform duration-200", eventsOpen && "rotate-180")}
-              />
-            </button>
-          </div>
-
-          {/* The three categories members actually browse, folded under Events. */}
-          <div
-            id="sidebar-event-categories"
-            aria-label="Event categories"
-            className={cn(
-              "overflow-hidden transition-all duration-200 ease-out",
-              eventsOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0",
-            )}
-          >
-            <div className="min-h-0 overflow-hidden">
-              <div className="ml-4 mt-0.5 space-y-0.5 border-l border-line py-0.5 pl-2.5">
-                <NavLink to="/sports" className={subNavItemClass} tabIndex={eventsOpen ? undefined : -1}>
-                  <Trophy className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-300" />
-                  {t("nav.sports", "Sport")}
-                </NavLink>
-                <NavLink to="/cinema" className={subNavItemClass} tabIndex={eventsOpen ? undefined : -1}>
-                  <Film className="h-3.5 w-3.5 text-rose-500 dark:text-rose-300" />
-                  {t("nav.cinema", "Cinema")}
-                </NavLink>
-                <NavLink to="/theatre" className={subNavItemClass} tabIndex={eventsOpen ? undefined : -1}>
-                  <Theater className="h-3.5 w-3.5 text-violet-500 dark:text-violet-300" />
-                  {t("nav.theatre", "Theatre")}
-                </NavLink>
-              </div>
-            </div>
-          </div>
-        </div>
+        <NavLink to="/events" className={navItemClass}>
+          <CalendarDays className="h-[18px] w-[18px]" /> {t("nav.events", "Events")}
+          {lang === "en" && (
+            <span lang="am" className="ml-auto font-ethiopic text-[9px] text-muted/60">
+              ዝግጅቶች
+            </span>
+          )}
+        </NavLink>
         <NavLink to="/meetups" className={navItemClass}>
           <Users className="h-[18px] w-[18px]" /> {t("nav.meetups", "Meetups")}
           {lang === "en" && (
@@ -721,20 +653,10 @@ function MobileNav() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const onEventsRoute =
-    location.pathname.startsWith("/events") ||
-    location.pathname.startsWith("/sports") ||
-    location.pathname.startsWith("/cinema") ||
-    location.pathname.startsWith("/theatre");
-  const [eventsOpen, setEventsOpen] = useState(onEventsRoute);
-
   const isModerator = user?.role === "ADMIN" || user?.role === "MODERATOR";
   const unreadTotal = unread.messages + unread.notifications;
 
   useEffect(() => setMenuOpen(false), [location.pathname]);
-
-  // Fold the categories in step with the section the member is browsing.
-  useEffect(() => setEventsOpen(onEventsRoute), [onEventsRoute]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -757,15 +679,6 @@ function MobileNav() {
       isActive
         ? "border-brand-600/30 bg-brand-50 text-brand-800 dark:bg-brand-500/10 dark:text-brand-200"
         : "border-line bg-surface text-ink hover:border-brand-300",
-    );
-
-  // Event categories sit under Events, matching the desktop sidebar.
-  const sheetSubItem = ({ isActive }: { isActive: boolean }) =>
-    cn(
-      "flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] font-medium transition",
-      isActive
-        ? "border-brand-600/30 bg-brand-50 text-brand-800 dark:bg-brand-500/10 dark:text-brand-200"
-        : "border-line/70 bg-surface text-muted hover:border-brand-300 hover:text-ink",
     );
 
   const sheetLinks: Array<{
@@ -882,85 +795,21 @@ function MobileNav() {
             </div>
 
             <div className="mt-3 grid grid-cols-2 gap-2">
-              {sheetLinks.map((item) => {
-                const isEvents = item.to === "/events";
-                const content = (
-                  <>
-                    <item.icon className={cn("h-4 w-4 shrink-0", item.tone)} />
-                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                    {item.badge ? (
-                      <span className="rounded-full bg-rose-600 px-1.5 py-0.5 text-[9px] font-bold leading-none text-white">
-                        {item.badge > 9 ? "9+" : item.badge}
-                      </span>
-                    ) : item.hint && !isEvents ? (
-                      <span lang="am" className="font-ethiopic text-[9px] text-muted/60">
-                        {item.hint}
-                      </span>
-                    ) : null}
-                  </>
-                );
-
-                return (
-                  <Fragment key={item.to}>
-                    {isEvents ? (
-                      <div className="col-span-2 flex items-stretch gap-1.5">
-                        <NavLink
-                          to={item.to}
-                          className={({ isActive }) => cn(sheetItem({ isActive }), "min-w-0 flex-1")}
-                        >
-                          {content}
-                        </NavLink>
-                        <button
-                          type="button"
-                          onClick={() => setEventsOpen((open) => !open)}
-                          aria-expanded={eventsOpen}
-                          aria-controls="sheet-event-categories"
-                          aria-label={eventsOpen ? "Collapse event categories" : "Expand event categories"}
-                          className="flex items-center rounded-xl border border-line bg-surface px-2.5 text-muted transition hover:border-brand-300 hover:text-ink"
-                        >
-                          <ChevronDown
-                            className={cn(
-                              "h-4 w-4 transition-transform duration-200",
-                              eventsOpen && "rotate-180",
-                            )}
-                          />
-                        </button>
-                      </div>
-                    ) : (
-                      <NavLink to={item.to} className={sheetItem}>
-                        {content}
-                      </NavLink>
-                    )}
-
-                    {isEvents ? (
-                      <div
-                        id="sheet-event-categories"
-                        className={cn(
-                          "col-span-2 overflow-hidden transition-all duration-200 ease-out",
-                          eventsOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0",
-                        )}
-                      >
-                        <div className="min-h-0 overflow-hidden">
-                          <div className="ml-3 mt-1 grid grid-cols-3 gap-1.5 border-l border-line pl-2">
-                            <NavLink to="/sports" className={sheetSubItem} tabIndex={eventsOpen ? undefined : -1}>
-                              <Trophy className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
-                              {t("nav.sports", "Sport")}
-                            </NavLink>
-                            <NavLink to="/cinema" className={sheetSubItem} tabIndex={eventsOpen ? undefined : -1}>
-                              <Film className="h-3.5 w-3.5 shrink-0 text-rose-500" />
-                              {t("nav.cinema", "Cinema")}
-                            </NavLink>
-                            <NavLink to="/theatre" className={sheetSubItem} tabIndex={eventsOpen ? undefined : -1}>
-                              <Theater className="h-3.5 w-3.5 shrink-0 text-violet-500" />
-                              {t("nav.theatre", "Theatre")}
-                            </NavLink>
-                          </div>
-                        </div>
-                      </div>
-                    ) : null}
-                  </Fragment>
-                );
-              })}
+              {sheetLinks.map((item) => (
+                <NavLink key={item.to} to={item.to} className={sheetItem}>
+                  <item.icon className={cn("h-4 w-4 shrink-0", item.tone)} />
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  {item.badge ? (
+                    <span className="rounded-full bg-rose-600 px-1.5 py-0.5 text-[9px] font-bold leading-none text-white">
+                      {item.badge > 9 ? "9+" : item.badge}
+                    </span>
+                  ) : item.hint ? (
+                    <span lang="am" className="font-ethiopic text-[9px] text-muted/60">
+                      {item.hint}
+                    </span>
+                  ) : null}
+                </NavLink>
+              ))}
             </div>
 
             <div className="mt-4 rounded-xl border border-line bg-raised/40 p-2.5">

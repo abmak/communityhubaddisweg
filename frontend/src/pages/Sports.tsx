@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { AlertCircle, ArrowRight, CalendarDays, Clock, MapPin, RefreshCw, Shield, Trophy } from "lucide-react";
 import { useQuery } from "../hooks/useApi";
 import { useTranslation } from "../store/i18n";
-import type { SportFixture, SportsResponse } from "../types";
+import type { SportFixture, SportsLeague, SportsResponse } from "../types";
 import { Spinner } from "../components/ui";
 import { cn, timeAgo } from "../lib/utils";
 
@@ -61,12 +61,24 @@ function TeamCrest({ src, name }: { src: string | null; name: string }) {
   );
 }
 
-export function SportsPage() {
-  const { t } = useTranslation();
+/**
+ * The league-by-league fixture schedule, without the page hero. Shared by the
+ * dedicated /sports page and the Sport category on the Events page.
+ */
+export function SportsSchedule({
+  leagues,
+  loading = false,
+  error = null,
+  onRetry,
+  showEmptyLink = true,
+}: {
+  leagues: SportsLeague[];
+  loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
+  showEmptyLink?: boolean;
+}) {
   const [league, setLeague] = useState<LeagueName | "ALL">("ALL");
-  const { data, loading, error, refetch } = useQuery<SportsResponse>("/api/events/sports?days=21");
-
-  const leagues = data?.leagues ?? [];
   const fixtureCount = leagues.reduce((total, entry) => total + entry.fixtures.length, 0);
 
   const fixtures = useMemo(() => {
@@ -93,41 +105,7 @@ export function SportsPage() {
   const zone = timeZoneLabel(now);
 
   return (
-    <div className="space-y-6">
-      <header className="relative overflow-hidden rounded-3xl bg-[#0b1f17] px-6 py-8 text-white sm:px-9">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(120%_120%_at_10%_0%,rgba(16,185,129,0.35),transparent_55%),radial-gradient(90%_90%_at_100%_100%,rgba(245,158,11,0.18),transparent_60%)]"
-        />
-        <div className="relative max-w-2xl">
-          <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300">
-            <Trophy className="h-3.5 w-3.5" /> Football schedules
-          </p>
-          <h1 className="mt-2 font-display text-3xl font-medium leading-tight tracking-tight sm:text-4xl">
-            The next three weeks, league by league.
-          </h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-white/65">
-            {t(
-              "sports.subtitle",
-              "Every fixture in the Premier League, La Liga, Serie A and Bundesliga, with kick-off times in your own timezone.",
-            )}
-          </p>
-          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-medium text-white/55">
-            <span className="inline-flex items-center gap-1.5">
-              <CalendarDays className="h-3.5 w-3.5 text-emerald-300" /> Next 21 days
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5 text-emerald-300" /> {zone ? `All times ${zone}` : "Your local kick-off times"}
-            </span>
-            {data?.updatedAt ? (
-              <span className="inline-flex items-center gap-1.5">
-                <RefreshCw className="h-3.5 w-3.5 text-emerald-300" /> Updated {timeAgo(data.updatedAt)}
-              </span>
-            ) : null}
-          </div>
-        </div>
-      </header>
-
+    <div className="space-y-5">
       <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Leagues">
         <button
           type="button"
@@ -167,7 +145,11 @@ export function SportsPage() {
         <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-6 text-center text-sm text-rose-500">
           <AlertCircle className="mx-auto mb-2 h-6 w-6" />
           <p>{error}</p>
-          <button type="button" onClick={refetch} className="mt-3 rounded-xl bg-surface px-4 py-2 text-xs font-semibold text-ink shadow-sm">
+          <button
+            type="button"
+            onClick={() => onRetry?.()}
+            className="mt-3 rounded-xl bg-surface px-4 py-2 text-xs font-semibold text-ink shadow-sm"
+          >
             Try again
           </button>
         </div>
@@ -178,9 +160,11 @@ export function SportsPage() {
           <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-muted">
             The league feed refreshes every few hours. New matchweeks appear here as soon as they are published.
           </p>
-          <Link to="/events" className="btn-secondary btn-sm mt-5 inline-flex">
-            Browse all events <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          {showEmptyLink && (
+            <Link to="/events" className="btn-secondary btn-sm mt-5 inline-flex">
+              Browse all events <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          )}
         </div>
       ) : (
         <div className="space-y-5">
@@ -248,6 +232,54 @@ export function SportsPage() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+export function SportsPage() {
+  const { t } = useTranslation();
+  const { data, loading, error, refetch } = useQuery<SportsResponse>("/api/events/sports?days=21");
+  const leagues = data?.leagues ?? [];
+  const fixtureCount = leagues.reduce((total, entry) => total + entry.fixtures.length, 0);
+  const zone = timeZoneLabel(new Date());
+
+  return (
+    <div className="space-y-6">
+      <header className="relative overflow-hidden rounded-3xl bg-[#0b1f17] px-6 py-8 text-white sm:px-9">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(120%_120%_at_10%_0%,rgba(16,185,129,0.35),transparent_55%),radial-gradient(90%_90%_at_100%_100%,rgba(245,158,11,0.18),transparent_60%)]"
+        />
+        <div className="relative max-w-2xl">
+          <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300">
+            <Trophy className="h-3.5 w-3.5" /> Football schedules
+          </p>
+          <h1 className="mt-2 font-display text-3xl font-medium leading-tight tracking-tight sm:text-4xl">
+            The next three weeks, league by league.
+          </h1>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-white/65">
+            {t(
+              "sports.subtitle",
+              "Every fixture in the Premier League, La Liga, Serie A and Bundesliga, with kick-off times in your own timezone.",
+            )}
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-medium text-white/55">
+            <span className="inline-flex items-center gap-1.5">
+              <CalendarDays className="h-3.5 w-3.5 text-emerald-300" /> Next 21 days
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-emerald-300" /> {zone ? `All times ${zone}` : "Your local kick-off times"}
+            </span>
+            {data?.updatedAt ? (
+              <span className="inline-flex items-center gap-1.5">
+                <RefreshCw className="h-3.5 w-3.5 text-emerald-300" /> Updated {timeAgo(data.updatedAt)}
+              </span>
+            ) : null}
+          </div>
+        </div>
+      </header>
+
+      <SportsSchedule leagues={leagues} loading={loading} error={error} onRetry={refetch} />
     </div>
   );
 }

@@ -34,6 +34,7 @@ import { useUI } from "../store/ui";
 import { useTranslation } from "../store/i18n";
 import { api, apiError, mediaSrc } from "../lib/api";
 import { useQuery } from "../hooks/useApi";
+import { SportsSchedule } from "./Sports";
 import type {
   CinemasResponse,
   CommunityEvent,
@@ -51,17 +52,79 @@ import { formatEthiopianDate, toEthiopianDate } from "../lib/ethiopian";
 const TOPIC_META: Record<EventTopic, { label: string; icon: typeof Film; className: string }> = {
   CINEMA: { label: "Cinema", icon: Film, className: "bg-rose-600" },
   THEATRE: { label: "Theatre", icon: Theater, className: "bg-purple-600" },
-  SPORTS: { label: "Football & sport", icon: Trophy, className: "bg-emerald-600" },
+  SPORTS: { label: "Sport", icon: Trophy, className: "bg-emerald-600" },
   MUSIC: { label: "Music", icon: Music2, className: "bg-sky-600" },
   FESTIVAL: { label: "Music festival", icon: PartyPopper, className: "bg-amber-600" },
   SOCIAL: { label: "Social", icon: Users, className: "bg-teal-600" },
   TRAVEL: { label: "Travel", icon: Plane, className: "bg-sky-600" },
   HIKING: { label: "Hiking", icon: Mountain, className: "bg-lime-700" },
-  BUSINESS: { label: "Business", icon: Briefcase, className: "bg-slate-700" },
-  SEASONAL: { label: "Seasonal", icon: Snowflake, className: "bg-indigo-600" },
+  BUSINESS: { label: "Business conferences", icon: Briefcase, className: "bg-slate-700" },
+  SEASONAL: { label: "Seasonal events", icon: Snowflake, className: "bg-indigo-600" },
   COMMUNITY: { label: "Community", icon: Sparkles, className: "bg-brand-600" },
   OTHER: { label: "Other", icon: CalendarDays, className: "bg-neutral-600" },
 };
+
+type EventCategoryKey =
+  | "SPORT"
+  | "CINEMA"
+  | "THEATRE"
+  | "MUSIC_FESTIVAL"
+  | "SOCIAL"
+  | "TRAVEL"
+  | "HIKING"
+  | "BUSINESS"
+  | "SEASONAL";
+
+/**
+ * The categories offered on the Events landing page. A category can cover more
+ * than one stored topic (music and festivals share one chip, social includes
+ * the older community topic) so no listing becomes unreachable.
+ */
+const EVENT_CATEGORIES: Array<{
+  key: EventCategoryKey;
+  label: string;
+  icon: typeof Film;
+  className: string;
+  topics: EventTopic[];
+}> = [
+  { key: "SPORT", label: "Sport", icon: Trophy, className: "bg-emerald-600", topics: ["SPORTS"] },
+  { key: "CINEMA", label: "Cinema", icon: Film, className: "bg-rose-600", topics: ["CINEMA"] },
+  { key: "THEATRE", label: "Theatre", icon: Theater, className: "bg-purple-600", topics: ["THEATRE"] },
+  {
+    key: "MUSIC_FESTIVAL",
+    label: "Music festival",
+    icon: PartyPopper,
+    className: "bg-amber-600",
+    topics: ["FESTIVAL", "MUSIC"],
+  },
+  {
+    key: "SOCIAL",
+    label: "Social",
+    icon: Users,
+    className: "bg-teal-600",
+    topics: ["SOCIAL", "COMMUNITY"],
+  },
+  { key: "TRAVEL", label: "Travel", icon: Plane, className: "bg-sky-600", topics: ["TRAVEL"] },
+  { key: "HIKING", label: "Hiking", icon: Mountain, className: "bg-lime-700", topics: ["HIKING"] },
+  {
+    key: "BUSINESS",
+    label: "Business conferences",
+    icon: Briefcase,
+    className: "bg-slate-700",
+    topics: ["BUSINESS"],
+  },
+  {
+    key: "SEASONAL",
+    label: "Seasonal events",
+    icon: Snowflake,
+    className: "bg-indigo-600",
+    topics: ["SEASONAL"],
+  },
+];
+
+function categoryForTopic(topic: EventTopic) {
+  return EVENT_CATEGORIES.find((category) => category.topics.includes(topic));
+}
 
 const PRESET_COVERS = [
   {
@@ -279,7 +342,9 @@ export function EventsPage({
   const showHub = view === "events" && !defaultTopic;
   const [searchQuery, setSearchQuery] = useState("");
   const [meetupFilter, setMeetupFilter] = useState<"ALL" | "HIKE" | "CINEMA" | "COFFEE">("ALL");
-  const [topicFilter, setTopicFilter] = useState<"ALL" | EventTopic>(defaultTopic ?? "ALL");
+  const [topicFilter, setTopicFilter] = useState<"ALL" | EventCategoryKey>(
+    () => (defaultTopic ? categoryForTopic(defaultTopic)?.key : undefined) ?? "ALL",
+  );
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -305,7 +370,8 @@ export function EventsPage({
       setError(null);
       const params = new URLSearchParams({ limit: "50" });
       if (view === "meetups") params.set("kind", "MEETUP");
-      if (defaultTopic) params.set("topic", defaultTopic);
+      // Load the whole feed so the category buttons on every events route can
+      // switch between topics without an extra round-trip.
       const res = await api.get<EventsResponse>(`/api/events?${params.toString()}`);
       setEvents(res.data.events);
     } catch (err) {
@@ -319,8 +385,15 @@ export function EventsPage({
     void loadEvents();
   }, []);
 
-  // The Events landing page previews the three categories the sidebar exposes.
-  const { data: sportsHub } = useQuery<SportsResponse>("/api/events/sports?days=21", { enabled: showHub });
+  // The Events landing page previews sport, cinema and theatre.
+  const {
+    data: sportsHub,
+    loading: sportsLoading,
+    error: sportsError,
+    refetch: refetchSports,
+  } = useQuery<SportsResponse>("/api/events/sports?days=21", {
+    enabled: showHub || topicFilter === "SPORT",
+  });
   const { data: cinemaHub } = useQuery<CinemasResponse>("/api/events/cinemas", { enabled: showHub });
   const { data: theatreHub } = useQuery<EventsResponse>("/api/events?topic=THEATRE&limit=50", {
     enabled: showHub,
@@ -532,21 +605,20 @@ export function EventsPage({
     () => new Set(events.filter((item) => item.kind === "EVENT" && item.source).map((item) => item.source!.id)).size,
     [events],
   );
-  const presentTopics = useMemo(() => {
-    const found = new Set<EventTopic>();
-    for (const item of events) if (item.kind === "EVENT") found.add(item.topic);
-    // A category route (/theatre) must still show which filter is active even
-    // when the feed has nothing in that category yet.
-    if (topicFilter !== "ALL") found.add(topicFilter);
-    return (Object.keys(TOPIC_META) as EventTopic[]).filter((topic) => found.has(topic));
-  }, [events, topicFilter]);
+  const activeCategory =
+    topicFilter === "ALL"
+      ? undefined
+      : EVENT_CATEGORIES.find((category) => category.key === topicFilter);
 
   const filteredEvents = useMemo(() => {
     return events.filter((item) => {
       if (item.kind !== tab) return false;
 
       if (tab === "EVENT") {
-        if (topicFilter !== "ALL" && item.topic !== topicFilter) return false;
+        if (topicFilter !== "ALL") {
+          const category = EVENT_CATEGORIES.find((entry) => entry.key === topicFilter);
+          if (!category?.topics.includes(item.topic)) return false;
+        }
       } else if (meetupFilter === "HIKE") {
         const isHike =
           item.category?.slug.includes("hike") ||
@@ -605,9 +677,11 @@ export function EventsPage({
 
             <h1 className="font-serif text-2xl font-bold tracking-tight text-white sm:text-3xl md:text-4xl">
               {tab === "EVENT"
-                ? defaultTopic
-                  ? `${TOPIC_META[defaultTopic].label} — every listing in one place.`
-                  : "Sport, cinema and theatre — all in one place."
+                ? activeCategory
+                  ? activeCategory.key === "SPORT"
+                    ? "Sport — the next three weeks, league by league."
+                    : `${activeCategory.label} — every listing in one place.`
+                  : "Sport, cinema, music and more — all in one place."
                 : t("events.title", "Real-world meetups, cinema nights & trail hikes.")}
             </h1>
 
@@ -735,26 +809,22 @@ export function EventsPage({
               >
                 All events ({eventCount})
               </button>
-              {presentTopics.map((topic) => {
-                const meta = TOPIC_META[topic];
-                const Icon = meta.icon;
-                return (
-                  <button
-                    key={topic}
-                    type="button"
-                    onClick={() => setTopicFilter(topic)}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition",
-                      topicFilter === topic
-                        ? `${meta.className} text-white shadow-sm`
-                        : "border border-line bg-surface text-muted hover:bg-raised hover:text-ink",
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    <span>{meta.label}</span>
-                  </button>
-                );
-              })}
+              {EVENT_CATEGORIES.map(({ key, label, icon: Icon, className }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setTopicFilter(key)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition",
+                    topicFilter === key
+                      ? `${className} text-white shadow-sm`
+                      : "border border-line bg-surface text-muted hover:bg-raised hover:text-ink",
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span>{label}</span>
+                </button>
+              ))}
             </>
           ) : (
             <>
@@ -813,21 +883,32 @@ export function EventsPage({
           )}
         </div>
 
-        {/* Search Input */}
-        <div className="relative min-w-[260px] sm:w-72">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t("events.searchPlaceholder", "Search events by title or location…")}
-            className="w-full rounded-xl border border-line bg-surface py-2 pl-10 pr-4 text-xs font-medium text-ink outline-none transition focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-          />
-        </div>
+        {/* The sport schedule has its own league tabs; a title search would have
+            nothing to filter there. */}
+        {topicFilter !== "SPORT" && (
+          <div className="relative min-w-[260px] sm:w-72">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t("events.searchPlaceholder", "Search events by title or location…")}
+              className="w-full rounded-xl border border-line bg-surface py-2 pl-10 pr-4 text-xs font-medium text-ink outline-none transition focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            />
+          </div>
+        )}
       </div>
 
       {/* Content Area */}
-      {loading ? (
+      {tab === "EVENT" && topicFilter === "SPORT" ? (
+        <SportsSchedule
+          leagues={sportsHub?.leagues ?? []}
+          loading={sportsLoading}
+          error={sportsError}
+          onRetry={refetchSports}
+          showEmptyLink={false}
+        />
+      ) : loading ? (
         <div className="flex min-h-[300px] flex-col items-center justify-center gap-3">
           <Spinner className="h-8 w-8 text-brand-600" />
           <p className="text-xs text-muted">Loading community gatherings…</p>
@@ -847,11 +928,19 @@ export function EventsPage({
         <div className="rounded-3xl border border-dashed border-line bg-surface/50 p-12 text-center">
           <CalendarDays className="mx-auto mb-3 h-10 w-10 text-muted/60" />
           <h3 className="text-base font-bold text-ink">
-            {tab === "EVENT" ? "No imported listings match that filter" : t("events.emptyTitle", "No upcoming meetups found")}
+            {tab === "EVENT"
+              ? searchQuery.trim()
+                ? "No events match your search"
+                : activeCategory
+                  ? `Nothing in ${activeCategory.label} yet`
+                  : "No events to show yet"
+              : t("events.emptyTitle", "No upcoming meetups found")}
           </h3>
           <p className="mx-auto mt-1 max-w-sm text-xs text-muted">
             {tab === "EVENT"
-              ? "New cinema, theatre and football listings appear here automatically as soon as a source publishes them."
+              ? searchQuery.trim()
+                ? "Try another title, place or host."
+                : "Listings appear here as soon as the community team or a source publishes them."
               : t("events.emptyDesc", "Be the first to schedule a coffee chat, film screening, or weekend hike!")}
           </p>
           {tab === "MEETUP" ? (

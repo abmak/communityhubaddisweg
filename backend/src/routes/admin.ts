@@ -1,11 +1,12 @@
 import { Router, type Request } from "express";
 import { z } from "zod";
-import type { Prisma } from "@prisma/client";
+import { EventKind, EventTopic, type Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { asyncHandler } from "../lib/async-handler";
 import { ApiError } from "../lib/errors";
 import { requireAuth } from "../middleware/auth";
 import { validate } from "../middleware/validate";
+import { EVENT_TOPIC_VALUES } from "../lib/event-topics";
 import { parseLimit, parsePage } from "../lib/pagination";
 import { publicUserSelect, selfUserSelect } from "../lib/serialize";
 import { emitToAll } from "../lib/realtime";
@@ -1690,6 +1691,239 @@ adminRouter.delete(
       targetType: "jokeSession",
       targetId: id,
       summary: `Deleted the Joke Time session “${session.title}”.`,
+    });
+
+    res.status(204).end();
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// Events desk
+//
+// Most listings arrive from feeds, but the community team also publishes its
+// own: music festivals, cinema and theatre runs, socials, travel and hiking
+// outings, business conferences and seasonal celebrations. These routes create
+// official Event rows (kind EVENT) so they sit beside imported listings and
+// inherit the same list, filter and RSVP surfaces.
+// ---------------------------------------------------------------------------
+
+function eventSlug(title: string): string {
+  const base =
+    title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .slice(0, 60) || "event";
+  return `${base}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function assertEventWindow(start: Date, end: Date | null | undefined): void {
+  if (end && end.getTime() < start.getTime()) {
+    throw new ApiError(400, "The event cannot end before it starts.", "BAD_EVENT_WINDOW");
+  }
+}
+
+const adminEventQuery = z.object({
+  scope: z.enum(["upcoming", "past", "all"]).default("upcoming"),
+  // The desk manages the community team's own listings by default; imported
+  // feed rows are only shown when asked for.
+  source: z.enum(["curated", "imported", "all"]).default("curated"),
+  topic: z.enum(EVENT_TOPIC_VALUES).optional(),
+  limit: z.coerce.number().int().min(1).max(200).optional().default(100),
+});
+
+const adminEventFields = {
+  title: z.string().trim().min(3, "Give the event a title of at least 3 characters").max(120),
+  description: z.string().trim().min(10, "Describe the event in at least 10 characters").max(3000),
+  topic: z.enum(EVENT_TOPIC_VALUES),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date().nullable().optional(),
+  location: z.string().trim().max(180).nullable().optional(),
+  coverUrl: z.string().trim().max(600).nullable().optional(),
+  maxAttendees: z.coerce.number().int().min(2).max(100000).nullable().optional(),
+};
+
+const createAdminEventSchema = z.object(adminEventFields);
+
+const updateAdminEventSchema = z.object({
+  title: adminEventFields.title.optional(),
+  description: adminEventFields.description.optional(),
+  topic: adminEventFields.topic.optional(),
+  startDate: adminEventFields.startDate.optional(),
+  endDate: adminEventFields.endDate,
+  location: adminEventFields.location,
+  coverUrl: adminEventFields.coverUrl,
+  maxAttendees: adminEventFields.maxAttendees,
+});
+
+const adminEventInclude = {
+  creator: { select: publicUserSelect },
+  category: { select: { id: true, name: true, slug: true, color: true } },
+  place: { select: { id: true, name: true, slug: true, city: true } },
+  source: { select: { id: true, key: true, name: true } },
+  _count: { select: { rsvps: true } },
+} satisfies Prisma.EventInclude;
+
+type AdminEventRecord = Prisma.EventGetPayload<{ include: typeof adminEventInclude }>;
+
+function adminEventView(event: AdminEventRecord) {
+  return {
+    id: event.id,
+    slug: event.slug,
+    title: event.title,
+    description: event.description,
+    topic: event.topic,
+    startDate: event.startDate.toISOString(),
+    endDate: event.endDate ? event.endDate.toISOString() : null,
+    location: event.location,
+    coverUrl: event.coverUrl,
+    maxAttendees: event.maxAttendees,
+    createdAt: event.createdAt.toISOString(),
+    attendeeCount: event._count.rsvps,
+    creator: event.creator,
+    category: event.category,
+    place: event.place,
+    source: event.source,
+  };
+}
+
+adminRouter.get(
+  "/events",
+  requirePermission("admin.events.view"),
+  validate(adminEventQuery, "query"),
+  asyncHandler(async (req, res) => {
+    const { scope, source, topic, limit } = req.query as unknown as z.infer<typeof adminEventQuery>;
+    const now = new Date();
+    const recent = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+
+    const filters: Prisma.EventWhereInput[] = [{ kind: EventKind.EVENT }];
+    if (scope === "upcoming") {
+      // Keep something that started in the last couple of hours, and keep
+      // multi-day events until they close rather than dropping them on day two.
+      filters.push({
+        OR: [
+          { endDate: { gte: recent } },
+          { endDate: null, startDate: { gte: recent } },
+        ],
+      });
+    }
+    if (scope === "past") {
+      filters.push({
+        OR: [
+          { endDate: { lt: now } },
+          { endDate: null, startDate: { lt: now } },
+        ],
+      });
+    }
+    if (source === "curated") filters.push({ sourceId: null });
+    if (source === "imported") filters.push({ sourceId: { not: null } });
+    if (topic) filters.push({ topic: topic as EventTopic });
+
+    const events = await prisma.event.findMany({
+      where: { AND: filters },
+      include: adminEventInclude,
+      orderBy: { startDate: scope === "past" ? "desc" : "asc" },
+      take: limit,
+    });
+
+    res.json({ events: events.map(adminEventView) });
+  }),
+);
+
+adminRouter.post(
+  "/events",
+  requirePermission("admin.events.manage"),
+  validate(createAdminEventSchema),
+  asyncHandler(async (req, res) => {
+    const data = req.body as z.infer<typeof createAdminEventSchema>;
+    assertEventWindow(data.startDate, data.endDate);
+
+    const event = await prisma.event.create({
+      data: {
+        slug: eventSlug(data.title),
+        kind: EventKind.EVENT,
+        title: data.title,
+        description: data.description,
+        topic: data.topic as EventTopic,
+        startDate: data.startDate,
+        endDate: data.endDate ?? null,
+        location: data.location?.trim() || null,
+        coverUrl: data.coverUrl?.trim() || null,
+        maxAttendees: data.maxAttendees ?? null,
+        creatorId: req.userId!,
+      },
+      include: adminEventInclude,
+    });
+
+    await recordAction(req, {
+      action: "event.create",
+      targetType: "event",
+      targetId: event.id,
+      summary: `Published “${event.title}” (${event.topic}) on ${event.startDate.toISOString()}.`,
+    });
+
+    res.status(201).json({ event: adminEventView(event) });
+  }),
+);
+
+adminRouter.patch(
+  "/events/:id",
+  requirePermission("admin.events.manage"),
+  validate(idParams, "params"),
+  validate(updateAdminEventSchema),
+  asyncHandler(async (req, res) => {
+    const id = String(req.params.id);
+    const data = req.body as z.infer<typeof updateAdminEventSchema>;
+    const existing = await prisma.event.findUnique({ where: { id } });
+    if (!existing) throw ApiError.notFound("That event could not be found.");
+
+    const startDate = data.startDate ?? existing.startDate;
+    const endDate = data.endDate !== undefined ? data.endDate : existing.endDate;
+    assertEventWindow(startDate, endDate);
+
+    const event = await prisma.event.update({
+      where: { id },
+      data: {
+        ...(data.title !== undefined ? { title: data.title } : {}),
+        ...(data.description !== undefined ? { description: data.description } : {}),
+        ...(data.topic !== undefined ? { topic: data.topic as EventTopic } : {}),
+        ...(data.startDate !== undefined ? { startDate: data.startDate } : {}),
+        ...(data.endDate !== undefined ? { endDate: data.endDate } : {}),
+        ...(data.location !== undefined ? { location: data.location?.trim() || null } : {}),
+        ...(data.coverUrl !== undefined ? { coverUrl: data.coverUrl?.trim() || null } : {}),
+        ...(data.maxAttendees !== undefined ? { maxAttendees: data.maxAttendees } : {}),
+      },
+      include: adminEventInclude,
+    });
+
+    await recordAction(req, {
+      action: "event.update",
+      targetType: "event",
+      targetId: event.id,
+      summary: `Updated “${event.title}” (${event.topic}) for ${event.startDate.toISOString()}.`,
+    });
+
+    res.json({ event: adminEventView(event) });
+  }),
+);
+
+adminRouter.delete(
+  "/events/:id",
+  requirePermission("admin.events.manage"),
+  validate(idParams, "params"),
+  asyncHandler(async (req, res) => {
+    const id = String(req.params.id);
+    const event = await prisma.event.findUnique({ where: { id }, select: { id: true, title: true } });
+    if (!event) throw ApiError.notFound("That event could not be found.");
+
+    await prisma.event.delete({ where: { id } });
+    await recordAction(req, {
+      action: "event.delete",
+      targetType: "event",
+      targetId: id,
+      summary: `Deleted the event “${event.title}”.`,
     });
 
     res.status(204).end();

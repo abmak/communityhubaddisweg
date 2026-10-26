@@ -608,6 +608,10 @@ enum EventKind {
   MEETUP
 }
 
+/// What kind of happening it is. The first seven predate the admin events
+/// desk; the rest are the kinds the community team publishes by hand — social
+/// meetups, travel and hiking outings, business conferences and seasonal
+/// celebrations. FESTIVAL is shown as "Music festival" in the UI.
 enum EventTopic {
   CINEMA
   THEATRE
@@ -615,6 +619,11 @@ enum EventTopic {
   MUSIC
   FESTIVAL
   COMMUNITY
+  SOCIAL
+  TRAVEL
+  HIKING
+  BUSINESS
+  SEASONAL
   OTHER
 }
 

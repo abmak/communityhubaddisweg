@@ -67,7 +67,12 @@ const TOPICS: { value: EventTopic; label: string }[] = [
   { value: "THEATRE", label: "Theatre" },
   { value: "SPORTS", label: "Sports" },
   { value: "MUSIC", label: "Music" },
-  { value: "FESTIVAL", label: "Festival" },
+  { value: "FESTIVAL", label: "Music festival" },
+  { value: "SOCIAL", label: "Social" },
+  { value: "TRAVEL", label: "Travel" },
+  { value: "HIKING", label: "Hiking" },
+  { value: "BUSINESS", label: "Business" },
+  { value: "SEASONAL", label: "Seasonal" },
   { value: "COMMUNITY", label: "Community" },
   { value: "OTHER", label: "Other" },
 ];

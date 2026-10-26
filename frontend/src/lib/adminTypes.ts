@@ -1,4 +1,4 @@
-import type { Category, Post, Role, User } from "../types";
+import type { Category, EventTopic, Post, Role, User } from "../types";
 import type { Permission } from "./rbac";
 
 export interface AdminMe {
@@ -244,4 +244,28 @@ export interface RolesResponse {
 
 export interface CategoriesResponse {
   categories: Category[];
+}
+
+/** An official listing as the events desk sees it: imported or hand-published. */
+export interface AdminEvent {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  topic: EventTopic;
+  startDate: string;
+  endDate: string | null;
+  location: string | null;
+  coverUrl: string | null;
+  maxAttendees: number | null;
+  createdAt: string;
+  attendeeCount: number;
+  creator: Pick<User, "id" | "username" | "displayName" | "avatarUrl">;
+  category: Pick<Category, "id" | "name" | "slug" | "color"> | null;
+  place: { id: string; name: string; slug: string; city: string } | null;
+  source: { id: string; key: string; name: string } | null;
+}
+
+export interface AdminEventsResponse {
+  events: AdminEvent[];
 }

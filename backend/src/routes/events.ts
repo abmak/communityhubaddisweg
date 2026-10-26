@@ -8,6 +8,7 @@ import { requireAuth } from "../middleware/auth";
 import { isStaffSync } from "../lib/roles";
 import { requirePermission } from "../lib/rbac";
 import { validate } from "../middleware/validate";
+import { EVENT_TOPIC_VALUES } from "../lib/event-topics";
 import { syncAllSources, syncSource } from "../lib/events/ingest";
 import { aiKeySnapshot, geminiKeyCount, geminiModel, geminiModels } from "../lib/ai/gemini";
 
@@ -27,7 +28,7 @@ const listEventsQuery = z.object({
   placeId: z.string().optional(),
   upcoming: z.coerce.boolean().optional().default(true),
   kind: z.enum(["EVENT", "MEETUP"]).optional(),
-  topic: z.enum(["CINEMA", "THEATRE", "SPORTS", "MUSIC", "FESTIVAL", "COMMUNITY", "OTHER"]).optional(),
+  topic: z.enum(EVENT_TOPIC_VALUES).optional(),
   q: z.string().max(100).optional(),
   limit: z.coerce.number().int().min(1).max(50).optional().default(20),
 });
@@ -35,9 +36,7 @@ const listEventsQuery = z.object({
 const createEventSchema = z.object({
   // Members host meetups; only staff can hand-create an official event.
   kind: z.enum(["EVENT", "MEETUP"]).optional().default("MEETUP"),
-  topic: z
-    .enum(["CINEMA", "THEATRE", "SPORTS", "MUSIC", "FESTIVAL", "COMMUNITY", "OTHER"])
-    .optional(),
+  topic: z.enum(EVENT_TOPIC_VALUES).optional(),
   title: z.string().trim().min(3, "Title must be at least 3 characters").max(120),
   description: z.string().trim().min(10, "Describe the gathering in at least 10 characters").max(3000),
   startDate: z.coerce.date(),
@@ -76,6 +75,29 @@ const userSelect = {
   avatarUrl: true,
 };
 
+const eventListInclude = {
+  creator: { select: userSelect },
+  category: { select: { id: true, name: true, slug: true, color: true, icon: true } },
+  source: { select: { id: true, key: true, name: true } },
+  place: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      kind: true,
+      city: true,
+      area: true,
+      lat: true,
+      lng: true,
+    },
+  },
+  rsvps: {
+    include: {
+      user: { select: userSelect },
+    },
+  },
+} satisfies Prisma.EventInclude;
+
 // GET /api/events
 eventsRouter.get(
   "/",
@@ -86,51 +108,56 @@ eventsRouter.get(
     >;
     const currentUserId = req.userId;
     const now = new Date();
+    const recent = new Date(now.getTime() - 2 * 60 * 60 * 1000);
 
-    const where = {
-      ...(categoryId ? { categoryId } : {}),
-      ...(placeId ? { placeId } : {}),
-      ...(kind ? { kind: kind as EventKind } : {}),
-      ...(topic ? { topic: topic as EventTopic } : {}),
-      ...(upcoming ? { startDate: { gte: new Date(now.getTime() - 2 * 60 * 60 * 1000) } } : {}),
-      ...(q
-        ? {
-            OR: [
-              { title: { contains: q, mode: "insensitive" as const } },
-              { description: { contains: q, mode: "insensitive" as const } },
-              { location: { contains: q, mode: "insensitive" as const } },
-            ],
-          }
-        : {}),
-    };
+    const filters: Prisma.EventWhereInput[] = [];
+    if (categoryId) filters.push({ categoryId });
+    if (placeId) filters.push({ placeId });
+    if (kind) filters.push({ kind: kind as EventKind });
+    if (topic) filters.push({ topic: topic as EventTopic });
+    if (upcoming) {
+      // Multi-day festivals and conferences stay listed until their closing
+      // time, not just for two hours after they open.
+      filters.push({
+        OR: [
+          { endDate: { gte: recent } },
+          { endDate: null, startDate: { gte: recent } },
+        ],
+      });
+    }
+    if (q) {
+      filters.push({
+        OR: [
+          { title: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
+          { location: { contains: q, mode: "insensitive" } },
+        ],
+      });
+    }
+    const where: Prisma.EventWhereInput = filters.length > 0 ? { AND: filters } : {};
 
-    const events = await prisma.event.findMany({
-      where,
+    // Imported feeds (league fixtures, cinema schedules) can fill every slot of
+    // a 50-row page, which would bury the listings the community team publishes
+    // from the admin events desk. Curated rows are fetched first and imported
+    // rows top up the rest, so a hand-made calendar entry is never invisible.
+    const curated = await prisma.event.findMany({
+      where: { ...where, sourceId: null },
       take: limit,
       orderBy: { startDate: "asc" },
-      include: {
-        creator: { select: userSelect },
-        category: { select: { id: true, name: true, slug: true, color: true, icon: true } },
-        source: { select: { id: true, key: true, name: true } },
-        place: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            kind: true,
-            city: true,
-            area: true,
-            lat: true,
-            lng: true,
-          },
-        },
-        rsvps: {
-          include: {
-            user: { select: userSelect },
-          },
-        },
-      },
+      include: eventListInclude,
     });
+    const importedTake = Math.max(0, limit - curated.length);
+    const imported = importedTake
+      ? await prisma.event.findMany({
+          where: { ...where, sourceId: { not: null } },
+          take: importedTake,
+          orderBy: { startDate: "asc" },
+          include: eventListInclude,
+        })
+      : [];
+    const events = [...curated, ...imported].sort(
+      (a, b) => a.startDate.getTime() - b.startDate.getTime(),
+    );
 
     const serialized = events.map((event) => {
       const goingCount = event.rsvps.filter((r) => r.status === RsvpStatus.GOING).length;
@@ -423,19 +450,17 @@ eventsRouter.get(
 // Declared before "/:slug" so "sources" is not read as an event slug.
 // ---------------------------------------------------------------------------
 
-const TOPICS = ["CINEMA", "THEATRE", "SPORTS", "MUSIC", "FESTIVAL", "COMMUNITY", "OTHER"] as const;
-
 const createSourceSchema = z.object({
   name: z.string().trim().min(3, "Give the source a name").max(80),
   adapter: z.enum(["SPORTS_API", "TELEGRAM", "RSS", "GEMINI"]),
-  topic: z.enum(TOPICS).optional().default("OTHER"),
+  topic: z.enum(EVENT_TOPIC_VALUES).optional().default("OTHER"),
   config: z.record(z.unknown()).optional().default({}),
   enabled: z.boolean().optional().default(true),
 });
 
 const updateSourceSchema = z.object({
   name: z.string().trim().min(3).max(80).optional(),
-  topic: z.enum(TOPICS).optional(),
+  topic: z.enum(EVENT_TOPIC_VALUES).optional(),
   config: z.record(z.unknown()).optional(),
   enabled: z.boolean().optional(),
   syncNow: z.boolean().optional(),

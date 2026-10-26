@@ -3,6 +3,7 @@ import { Link, Navigate, NavLink, Outlet, useLocation, useNavigate, useOutletCon
 import {
   ArrowUpRight,
   CalendarClock,
+  CalendarDays,
   FileText,
   Flag,
   History,
@@ -61,6 +62,7 @@ const NAV: Array<{ group: string; items: NavItem[] }> = [
     items: [
       { to: "/admin/categories", label: "Rooms", icon: LayoutGrid, permission: "admin.categories.view" },
       { to: "/admin/announcements", label: "Announcements", icon: Megaphone, permission: "admin.announcements.publish" },
+      { to: "/admin/events", label: "Events", icon: CalendarDays, permission: "admin.events.view" },
       { to: "/admin/event-sources", label: "Event sources", icon: CalendarClock, permission: "admin.events.view" },
       { to: "/admin/jokes", label: "Joke Time", icon: Laugh, permission: "admin.jokes.view" },
     ],

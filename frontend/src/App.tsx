@@ -48,6 +48,7 @@ import { AdminAudit } from "./pages/admin/AdminAudit";
 import { AdminCategories } from "./pages/admin/AdminCategories";
 import { AdminAnnouncements } from "./pages/admin/AdminAnnouncements";
 import { AdminJokes } from "./pages/admin/AdminJokes";
+import { AdminEvents } from "./pages/admin/AdminEvents";
 import { AdminEventSources } from "./pages/admin/AdminEventSources";
 import { NotFound } from "./pages/NotFound";
 
@@ -147,6 +148,7 @@ export default function App() {
             <Route path="categories" element={<AdminCategories />} />
             <Route path="announcements" element={<AdminAnnouncements />} />
             <Route path="jokes" element={<AdminJokes />} />
+            <Route path="events" element={<AdminEvents />} />
             <Route path="event-sources" element={<AdminEventSources />} />
             <Route path="*" element={<Navigate to="overview" replace />} />
           </Route>

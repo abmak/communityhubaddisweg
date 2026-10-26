@@ -30,7 +30,12 @@ const TOPIC_LABEL: Record<string, string> = {
   THEATRE: "Theatre",
   SPORTS: "Football & sport",
   MUSIC: "Music",
-  FESTIVAL: "Festival",
+  FESTIVAL: "Music festival",
+  SOCIAL: "Social",
+  TRAVEL: "Travel",
+  HIKING: "Hiking",
+  BUSINESS: "Business conference",
+  SEASONAL: "Seasonal event",
   COMMUNITY: "Community",
   OTHER: "Event",
 };
@@ -75,7 +80,17 @@ function formatEventDate(startStr: string, endStr?: string | null): string {
         hour: "numeric",
         minute: "2-digit",
       });
-      return `${dateFormatted}${ethiopian} at ${timeStart} – ${timeEnd}`;
+      if (end.toDateString() === start.toDateString()) {
+        return `${dateFormatted}${ethiopian} at ${timeStart} – ${timeEnd}`;
+      }
+      // Multi-day events (festivals, conferences) must show the closing date.
+      const endDateFormatted = end.toLocaleDateString(undefined, {
+        weekday: "short",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      return `${dateFormatted}${ethiopian} at ${timeStart} – ${endDateFormatted} at ${timeEnd}`;
     }
     return `${dateFormatted}${ethiopian} at ${timeStart}`;
   } catch {
@@ -428,9 +443,10 @@ export function EventDetailPage() {
             {event.kind === "EVENT" && (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-medium text-muted">
                 <span className="inline-flex items-center gap-1 rounded-full bg-brand-500/10 px-2.5 py-0.5 font-bold uppercase tracking-wide text-brand-700 dark:text-brand-300">
-                  <Radio className="h-3 w-3" /> {TOPIC_LABEL[event.topic] ?? "Event"} · auto-imported
+                  <Radio className="h-3 w-3" /> {TOPIC_LABEL[event.topic] ?? "Event"}
+                  {event.source ? " · auto-imported" : " · official listing"}
                 </span>
-                <span>Listed by {event.source?.name ?? "an online source"}</span>
+                {event.source && <span>Listed by {event.source.name}</span>}
                 {event.sourceUrl && (
                   <a
                     href={event.sourceUrl}
@@ -608,8 +624,8 @@ export function EventDetailPage() {
             </div>
           </div>
 
-          {/* Source card for imported listings, host card for meetups. */}
-          {event.kind === "EVENT" ? (
+          {/* Source card for imported listings, organiser card for curated ones. */}
+          {event.source ? (
             <div className="rounded-3xl border border-line bg-surface p-6 shadow-lift">
               <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Source</h3>
               <div className="mt-4 flex items-center gap-3">
@@ -641,7 +657,9 @@ export function EventDetailPage() {
             </div>
           ) : (
           <div className="rounded-3xl border border-line bg-surface p-6 shadow-lift">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Organized by</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">
+              {event.kind === "EVENT" ? "Published by" : "Organized by"}
+            </h3>
             <div className="mt-4 flex items-center gap-3">
               <Avatar
                 src={event.creator.avatarUrl}
@@ -664,8 +682,14 @@ export function EventDetailPage() {
               to={`/u/${event.creator.username}`}
               className="mt-4 block w-full rounded-xl border border-line bg-surface py-2 text-center text-xs font-semibold text-ink transition hover:bg-raised"
             >
-              View Host Profile
+              {event.kind === "EVENT" ? "View organiser profile" : "View host profile"}
             </Link>
+
+            {event.kind === "EVENT" && (
+              <p className="mt-3 text-[11px] leading-relaxed text-muted">
+                An official listing from the Addis Gebeta community team.
+              </p>
+            )}
           </div>
           )}
 

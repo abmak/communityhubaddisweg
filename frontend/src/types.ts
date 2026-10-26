@@ -367,7 +367,19 @@ export interface EventAttendee {
 
 export type EventKind = "EVENT" | "MEETUP";
 
-export type EventTopic = "CINEMA" | "THEATRE" | "SPORTS" | "MUSIC" | "FESTIVAL" | "COMMUNITY" | "OTHER";
+export type EventTopic =
+  | "FESTIVAL"
+  | "CINEMA"
+  | "THEATRE"
+  | "SOCIAL"
+  | "TRAVEL"
+  | "HIKING"
+  | "BUSINESS"
+  | "SEASONAL"
+  | "MUSIC"
+  | "SPORTS"
+  | "COMMUNITY"
+  | "OTHER";
 
 /** A feed that publishes events automatically (sports league, cinema, RSS). */
 export interface EventSourceSummary {

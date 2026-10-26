@@ -24,6 +24,9 @@ import {
   Theater,
   Music2,
   PartyPopper,
+  Briefcase,
+  Plane,
+  Snowflake,
   RefreshCw,
 } from "lucide-react";
 import { useAuth } from "../store/auth";
@@ -50,7 +53,12 @@ const TOPIC_META: Record<EventTopic, { label: string; icon: typeof Film; classNa
   THEATRE: { label: "Theatre", icon: Theater, className: "bg-purple-600" },
   SPORTS: { label: "Football & sport", icon: Trophy, className: "bg-emerald-600" },
   MUSIC: { label: "Music", icon: Music2, className: "bg-sky-600" },
-  FESTIVAL: { label: "Festival", icon: PartyPopper, className: "bg-amber-600" },
+  FESTIVAL: { label: "Music festival", icon: PartyPopper, className: "bg-amber-600" },
+  SOCIAL: { label: "Social", icon: Users, className: "bg-teal-600" },
+  TRAVEL: { label: "Travel", icon: Plane, className: "bg-sky-600" },
+  HIKING: { label: "Hiking", icon: Mountain, className: "bg-lime-700" },
+  BUSINESS: { label: "Business", icon: Briefcase, className: "bg-slate-700" },
+  SEASONAL: { label: "Seasonal", icon: Snowflake, className: "bg-indigo-600" },
   COMMUNITY: { label: "Community", icon: Sparkles, className: "bg-brand-600" },
   OTHER: { label: "Other", icon: CalendarDays, className: "bg-neutral-600" },
 };
@@ -94,7 +102,18 @@ function formatEventDate(startStr: string, endStr?: string | null): string {
         hour: "numeric",
         minute: "2-digit",
       });
-      return `${dateFormatted}${ethiopian} · ${timeStart} - ${timeEnd}`;
+      if (end.toDateString() === start.toDateString()) {
+        return `${dateFormatted}${ethiopian} · ${timeStart} - ${timeEnd}`;
+      }
+      // Multi-day events (festivals, conferences) must show the closing date,
+      // not just a later time on the opening day.
+      const endDateFormatted = end.toLocaleDateString(
+        undefined,
+        end.getFullYear() === start.getFullYear()
+          ? { month: "short", day: "numeric" }
+          : { year: "numeric", month: "short", day: "numeric" },
+      );
+      return `${dateFormatted}${ethiopian} · ${timeStart} - ${endDateFormatted} · ${timeEnd}`;
     }
     return `${dateFormatted}${ethiopian} · ${timeStart}`;
   } catch {
@@ -578,7 +597,7 @@ export function EventsPage({
               ) : (
                 <CalendarDays className="h-3.5 w-3.5 text-accent-400" />
               )}
-              <span>{tab === "EVENT" ? "Events · auto-updated" : "Meetups · hosted by members"}</span>
+              <span>{tab === "EVENT" ? "Events · city calendar" : "Meetups · hosted by members"}</span>
               <span className="font-ethiopic text-[11px] text-accent-300">
                 {tab === "EVENT" ? "· ዝግጅቶች" : "· ስብሰባዎች"}
               </span>
@@ -596,7 +615,7 @@ export function EventsPage({
               {tab === "EVENT"
                 ? `Updated automatically from ${sourceCount || 1} online ${
                     sourceCount === 1 ? "source" : "sources"
-                  }. Jump straight into a league schedule, find a screening at a hall you like, or see what is on stage.`
+                  }, plus official listings from the community team. Jump straight into a league schedule, find a screening at a hall you like, or see what is on stage.`
                 : t(
                     "events.subtitle",
                     "Pick a time and a place, post it, and everyone can see the schedule and who is coming. Hikes, watch parties and coffee ceremonies across Addis Ababa.",
@@ -989,8 +1008,8 @@ export function EventsPage({
                     </div>
                   </div>
 
-                  {/* Auto-imported listings credit the feed; meetups credit the host. */}
-                  {item.kind === "EVENT" ? (
+                  {/* Imported listings credit the feed; curated events and meetups credit their host. */}
+                  {item.source ? (
                     <div className="mt-4 flex items-center gap-2.5 border-t border-line/60 pt-3">
                       <span className="rounded-lg bg-brand-500/10 p-1.5 text-brand-600 dark:text-brand-300">
                         <Radio className="h-3.5 w-3.5" />
@@ -998,7 +1017,7 @@ export function EventsPage({
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-[11px] text-muted">
                           Imported from{" "}
-                          <span className="font-semibold text-ink">{item.source?.name ?? "an online source"}</span>
+                          <span className="font-semibold text-ink">{item.source.name}</span>
                         </p>
                       </div>
                       {item.sourceUrl && (
@@ -1022,7 +1041,7 @@ export function EventsPage({
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-[11px] text-muted">
-                          {t("events.host", "Hosted by")}{" "}
+                          {item.kind === "EVENT" ? "Published by" : t("events.host", "Hosted by")}{" "}
                           <Link
                             to={`/u/${item.creator.username}`}
                             className="font-semibold text-ink hover:underline"
@@ -1032,10 +1051,14 @@ export function EventsPage({
                         </p>
                       </div>
 
-                      {item.maxAttendees && (
-                        <span className="text-[11px] font-medium text-muted">
-                          Max: {item.maxAttendees}
-                        </span>
+                      {item.kind === "EVENT" ? (
+                        <Badge tone="brand">Official</Badge>
+                      ) : (
+                        item.maxAttendees && (
+                          <span className="text-[11px] font-medium text-muted">
+                            Max: {item.maxAttendees}
+                          </span>
+                        )
                       )}
                     </div>
                   )}

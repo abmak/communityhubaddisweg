@@ -70,9 +70,10 @@ export default {
         ethiopic: ["Noto Serif Ethiopic", "Noto Sans Ethiopic", "Georgia", "serif"],
       },
       boxShadow: {
-        card: "0 1px 2px rgb(60 40 20 / 0.05), 0 16px 36px -24px rgb(60 40 20 / 0.25)",
-        lift: "0 22px 55px -26px rgb(45 30 15 / 0.38)",
-        glow: "0 0 0 1px rgb(15 107 58 / 0.18), 0 14px 32px -16px rgb(15 107 58 / 0.45)",
+        card: "0 1px 2px rgb(16 24 20 / 0.04), 0 1px 3px rgb(16 24 20 / 0.03)",
+        soft: "0 1px 2px rgb(16 24 20 / 0.04), 0 8px 24px -18px rgb(16 24 20 / 0.2)",
+        lift: "0 2px 4px rgb(16 24 20 / 0.04), 0 18px 40px -24px rgb(16 24 20 / 0.26)",
+        glow: "0 0 0 1px rgb(15 107 58 / 0.14), 0 10px 28px -14px rgb(15 107 58 / 0.4)",
       },
       borderRadius: {
         "4xl": "2rem",

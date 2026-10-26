@@ -4,24 +4,24 @@
 
 @layer base {
   :root {
-    /* Warm parchment, highland green and coffee-brown ink. */
-    --canvas: 251 247 238;
-    --surface: 255 253 248;
-    --surface-2: 245 238 225;
-    --ink: 39 32 24;
-    --muted: 112 100 85;
-    --line: 231 220 203;
+    /* Paper-white canvas, highland green and coffee-brown ink. */
+    --canvas: 247 247 244;
+    --surface: 255 255 255;
+    --surface-2: 241 244 239;
+    --ink: 20 27 23;
+    --muted: 98 110 102;
+    --line: 228 232 226;
     --pattern: 15 107 58;
     color-scheme: light;
   }
 
   .dark {
-    --canvas: 17 21 18;
-    --surface: 24 30 25;
-    --surface-2: 33 41 34;
-    --ink: 238 240 231;
-    --muted: 163 171 157;
-    --line: 54 65 55;
+    --canvas: 9 13 11;
+    --surface: 15 21 18;
+    --surface-2: 23 31 27;
+    --ink: 236 241 236;
+    --muted: 154 167 158;
+    --line: 35 47 40;
     --pattern: 120 215 156;
     color-scheme: dark;
   }
@@ -32,19 +32,38 @@
 
   html {
     @apply scroll-smooth;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
     @apply min-h-screen bg-canvas font-sans text-ink antialiased;
+    background-image:
+      radial-gradient(70rem 44rem at 100% -12%, rgb(15 107 58 / 0.045), transparent 62%),
+      radial-gradient(55rem 40rem at -12% 4%, rgb(233 185 73 / 0.05), transparent 58%);
+    background-attachment: fixed;
     text-rendering: optimizeLegibility;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(70rem 44rem at 100% -12%, rgb(31 163 87 / 0.08), transparent 60%),
+      radial-gradient(55rem 40rem at -12% 4%, rgb(233 185 73 / 0.04), transparent 55%);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
   }
 
   ::selection {
-    background: rgb(233 185 73 / 0.42);
+    background: rgb(233 185 73 / 0.4);
   }
 
   :focus-visible {
-    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-canvas;
+    @apply outline-none ring-2 ring-brand-500/70 ring-offset-2 ring-offset-canvas;
   }
 
   /* Amharic copy needs a little more breathing room than Latin text. */
@@ -71,19 +90,77 @@
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-line bg-surface shadow-card transition-[border-color,box-shadow,transform] duration-200;
+    @apply rounded-2xl border border-line bg-surface transition-[border-color,box-shadow,transform] duration-200;
+    box-shadow:
+      0 1px 2px rgb(16 24 20 / 0.04),
+      0 1px 3px rgb(16 24 20 / 0.02);
+  }
+
+  .dark .card {
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.3),
+      inset 0 1px 0 rgb(255 255 255 / 0.02);
+  }
+
+  /* Opt-in lift for cards that are links or otherwise interactive. */
+  .card-interactive {
+    @apply hover:-translate-y-0.5 hover:border-brand-600/25 hover:shadow-lift;
+  }
+
+  .panel {
+    @apply relative overflow-hidden rounded-2xl border border-line bg-surface;
+    background-image:
+      radial-gradient(42rem 24rem at 100% 0%, rgb(15 107 58 / 0.06), transparent 60%),
+      radial-gradient(30rem 20rem at 0% 100%, rgb(233 185 73 / 0.07), transparent 62%);
+    box-shadow:
+      0 1px 2px rgb(16 24 20 / 0.04),
+      0 12px 32px -24px rgb(16 24 20 / 0.22);
+  }
+
+  .dark .panel {
+    background-image:
+      radial-gradient(42rem 24rem at 100% 0%, rgb(31 163 87 / 0.12), transparent 60%),
+      radial-gradient(30rem 20rem at 0% 100%, rgb(233 185 73 / 0.05), transparent 62%);
   }
 
   .btn {
-    @apply inline-flex select-none items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-150 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-55 disabled:active:scale-100;
+    @apply inline-flex select-none items-center justify-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-y-0;
   }
 
   .btn-primary {
-    @apply btn bg-brand-700 text-white shadow-sm hover:bg-brand-800 hover:shadow-glow active:scale-[0.99];
+    @apply btn bg-brand-700 text-white;
+    background-image: linear-gradient(180deg, #128546 0%, #0f6b3a 100%);
+    border: 1px solid rgb(11 68 41 / 0.9);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.16),
+      0 1px 2px rgb(16 24 20 / 0.18);
+  }
+
+  .btn-primary:hover {
+    background-image: linear-gradient(180deg, #199d55 0%, #128546 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.18),
+      0 6px 16px -8px rgb(15 107 58 / 0.65);
+  }
+
+  .dark .btn-primary {
+    background-image: linear-gradient(180deg, #199d55 0%, #0f6b3a 100%);
+    border-color: rgb(120 215 156 / 0.22);
   }
 
   .btn-secondary {
-    @apply btn border border-line bg-surface text-ink hover:bg-raised;
+    @apply btn border border-line bg-surface text-ink;
+    box-shadow:
+      0 1px 2px rgb(16 24 20 / 0.05),
+      inset 0 1px 0 rgb(255 255 255 / 0.6);
+  }
+
+  .btn-secondary:hover {
+    @apply border-line bg-raised/80 text-ink;
+  }
+
+  .dark .btn-secondary {
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
   }
 
   .btn-ghost {
@@ -91,27 +168,30 @@
   }
 
   .btn-danger {
-    @apply btn bg-rose-600 text-white hover:bg-rose-700;
+    @apply btn bg-rose-600 text-white shadow-sm hover:bg-rose-700;
   }
 
   .btn-sm {
-    @apply rounded-lg px-3 py-1.5 text-xs;
+    @apply gap-1.5 rounded-lg px-3 py-1.5 text-xs;
   }
 
   .input {
-    @apply w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-muted/70 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20;
+    @apply w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10;
+    box-shadow: inset 0 1px 2px rgb(16 24 20 / 0.03);
   }
 
   .label {
-    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted;
+    @apply mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted;
   }
 
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-muted transition hover:border-brand-300 hover:text-ink;
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-muted transition hover:border-brand-500/40 hover:text-ink;
+    box-shadow: 0 1px 2px rgb(16 24 20 / 0.04);
   }
 
   .chip-active {
-    @apply border-brand-600/30 bg-brand-50 text-brand-800 dark:bg-brand-900/30 dark:text-brand-200;
+    @apply border-brand-600/30 bg-brand-50 text-brand-800 dark:border-brand-400/25 dark:bg-brand-500/10 dark:text-brand-200;
+    box-shadow: inset 0 0 0 1px rgb(15 107 58 / 0.08);
   }
 
   /* Signature green–gold–red rule. */
@@ -135,20 +215,34 @@
     mask-repeat: repeat;
   }
 
-  /* Soft mesob-like glow behind hero sections. */
+  /* Soft, clean glow behind hero sections. */
   .eth-hero-glow {
     background-image:
-      radial-gradient(70% 70% at 12% 0%, rgb(15 107 58 / 0.16), transparent 60%),
-      radial-gradient(60% 60% at 92% 22%, rgb(233 185 73 / 0.22), transparent 62%),
-      radial-gradient(55% 55% at 60% 100%, rgb(200 16 46 / 0.08), transparent 65%);
+      radial-gradient(60% 70% at 8% 0%, rgb(15 107 58 / 0.1), transparent 62%),
+      radial-gradient(50% 60% at 96% 10%, rgb(233 185 73 / 0.16), transparent 64%),
+      radial-gradient(40% 50% at 55% 100%, rgb(200 16 46 / 0.05), transparent 70%);
+  }
+
+  /* Faint blueprint grid — used behind marketing and empty surfaces. */
+  .app-grid {
+    background-image:
+      linear-gradient(to right, rgb(var(--line) / 0.55) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--line) / 0.55) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 40%, transparent 100%);
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 40%, transparent 100%);
   }
 
   .kicker {
-    @apply text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-700 dark:text-brand-300;
+    @apply inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-700 dark:text-brand-300;
   }
 
   .amharic-note {
     @apply font-ethiopic text-[0.95rem] leading-7 text-ink/90;
+  }
+
+  .icon-tile {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-raised/70 text-ink;
   }
 
   .menu-item {
@@ -179,36 +273,117 @@
     scrollbar-width: none;
   }
 
-  /* Brand mark: a single gold tilet diamond, still and confident. */
+  /* Brand mark: Addis Gebeta animated communal emblem */
+  .brand-mark {
+    transform-origin: center center;
+    transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
   .brand-mark-svg {
     overflow: visible;
-    transition: transform 300ms ease;
+    transition: transform 300ms ease, filter 300ms ease;
+  }
+
+  .gebeta-halo {
+    background: radial-gradient(circle at center, rgb(233 185 73 / 0.5), rgb(15 107 58 / 0.3) 55%, transparent 75%);
+    filter: blur(14px);
+    animation: gebeta-glow 5s ease-in-out infinite;
   }
 
   .brand-halo {
     background: radial-gradient(circle at 34% 28%, rgb(233 185 73 / 0.5), rgb(15 107 58 / 0.28) 55%, transparent 72%);
     filter: blur(12px);
-    animation: brand-halo 6.5s ease-in-out infinite;
+    animation: gebeta-glow 6.5s ease-in-out infinite;
+  }
+
+  .gebeta-orbit {
+    transform-origin: 32px 32px;
+    animation: gebeta-spin 22s linear infinite;
+  }
+
+  .gebeta-inner-crown {
+    transform-origin: 32px 32px;
+    animation: gebeta-spin-reverse 34s linear infinite;
+  }
+
+  .gebeta-core-pulse {
+    transform-origin: 32px 32px;
+    animation: gebeta-pulse 3.4s ease-in-out infinite;
+  }
+
+  .gebeta-ripple {
+    transform-origin: 32px 32px;
+    animation: gebeta-ripple-wave 3s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
   }
 
   .brand-dot {
     animation: brand-dot 3.2s ease-in-out infinite;
   }
 
+  .brand-mark:hover .gebeta-orbit {
+    animation-duration: 8s;
+  }
+
+  .brand-mark:hover .gebeta-inner-crown {
+    animation-duration: 12s;
+  }
+
   .brand-mark:hover .brand-mark-svg {
-    transform: scale(1.035);
+    transform: scale(1.06);
+    filter: drop-shadow(0 8px 22px rgba(233, 185, 73, 0.4));
   }
 }
 
-@keyframes brand-halo {
+@keyframes gebeta-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gebeta-spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes gebeta-pulse {
   0%,
   100% {
-    opacity: 0.55;
-    transform: scale(0.96);
+    transform: scale(0.92);
+    opacity: 0.9;
   }
   50% {
-    opacity: 0.9;
-    transform: scale(1.06);
+    transform: scale(1.14);
+    opacity: 1;
+  }
+}
+
+@keyframes gebeta-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.88;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes gebeta-ripple-wave {
+  0% {
+    r: 6;
+    opacity: 0.85;
+  }
+  100% {
+    r: 19;
+    opacity: 0;
   }
 }
 

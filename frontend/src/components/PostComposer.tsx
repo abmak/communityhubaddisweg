@@ -134,7 +134,7 @@ export function PostComposer({ onCreated, fixedCategory, className }: PostCompos
         className,
       )}
     >
-      <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 h-1.5" />
+      <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 h-1 opacity-70" />
       <div className="flex gap-3">
         <Avatar name={user.displayName} username={user.username} src={user.avatarUrl} size="md" />
         <div className="min-w-0 flex-1">

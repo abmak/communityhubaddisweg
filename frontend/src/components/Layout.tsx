@@ -137,10 +137,10 @@ function NavBadge({ count }: { count: number }) {
 
 const navItemClass = ({ isActive }: { isActive: boolean }) =>
   cn(
-    "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition",
+    "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition",
     isActive
-      ? "bg-brand-50 text-brand-800 dark:bg-brand-500/10 dark:text-brand-200"
-      : "text-muted hover:bg-raised hover:text-ink",
+      ? "bg-brand-50/80 text-brand-900 shadow-[inset_0_0_0_1px_rgba(15,107,58,0.08)] dark:bg-brand-500/10 dark:text-brand-100"
+      : "text-muted hover:bg-raised/70 hover:text-ink",
   );
 
 function Sidebar() {
@@ -160,9 +160,9 @@ function Sidebar() {
   const ThemeIcon = theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[272px] flex-col border-r border-line bg-surface/70 px-4 py-5 backdrop-blur-xl lg:flex">
-      <Link to="/home" className="mb-6 flex items-center gap-3 px-2">
-        <BrandMark className="h-10 w-10" />
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[272px] flex-col border-r border-line/80 bg-surface/80 px-3.5 py-5 backdrop-blur-xl lg:flex">
+      <Link to="/home" className="mb-6 flex items-center gap-3 rounded-xl px-2 py-1">
+        <BrandMark className="h-9 w-9" />
         <Wordmark subtitle="Addis Gebeta · since 2026" />
       </Link>
 
@@ -180,8 +180,9 @@ function Sidebar() {
         </Link>
       )}
 
-      <nav className="space-y-1" aria-label="Main navigation">
-        <p lang="am" className="mb-1 px-3 font-ethiopic text-[10px] uppercase tracking-[0.14em] text-muted/50">
+      <div className="no-scrollbar -mr-1 min-h-0 flex-1 overflow-y-auto pr-1">
+        <nav className="space-y-1" aria-label="Main navigation">
+          <p lang="am" className="mb-1 px-3 font-ethiopic text-[10px] uppercase tracking-[0.14em] text-muted/50">
           {lang === "am" ? "ዋና ገጾች" : lang === "om" ? "Kutaalee Ijoo" : "Navigation"}
         </p>
         <NavLink to="/home" className={navItemClass}>
@@ -278,34 +279,35 @@ function Sidebar() {
             </NavLink>
           </>
         )}
-      </nav>
+        </nav>
 
-      {user && (
-        <>
-          <div className="my-4 border-t border-line" />
-          <div className="space-y-1">
-            <NavLink to={`/u/${user.username}`} className={navItemClass}>
-              <UserIcon className="h-[18px] w-[18px]" /> {t("nav.profile", "Your profile")}
-            </NavLink>
-            <NavLink to="/settings" className={navItemClass}>
-              <Settings className="h-[18px] w-[18px]" /> {t("nav.settings", "Settings")}
-            </NavLink>
-            {isModerator && (
-              <NavLink to="/admin/overview" className={navItemClass}>
-                <Shield className="h-[18px] w-[18px]" /> {t("nav.admin", "Admin dashboard")}
+        {user && (
+          <>
+            <div className="my-4 border-t border-line" />
+            <div className="space-y-1">
+              <NavLink to={`/u/${user.username}`} className={navItemClass}>
+                <UserIcon className="h-[18px] w-[18px]" /> {t("nav.profile", "Your profile")}
               </NavLink>
-            )}
-          </div>
-        </>
-      )}
+              <NavLink to="/settings" className={navItemClass}>
+                <Settings className="h-[18px] w-[18px]" /> {t("nav.settings", "Settings")}
+              </NavLink>
+              {isModerator && (
+                <NavLink to="/admin/overview" className={navItemClass}>
+                  <Shield className="h-[18px] w-[18px]" /> {t("nav.admin", "Admin dashboard")}
+                </NavLink>
+              )}
+            </div>
+          </>
+        )}
+      </div>
 
-      <div className="mt-auto space-y-2.5">
-        <div className="relative overflow-hidden rounded-2xl border border-accent-600/20 bg-accent-50/80 p-3 dark:border-accent-400/15 dark:bg-accent-500/5">
-          <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 h-1.5" />
-          <p lang="am" className="font-ethiopic text-sm font-semibold text-coffee-800 dark:text-accent-200">
+      <div className="mt-4 space-y-2.5">
+        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-brand-900 p-3.5 text-white shadow-soft">
+          <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 h-1 opacity-60" />
+          <p lang="am" className="font-ethiopic text-sm font-semibold text-accent-200">
             {t("common.bunaTetu", "ቡና ተጠጡ")}
           </p>
-          <p className="mt-1 text-[11px] leading-5 text-coffee-700/80 dark:text-accent-100/60">
+          <p className="mt-1 text-[11px] leading-5 text-white/55">
             {t("common.coffeeToast", "Every good table starts with a cup and a story. Pull up a chair.")}
           </p>
         </div>
@@ -315,7 +317,7 @@ function Sidebar() {
         <button
           type="button"
           onClick={cycleTheme}
-          className="flex w-full items-center gap-2.5 rounded-xl border border-line bg-surface/80 px-3 py-2 text-xs font-medium text-muted transition hover:bg-raised hover:text-ink"
+          className="flex w-full items-center gap-2.5 rounded-lg border border-line bg-surface px-3 py-2 text-xs font-medium text-muted shadow-[0_1px_2px_rgba(16,24,20,0.04)] transition hover:bg-raised hover:text-ink"
         >
           <ThemeIcon className="h-4 w-4" />
           {theme === "light" ? t("common.light", "Light") : theme === "dark" ? t("common.dark", "Dark") : t("common.system", "System")} {t("common.switchTheme", "theme")}
@@ -323,7 +325,7 @@ function Sidebar() {
         </button>
 
         {user ? (
-          <div className="rounded-2xl border border-line bg-surface p-2.5">
+          <div className="rounded-xl border border-line bg-surface p-2.5 shadow-[0_1px_2px_rgba(16,24,20,0.04)]">
             <div className="flex items-center gap-2.5">
               <Link to={`/u/${user.username}`} className="min-w-0 flex-1">
                 <span className="flex items-center gap-2.5">
@@ -353,7 +355,7 @@ function Sidebar() {
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl border border-line bg-surface p-3">
+          <div className="rounded-xl border border-line bg-surface p-3 shadow-[0_1px_2px_rgba(16,24,20,0.04)]">
             <p className="text-xs leading-5 text-muted">
               Join a community that talks about films, books, trails and everyday life.
             </p>
@@ -386,22 +388,22 @@ function TopBar() {
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-[1320px] items-center gap-3 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 border-b border-line/80 bg-surface/75 backdrop-blur-xl supports-[backdrop-filter]:bg-surface/65">
+      <div className="mx-auto flex h-[60px] max-w-[1320px] items-center gap-3 px-4 sm:px-6 lg:px-8">
         <Link to="/home" className="flex items-center gap-2.5 lg:hidden">
-          <BrandMark className="h-9 w-9" />
+          <BrandMark className="h-8 w-8" />
           <Wordmark compact />
         </Link>
 
-        <form onSubmit={submit} className="ml-auto hidden w-full max-w-md sm:block">
+        <form onSubmit={submit} className="ml-auto hidden w-full max-w-[420px] sm:block">
           <label className="relative block">
             <span className="sr-only">{t("nav.search", "Search")}</span>
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted/80" />
             <input
               value={term}
               onChange={(event) => setTerm(event.target.value)}
               placeholder={t("nav.searchPlaceholder", "Search films, books, trails, people…")}
-              className="input h-10 rounded-full border-transparent bg-raised pl-10 pr-4 focus:border-brand-400 focus:bg-surface"
+              className="input h-9 rounded-lg border-line/80 bg-raised/50 pl-9 pr-3 text-[13px] shadow-none transition focus:bg-surface"
             />
           </label>
         </form>
@@ -415,7 +417,7 @@ function TopBar() {
             <Search className="h-5 w-5" />
           </Link>
 
-          <LanguageSwitcher compact className="shrink-0" />
+          <LanguageSwitcher compact className="hidden shrink-0 sm:inline-flex" />
 
           {user ? (
             <>
@@ -475,11 +477,13 @@ function RightRail() {
   const places = placesData?.places ?? [];
 
   return (
-    <aside className="sticky top-20 hidden h-fit w-[320px] shrink-0 space-y-4 xl:block">
+    <aside className="sticky top-[84px] hidden h-fit w-[312px] shrink-0 space-y-4 xl:block">
       <section className="card p-4">
         <div className="mb-3 flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-brand-700" />
-          <h2 className="text-sm font-semibold text-ink">Hot in the hub</h2>
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
+            <TrendingUp className="h-3.5 w-3.5" />
+          </span>
+          <h2 className="text-[13px] font-semibold text-ink">Hot in the hub</h2>
           <span lang="am" className="ml-auto font-ethiopic text-[10px] text-muted/60">
             የዕለቱ ሞቃት
           </span>
@@ -573,8 +577,9 @@ function RightRail() {
         </Link>
       </section>
 
-      <section className="relative overflow-hidden rounded-2xl border border-brand-700/15 bg-brand-900 p-4 text-white shadow-card">
-        <span aria-hidden="true" className="tilet-strip absolute inset-y-0 right-0 w-16 opacity-30" />
+      <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-brand-900 p-4 text-white shadow-soft">
+        <span aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(90%_90%_at_100%_0%,rgba(233,185,73,0.18),transparent_60%),radial-gradient(80%_80%_at_0%_100%,rgba(31,163,87,0.24),transparent_60%)]" />
+        <span aria-hidden="true" className="tilet-strip absolute inset-y-0 right-0 w-12 opacity-20" />
         <p lang="am" className="font-ethiopic text-[11px] font-semibold text-accent-300">
           የዕለቱ ቡና
         </p>
@@ -586,7 +591,7 @@ function RightRail() {
         </p>
         <Link
           to="/create"
-          className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1.5 text-[11px] font-semibold text-white ring-1 ring-inset ring-white/15 transition hover:bg-white/20"
+          className="relative mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1.5 text-[11px] font-semibold text-white ring-1 ring-inset ring-white/15 transition hover:bg-white/20"
         >
           Add your answer
         </Link>
@@ -719,7 +724,7 @@ function MobileNav() {
 
   return (
     <>
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur-xl lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line/80 bg-surface/90 backdrop-blur-xl lg:hidden">
         <div className="flex items-stretch px-2 pb-[env(safe-area-inset-bottom)]">
           <NavLink to="/home" className={({ isActive }) => itemClass(isActive)}>
             <Home className="h-5 w-5" />
@@ -734,7 +739,7 @@ function MobileNav() {
             className="relative -mt-4 flex w-16 flex-col items-center justify-center"
             aria-label={t("nav.post", "Create a post")}
           >
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-brand-700 text-white shadow-glow">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-b from-brand-600 to-brand-800 text-white shadow-[0_8px_20px_-8px_rgba(15,107,58,0.65)] ring-4 ring-canvas">
               <Plus className="h-5 w-5" />
             </span>
           </Link>
@@ -779,7 +784,7 @@ function MobileNav() {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
-            className="absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-3xl border-t border-line bg-surface px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 shadow-lift"
+            className="absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-2xl border-t border-line bg-surface px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 shadow-lift"
           >
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line" aria-hidden="true" />
             <div className="flex items-center justify-between px-1">
@@ -812,7 +817,14 @@ function MobileNav() {
               ))}
             </div>
 
-            <div className="mt-4 rounded-xl border border-line bg-raised/40 p-2.5">
+            <div className="mt-4">
+              <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+                Language
+              </p>
+              <LanguageSwitcher className="w-full [&>button]:w-full" />
+            </div>
+
+            <div className="mt-3 rounded-xl border border-line bg-raised/50 p-2.5">
               <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
                 Appearance
               </p>
@@ -869,14 +881,13 @@ export function AppLayout() {
   const isMessages = location.pathname.startsWith("/messages");
 
   return (
-    <div className="min-h-screen bg-canvas">
+    <div className="min-h-screen">
       <Sidebar />
       <div className="lg:pl-[272px]">
-        <TopBar />
-        <div
+        <TopBar />        <div
           className={cn(
-            "mx-auto flex w-full gap-6 px-4 pb-24 pt-5 sm:px-6 lg:px-8",
-            isMessages ? "max-w-[1440px]" : "max-w-[1220px]",
+            "mx-auto flex w-full gap-8 px-4 pb-24 pt-6 sm:px-6 lg:px-8 xl:gap-10",
+            isMessages ? "max-w-[1440px]" : "max-w-[1260px]",
           )}
         >
           <main className={cn("min-w-0 flex-1", isMessages && "h-[calc(100dvh-7.5rem)]")}>

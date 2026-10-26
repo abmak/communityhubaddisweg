@@ -17,7 +17,6 @@ import {
   Palette,
   Search,
   ShieldCheck,
-  Sparkles,
   Star,
   Sun,
   UtensilsCrossed,
@@ -123,11 +122,32 @@ const ROOM_TILES = [
 function GebetaScene({ members, posts, rooms }: { members: number; posts: number; rooms: number }) {
   return (
     <div className="relative mx-auto w-full min-w-0 max-w-md">
-      <div className="relative overflow-hidden rounded-[2rem] border border-brand-900/20 bg-brand-950 shadow-lift">
-        <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 z-10 h-1.5 opacity-80" />
+      <div
+        aria-hidden="true"
+        className="absolute -inset-8 rounded-[3rem] bg-[radial-gradient(60%_60%_at_50%_20%,rgba(15,107,58,0.16),transparent_70%),radial-gradient(50%_50%_at_80%_80%,rgba(233,185,73,0.16),transparent_70%)] blur-2xl"
+      />
 
-        <div className="grid grid-cols-2 gap-px bg-white/10">
-          {ROOM_TILES.map((tile) => {
+      <div className="relative overflow-hidden rounded-2xl border border-line bg-surface p-1.5 shadow-lift">
+        <div className="flex items-center gap-2 px-2.5 py-2">
+          <span className="flex gap-1.5" aria-hidden="true">
+            <span className="h-2 w-2 rounded-full bg-rose-400/80" />
+            <span className="h-2 w-2 rounded-full bg-amber-400/80" />
+            <span className="h-2 w-2 rounded-full bg-emerald-400/80" />
+          </span>
+          <span className="mx-auto hidden items-center gap-1.5 rounded-md border border-line bg-raised/60 px-2.5 py-1 text-[9px] font-medium text-muted sm:inline-flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
+            addisgebeta.et / community
+          </span>
+          <span className="ml-auto rounded-full border border-brand-600/15 bg-brand-50 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-brand-700 dark:bg-brand-500/10 dark:text-brand-300 sm:ml-0">
+            Live
+          </span>
+        </div>
+
+        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-brand-950">
+          <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 z-10 h-1 opacity-80" />
+
+          <div className="grid grid-cols-3 gap-px bg-white/10">
+            {ROOM_TILES.map((tile) => {
             const Icon = tile.icon;
             return (
               <figure key={tile.label} className="relative overflow-hidden">
@@ -143,54 +163,55 @@ function GebetaScene({ members, posts, rooms }: { members: number; posts: number
                   aria-hidden="true"
                   className="absolute inset-0 bg-gradient-to-t from-brand-950/95 via-brand-950/25 to-transparent"
                 />
-                <figcaption className="absolute inset-x-2.5 bottom-2 flex min-w-0 items-center gap-1.5 text-white">
+                <figcaption
+                  className="absolute inset-x-2 bottom-1.5 flex min-w-0 items-center gap-1 text-white"
+                  title={`${tile.am} · ${tile.label}`}
+                >
                   <Icon className="h-3 w-3 shrink-0 text-accent-300" />
-                  <span lang="am" className="font-ethiopic shrink-0 text-[11px] text-accent-100">
-                    {tile.am}
-                  </span>
-                  <span className="truncate text-[9px] uppercase tracking-[0.16em] text-white/70">
+                  <span className="truncate text-[9px] uppercase tracking-[0.1em] text-white/75">
                     {tile.label}
                   </span>
                 </figcaption>
-              </figure>
-            );
-          })}
-        </div>
-
-        <div className="relative px-4 pb-4 pt-3.5 text-white">
-          <div className="flex items-center justify-between gap-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/45">
-            <span className="inline-flex min-w-0 items-center gap-1.5">
-              <UtensilsCrossed className="h-3 w-3 shrink-0 text-accent-300" />
-              <span lang="am" className="font-ethiopic normal-case tracking-normal text-accent-200">
-                የገበታ ጊዜ
-              </span>
-              <span className="text-white/25">·</span>
-              <span className="truncate">the shared table</span>
-            </span>
-            <span className="shrink-0">{rooms} rooms</span>
+                </figure>
+              );
+            })}
           </div>
 
-          <p className="mt-2 font-display text-[1.15rem] leading-snug">One table, every interest.</p>
+          <div className="relative px-4 pb-8 pt-3.5 text-white">
+            <div className="flex items-center justify-between gap-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/45">
+              <span className="inline-flex min-w-0 items-center gap-1.5">
+                <UtensilsCrossed className="h-3 w-3 shrink-0 text-accent-300" />
+                <span lang="am" className="font-ethiopic normal-case tracking-normal text-accent-200">
+                  የገበታ ጊዜ
+                </span>
+                <span className="text-white/25">·</span>
+                <span className="truncate">the shared table</span>
+              </span>
+              <span className="shrink-0">{rooms} rooms</span>
+            </div>
 
-          <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-            {[
-              { label: "Rooms", value: String(rooms) },
-              { label: "Members", value: `${formatCount(members)}+` },
-              { label: "Stories", value: formatCount(posts) },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-xl border border-white/10 bg-white/[0.06] px-2 py-2"
-              >
-                <p className="font-display text-lg font-semibold text-white">{stat.value}</p>
-                <p className="text-[9px] uppercase tracking-[0.16em] text-white/60">{stat.label}</p>
-              </div>
-            ))}
+            <p className="mt-2 font-display text-[1.15rem] leading-snug">One table, every interest.</p>
+
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+              {[
+                { label: "Rooms", value: String(rooms) },
+                { label: "Members", value: `${formatCount(members)}+` },
+                { label: "Stories", value: formatCount(posts) },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-lg border border-white/10 bg-white/[0.06] px-2 py-2"
+                >
+                  <p className="font-display text-lg font-semibold text-white">{stat.value}</p>
+                  <p className="text-[9px] uppercase tracking-[0.16em] text-white/60">{stat.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto mt-3 hidden w-full max-w-md items-center gap-2.5 rounded-2xl border border-line bg-surface px-3 py-2.5 shadow-card sm:flex">
+      <div className="relative z-10 mx-auto -mt-5 flex w-[90%] items-center gap-2.5 rounded-xl border border-line bg-surface px-3 py-2.5 shadow-lift">
         <Avatar name="Selam Tesfaye" username="selam" size="xs" />
         <p className="min-w-0 flex-1 truncate text-[11px] leading-4 text-muted">
           <span className="font-semibold text-ink">Selam</span> shared a photo in Coffee Talk
@@ -227,12 +248,12 @@ function NearbyPreview({ places }: { places: Place[] }) {
   };
 
   return (
-    <section id="nearby" className="py-16">
+    <section id="nearby" className="py-20">
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl">
             <p className="kicker">አቅራቢያ · Nearby</p>
-            <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-ink">
+            <h2 className="mt-2 font-display text-[2rem] font-semibold tracking-tight text-ink sm:text-[2.25rem]">
               Cinema, coffee, castles, trails.
             </h2>
             <p className="mt-2 text-sm leading-6 text-muted">
@@ -284,7 +305,7 @@ function NearbyPreview({ places }: { places: Place[] }) {
               <Link
                 key={place.id}
                 to={placePath(place)}
-                className="card group flex flex-col overflow-hidden transition duration-200 hover:-translate-y-1 hover:border-brand-600/25 hover:shadow-lift"
+                className="card group flex flex-col overflow-hidden duration-200 hover:-translate-y-1 hover:border-brand-600/25 hover:shadow-lift"
               >
                 <div className="relative h-40 overflow-hidden bg-brand-950">
                   <KindMedia
@@ -382,25 +403,25 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-canvas">
-      <header className="sticky top-0 z-40 border-b border-line/70 bg-canvas/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-5 sm:px-8">
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-40 border-b border-line/70 bg-surface/75 backdrop-blur-xl supports-[backdrop-filter]:bg-surface/65">
+        <div className="mx-auto flex h-16 max-w-[1180px] items-center gap-3 px-5 sm:px-8">
           <Link to="/" className="flex items-center gap-2.5">
             <BrandMark className="h-10 w-10" glow />
             <Wordmark />
           </Link>
 
-          <nav className="ml-8 hidden items-center gap-6 text-sm font-medium text-muted md:flex">
-            <a href="#rooms" className="transition hover:text-ink">
+          <nav className="ml-8 hidden items-center gap-1 text-[13px] font-medium text-muted md:flex">
+            <a href="#rooms" className="rounded-lg px-3 py-2 transition hover:bg-raised/70 hover:text-ink">
               Rooms
             </a>
-            <a href="#nearby" className="transition hover:text-ink">
+            <a href="#nearby" className="rounded-lg px-3 py-2 transition hover:bg-raised/70 hover:text-ink">
               Nearby
             </a>
-            <a href="#happening" className="transition hover:text-ink">
+            <a href="#happening" className="rounded-lg px-3 py-2 transition hover:bg-raised/70 hover:text-ink">
               Today at the table
             </a>
-            <a href="#why" className="transition hover:text-ink">
+            <a href="#why" className="rounded-lg px-3 py-2 transition hover:bg-raised/70 hover:text-ink">
               Why join
             </a>
           </nav>
@@ -435,25 +456,30 @@ export function LandingPage() {
             )}
           </div>
         </div>
-        <span className="eth-band absolute inset-x-0 bottom-0 h-[2px] opacity-70" />
+        <span className="eth-band absolute inset-x-0 bottom-0 h-px opacity-60" />
       </header>
 
       <main>
         {/* Hero */}
         <section className="relative overflow-hidden">
           <span aria-hidden="true" className="eth-hero-glow absolute inset-0" />
-          <span aria-hidden="true" className="tilet-strip absolute inset-y-0 left-0 w-16 opacity-25 sm:w-28" />
+          <span aria-hidden="true" className="app-grid absolute inset-0 opacity-60" />
 
-          <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 pt-12 sm:px-8 lg:grid-cols-[1.04fr_0.96fr] lg:pb-24 lg:pt-16">
+          <div className="relative mx-auto grid max-w-[1180px] items-center gap-12 px-5 pb-20 pt-14 sm:px-8 lg:grid-cols-[1.04fr_0.96fr] lg:pb-28 lg:pt-20">
             <div className="min-w-0 animate-slide-up">
-              <span className="inline-flex items-center gap-2 rounded-full border border-brand-600/20 bg-brand-50 px-3 py-1.5 text-[11px] font-semibold text-brand-800 dark:bg-brand-500/10 dark:text-brand-200">
-                <Sparkles className="h-3.5 w-3.5 text-accent-600" />
-                <span lang="am" className="font-ethiopic">እንኳን ደህና መጡ</span>
-                <span className="text-brand-700/40 dark:text-brand-200/40">·</span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface/80 px-3 py-1.5 text-[11px] font-semibold text-ink shadow-[0_1px_2px_rgba(16,24,20,0.04)] backdrop-blur">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-500 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-600" />
+                </span>
+                <span lang="am" className="font-ethiopic text-brand-800 dark:text-brand-300">
+                  እንኳን ደህና መጡ
+                </span>
+                <span className="text-muted/50">·</span>
                 Welcome to the table
               </span>
 
-              <h1 className="mt-5 font-display text-[2.9rem] font-semibold leading-[1.02] tracking-[-0.02em] text-ink sm:text-6xl">
+              <h1 className="mt-5 font-display text-[2.9rem] font-semibold leading-[1.02] tracking-[-0.025em] text-ink sm:text-[3.75rem] sm:leading-[1.03]">
                 <span lang="am" className="font-ethiopic block text-[2.55rem] leading-[1.15] text-brand-800 dark:text-brand-300 sm:text-[3.4rem]">
                   አዲስ ገበታ
                 </span>
@@ -463,7 +489,7 @@ export function LandingPage() {
                     <span className="relative z-10">shared stories.</span>
                     <span
                       aria-hidden="true"
-                      className="absolute inset-x-0 bottom-1 z-0 h-3 -rotate-1 rounded-full bg-accent-300/60 dark:bg-accent-500/25"
+                      className="absolute inset-x-0 bottom-1 z-0 h-2.5 -rotate-1 rounded-full bg-gradient-to-r from-accent-300/70 to-accent-200/20 dark:from-accent-500/30 dark:to-transparent"
                     />
                   </span>
                 </span>
@@ -476,21 +502,21 @@ export function LandingPage() {
               </p>
 
               <div className="mt-7 flex flex-wrap items-center gap-3">
-                <Link to={user ? "/home" : "/register"} className="btn-primary px-5 py-3">
+                <Link to={user ? "/home" : "/register"} className="btn-primary px-5 py-3 text-[15px]">
                   {user ? "Open the feed" : "Pull up a chair"} <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link to="/categories" className="btn-secondary px-5 py-3">
+                <Link to="/categories" className="btn-secondary px-5 py-3 text-[15px]">
                   <Compass className="h-4 w-4" /> Browse the rooms
                 </Link>
               </div>
 
-              <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-3 text-xs text-muted">
+              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-muted">
                 <span className="flex items-center gap-2">
                   <span className="flex -space-x-2">
                     {["#0f6b3a", "#b57c3f", "#c8102e", "#e9b949"].map((color) => (
                       <span
                         key={color}
-                        className="h-6 w-6 rounded-full border-2 border-canvas"
+                        className="h-6 w-6 rounded-full border-2 border-canvas shadow-sm"
                         style={{ backgroundColor: color }}
                       />
                     ))}
@@ -498,10 +524,11 @@ export function LandingPage() {
                   <span>{formatCount(members)}+ members around the table</span>
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <MessageCircle className="h-3.5 w-3.5 text-brand-700" /> {formatCount(posts)} stories
+                  <MessageCircle className="h-3.5 w-3.5 text-brand-700 dark:text-brand-300" />{" "}
+                  {formatCount(posts)} stories
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Mic className="h-3.5 w-3.5 text-brand-700" /> voice-first
+                  <Mic className="h-3.5 w-3.5 text-brand-700 dark:text-brand-300" /> voice-first
                 </span>
               </div>
             </div>
@@ -511,12 +538,12 @@ export function LandingPage() {
         </section>
 
         {/* Rooms */}
-        <section id="rooms" className="border-y border-line bg-surface/70 py-16">
-          <div className="mx-auto max-w-6xl px-5 sm:px-8">
+        <section id="rooms" className="border-y border-line/70 bg-surface/60 py-20">
+          <div className="mx-auto max-w-[1180px] px-5 sm:px-8">
             <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
               <div className="max-w-2xl">
                 <p className="kicker">የእኛ ማህበረሰብ · Community rooms</p>
-                <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-ink">
+                <h2 className="mt-2 font-display text-[2rem] font-semibold tracking-tight text-ink sm:text-[2.25rem]">
                   {categories.length || 11} tables. One community.
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-muted">
@@ -547,13 +574,13 @@ export function LandingPage() {
         <NearbyPreview places={nearbyPicks} />
 
         {/* Happening now */}
-        <section id="happening" className="border-t border-line py-16">
-          <div className="mx-auto grid max-w-6xl gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_320px]">
+        <section id="happening" className="border-t border-line/70 py-20">
+          <div className="mx-auto grid max-w-[1180px] gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_320px]">
             <div>
               <div className="mb-6 flex items-end justify-between">
                 <div>
                   <p className="kicker">በዛሬው ዕለት · Live from the community</p>
-                  <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-ink">
+                  <h2 className="mt-2 font-display text-[2rem] font-semibold tracking-tight text-ink sm:text-[2.25rem]">
                     Happening right now.
                   </h2>
                 </div>
@@ -621,21 +648,24 @@ export function LandingPage() {
         </section>
 
         {/* Why join */}
-        <section id="why" className="border-y border-line bg-surface/60 py-16">
-          <div className="mx-auto max-w-6xl px-5 sm:px-8">
+        <section id="why" className="border-y border-line/70 bg-surface/60 py-20">
+          <div className="mx-auto max-w-[1180px] px-5 sm:px-8">
             <div className="mb-8 max-w-2xl">
               <p className="kicker">ለምን አዲስ ገበታ · Thoughtfully built</p>
-              <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-ink">
+              <h2 className="mt-2 font-display text-[2rem] font-semibold tracking-tight text-ink sm:text-[2.25rem]">
                 Made for conversation, not performance.
               </h2>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {FEATURES.map((feature) => (
-                <div key={feature.title} className="card p-5">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-brand-600/15 dark:bg-brand-500/10 dark:text-brand-300">
+                <div
+                  key={feature.title}
+                  className="card p-5 transition hover:-translate-y-0.5 hover:border-brand-600/20 hover:shadow-soft"
+                >
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-brand-600/10 bg-brand-50 text-brand-700 dark:border-brand-400/15 dark:bg-brand-500/10 dark:text-brand-300">
                     <feature.icon className="h-5 w-5" />
                   </span>
-                  <h3 className="mt-3 font-display text-base font-semibold text-ink">{feature.title}</h3>
+                  <h3 className="mt-3 text-[15px] font-semibold text-ink">{feature.title}</h3>
                   <p className="mt-1.5 text-sm leading-6 text-muted">{feature.body}</p>
                 </div>
               ))}
@@ -667,10 +697,14 @@ export function LandingPage() {
         </section>
 
         {/* CTA */}
-        <section className="py-16">
-          <div className="mx-auto max-w-6xl px-5 sm:px-8">
-            <div className="relative overflow-hidden rounded-[28px] bg-brand-900 px-7 py-12 text-white sm:px-12">
-              <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 h-2 opacity-50" />
+        <section className="py-20">
+          <div className="mx-auto max-w-[1180px] px-5 sm:px-8">
+            <div className="relative overflow-hidden rounded-3xl bg-brand-950 px-7 py-14 text-white shadow-lift sm:px-12">
+              <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 h-1.5 opacity-50" />
+              <span
+                aria-hidden="true"
+                className="app-grid absolute inset-0 opacity-[0.18]"
+              />
               <div
                 aria-hidden="true"
                 className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-accent-400/20 blur-3xl"
@@ -705,8 +739,8 @@ export function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-line py-10">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 sm:px-8 md:flex-row md:items-center md:justify-between">
+      <footer className="border-t border-line/70 py-12">
+        <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-5 sm:px-8 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-2.5">
             <BrandMark className="h-9 w-9" />
             <div>

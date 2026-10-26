@@ -112,7 +112,12 @@ export function SportsSchedule({
           role="tab"
           aria-selected={league === "ALL"}
           onClick={() => setLeague("ALL")}
-          className={cn("chip shrink-0", league === "ALL" && "chip-active")}
+          className={cn(
+            "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition",
+            league === "ALL"
+              ? "border-transparent bg-brand-800 text-white shadow-sm"
+              : "chip border-line bg-surface",
+          )}
         >
           All leagues <span className="ml-1 opacity-60">{fixtureCount}</span>
         </button>
@@ -126,8 +131,10 @@ export function SportsSchedule({
               aria-selected={league === entry.name}
               onClick={() => setLeague(entry.name)}
               className={cn(
-                "chip shrink-0",
-                league === entry.name ? `${entry.tone} border-transparent text-white` : "border-line bg-surface",
+                "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition",
+                league === entry.name
+                  ? "border-transparent bg-brand-800 text-white shadow-sm"
+                  : "chip border-line bg-surface",
               )}
             >
               {entry.short} <span className="ml-1 opacity-60">{count}</span>
@@ -245,19 +252,21 @@ export function SportsPage() {
 
   return (
     <div className="space-y-6">
-      <header className="relative overflow-hidden rounded-3xl bg-[#0b1f17] px-6 py-8 text-white sm:px-9">
+      <header className="relative overflow-hidden rounded-2xl border border-white/10 bg-brand-950 px-6 py-8 text-white shadow-soft sm:px-9">
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(120%_120%_at_10%_0%,rgba(16,185,129,0.35),transparent_55%),radial-gradient(90%_90%_at_100%_100%,rgba(245,158,11,0.18),transparent_60%)]"
+          className="absolute inset-0 bg-[radial-gradient(110%_120%_at_0%_0%,rgba(31,163,87,0.3),transparent_58%),radial-gradient(80%_90%_at_100%_100%,rgba(233,185,73,0.16),transparent_60%)]"
         />
+        <span aria-hidden="true" className="app-grid absolute inset-0 opacity-[0.16]" />
+        <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 h-1 opacity-50" />
         <div className="relative max-w-2xl">
-          <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300">
+          <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent-300">
             <Trophy className="h-3.5 w-3.5" /> Football schedules
           </p>
-          <h1 className="mt-2 font-display text-3xl font-medium leading-tight tracking-tight sm:text-4xl">
+          <h1 className="mt-2 font-display text-[1.9rem] font-semibold leading-tight tracking-tight sm:text-[2.15rem]">
             The next three weeks, league by league.
           </h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-white/65">
+          <p className="mt-3 max-w-xl text-sm leading-6 text-white/60">
             {t(
               "sports.subtitle",
               "Every fixture in the Premier League, La Liga, Serie A and Bundesliga, with kick-off times in your own timezone.",
@@ -265,14 +274,14 @@ export function SportsPage() {
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-medium text-white/55">
             <span className="inline-flex items-center gap-1.5">
-              <CalendarDays className="h-3.5 w-3.5 text-emerald-300" /> Next 21 days
+              <CalendarDays className="h-3.5 w-3.5 text-accent-300" /> Next 21 days
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5 text-emerald-300" /> {zone ? `All times ${zone}` : "Your local kick-off times"}
+              <Clock className="h-3.5 w-3.5 text-accent-300" /> {zone ? `All times ${zone}` : "Your local kick-off times"}
             </span>
             {data?.updatedAt ? (
               <span className="inline-flex items-center gap-1.5">
-                <RefreshCw className="h-3.5 w-3.5 text-emerald-300" /> Updated {timeAgo(data.updatedAt)}
+                <RefreshCw className="h-3.5 w-3.5 text-accent-300" /> Updated {timeAgo(data.updatedAt)}
               </span>
             ) : null}
           </div>

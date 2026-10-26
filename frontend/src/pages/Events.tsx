@@ -273,7 +273,7 @@ function HubCard({
   return (
     <Link
       to={href}
-      className="group relative flex flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-card transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-lift"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-card transition hover:-translate-y-0.5 hover:border-brand-500/30 hover:shadow-lift"
     >
       <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent", palette.wash)} />
 
@@ -655,27 +655,31 @@ export function EventsPage({
   }, [events, tab, topicFilter, meetupFilter, searchQuery]);
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-7 pb-16">
       {/* Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-brand-900 via-brand-950 to-canvas p-6 text-white shadow-lift sm:p-8">
-        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-accent-500/15 blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 -mb-16 h-48 w-48 rounded-full bg-brand-500/10 blur-2xl" />
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-brand-950 p-6 text-white shadow-soft sm:p-8">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(90%_120%_at_0%_0%,rgba(31,163,87,0.3),transparent_58%),radial-gradient(70%_90%_at_100%_100%,rgba(233,185,73,0.16),transparent_60%)]"
+        />
+        <span aria-hidden="true" className="app-grid absolute inset-0 opacity-[0.16]" />
+        <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 h-1 opacity-50" />
 
         <div className="relative z-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
           <div className="max-w-2xl space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1 text-xs font-semibold backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1 text-[11px] font-semibold backdrop-blur-md">
               {tab === "EVENT" ? (
-                <Radio className="h-3.5 w-3.5 text-accent-400" />
+                <Radio className="h-3 w-3 text-accent-300" />
               ) : (
-                <CalendarDays className="h-3.5 w-3.5 text-accent-400" />
+                <CalendarDays className="h-3 w-3 text-accent-300" />
               )}
               <span>{tab === "EVENT" ? "Events · city calendar" : "Meetups · hosted by members"}</span>
-              <span className="font-ethiopic text-[11px] text-accent-300">
+              <span lang="am" className="font-ethiopic text-[11px] text-accent-200">
                 {tab === "EVENT" ? "· ዝግጅቶች" : "· ስብሰባዎች"}
               </span>
             </div>
 
-            <h1 className="font-serif text-2xl font-bold tracking-tight text-white sm:text-3xl md:text-4xl">
+            <h1 className="font-display text-[1.75rem] font-semibold leading-tight tracking-tight text-white sm:text-[2.1rem] md:text-[2.35rem]">
               {tab === "EVENT"
                 ? activeCategory
                   ? activeCategory.key === "SPORT"
@@ -685,7 +689,7 @@ export function EventsPage({
                 : t("events.title", "Real-world meetups, cinema nights & trail hikes.")}
             </h1>
 
-            <p className="text-sm leading-relaxed text-zinc-300 sm:text-base">
+            <p className="max-w-xl text-sm leading-relaxed text-white/60">
               {tab === "EVENT"
                 ? `Updated automatically from ${sourceCount || 1} online ${
                     sourceCount === 1 ? "source" : "sources"
@@ -701,14 +705,14 @@ export function EventsPage({
             <button
               type="button"
               onClick={handleOpenCreateModal}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-accent-500 to-amber-500 px-6 py-3.5 text-sm font-bold text-zinc-950 shadow-glow transition hover:opacity-95 active:scale-95 sm:self-start lg:self-auto"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent-400 px-5 py-3 text-sm font-semibold text-brand-950 shadow-sm transition hover:bg-accent-300 active:translate-y-px sm:self-start lg:self-auto"
             >
               <Plus className="h-4 w-4" />
               <span>{t("events.create", "Schedule a Meetup")}</span>
             </button>
           ) : (
-            <div className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-[11px] font-medium text-zinc-300 backdrop-blur-md sm:self-start lg:self-auto">
-              <RefreshCw className="h-3.5 w-3.5 text-accent-400" />
+            <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-3.5 py-2.5 text-[11px] font-medium text-white/60 backdrop-blur-md sm:self-start lg:self-auto">
+              <RefreshCw className="h-3.5 w-3.5 text-accent-300" />
               <span>Refreshed from live sources throughout the day</span>
             </div>
           )}
@@ -794,17 +798,17 @@ export function EventsPage({
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="no-scrollbar -mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 [&>button]:shrink-0 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
           {tab === "EVENT" ? (
             <>
               <button
                 type="button"
                 onClick={() => setTopicFilter("ALL")}
                 className={cn(
-                  "rounded-xl px-3.5 py-2 text-xs font-semibold transition",
+                  "rounded-lg px-3 py-2 text-xs font-semibold transition",
                   topicFilter === "ALL"
-                    ? "bg-brand-700 text-white shadow-sm"
-                    : "border border-line bg-surface text-muted hover:bg-raised hover:text-ink",
+                    ? "bg-brand-800 text-white shadow-sm"
+                    : "border border-line bg-surface text-muted shadow-[0_1px_2px_rgba(16,24,20,0.04)] hover:bg-raised hover:text-ink",
                 )}
               >
                 All events ({eventCount})
@@ -815,13 +819,20 @@ export function EventsPage({
                   type="button"
                   onClick={() => setTopicFilter(key)}
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition",
+                    "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition",
                     topicFilter === key
-                      ? `${className} text-white shadow-sm`
-                      : "border border-line bg-surface text-muted hover:bg-raised hover:text-ink",
+                      ? "bg-brand-800 text-white shadow-sm"
+                      : "border border-line bg-surface text-muted shadow-[0_1px_2px_rgba(16,24,20,0.04)] hover:bg-raised hover:text-ink",
                   )}
                 >
-                  <Icon className="h-3.5 w-3.5" />
+                  <span
+                    className={cn(
+                      "inline-flex h-4 w-4 items-center justify-center rounded text-white",
+                      topicFilter === key ? "bg-white/15" : className,
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                  </span>
                   <span>{label}</span>
                 </button>
               ))}
@@ -893,7 +904,7 @@ export function EventsPage({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t("events.searchPlaceholder", "Search events by title or location…")}
-              className="w-full rounded-xl border border-line bg-surface py-2 pl-10 pr-4 text-xs font-medium text-ink outline-none transition focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="input h-9 w-full pl-9 pr-4 text-[13px]"
             />
           </div>
         )}
@@ -974,7 +985,7 @@ export function EventsPage({
             return (
               <div
                 key={item.id}
-                className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-lift transition hover:border-brand-500/40 hover:shadow-glow"
+                className="group flex flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-card transition hover:-translate-y-0.5 hover:border-brand-500/35 hover:shadow-lift"
               >
                 {/* Event Cover Image */}
                 <div className="relative aspect-[16/9] w-full overflow-hidden bg-neutral-900">

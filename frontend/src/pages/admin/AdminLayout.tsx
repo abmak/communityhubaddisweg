@@ -73,10 +73,10 @@ const ALL_ITEMS = NAV.flatMap((section) => section.items);
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
   return cn(
-    "group flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium transition",
+    "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition",
     isActive
-      ? "bg-brand-50 text-brand-800 shadow-[inset_0_0_0_1px_rgba(15,107,58,0.12)] dark:bg-brand-500/10 dark:text-brand-200"
-      : "text-muted hover:bg-raised hover:text-ink",
+      ? "bg-brand-50/80 text-brand-900 shadow-[inset_0_0_0_1px_rgba(15,107,58,0.08)] dark:bg-brand-500/10 dark:text-brand-100"
+      : "text-muted hover:bg-raised/70 hover:text-ink",
   );
 }
 
@@ -128,17 +128,19 @@ export function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-canvas text-ink">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col border-r border-line bg-surface/80 backdrop-blur-xl lg:flex">
+    <div className="min-h-screen text-ink">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col border-r border-line/80 bg-surface/80 backdrop-blur-xl lg:flex">
         <div className="flex items-center gap-2.5 px-5 py-5">
-          <BrandMark className="h-9 w-9" />
+          <BrandMark className="h-8 w-8" />
           <div className="leading-tight">
-            <p className="font-display text-sm font-semibold text-ink">Addis Gebeta</p>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">Operations</p>
+            <p className="text-[13px] font-semibold text-ink">Addis Gebeta</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+              Operations
+            </p>
           </div>
         </div>
 
-        <div className="mx-3 mb-4 flex items-center gap-2 rounded-xl border border-brand-600/15 bg-brand-50/70 px-3 py-2 dark:border-brand-400/15 dark:bg-brand-500/5">
+        <div className="mx-3 mb-4 flex items-center gap-2 rounded-lg border border-brand-600/10 bg-brand-50/60 px-3 py-2 dark:border-brand-400/15 dark:bg-brand-500/5">
           <Shield className="h-3.5 w-3.5 text-brand-700 dark:text-brand-300" />
           <span className="text-[11px] font-semibold text-brand-800 dark:text-brand-200">
             {ROLE_LABELS[user.role]} workspace
@@ -163,7 +165,7 @@ export function AdminLayout() {
           ))}
         </nav>
 
-        <div className="border-t border-line p-3">
+        <div className="border-t border-line/80 p-3">
           <Link
             to={`/u/${user.username}`}
             className="flex items-center gap-2.5 rounded-xl px-2 py-2 transition hover:bg-raised"
@@ -185,7 +187,7 @@ export function AdminLayout() {
       </aside>
 
       <div className="lg:pl-[248px]">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-line bg-surface/85 px-4 backdrop-blur-xl sm:px-6">
+        <header className="sticky top-0 z-30 flex h-[60px] items-center gap-3 border-b border-line/80 bg-surface/75 px-4 backdrop-blur-xl supports-[backdrop-filter]:bg-surface/65 sm:px-6">
           <Link to="/admin/overview" className="flex items-center gap-2 lg:hidden">
             <BrandMark className="h-7 w-7" />
             <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Admin</span>
@@ -239,7 +241,7 @@ export function AdminLayout() {
           )}
         </div>
 
-        <main className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:py-8">
+        <main className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 lg:py-9">
           {me.loading && !me.data ? (
             <PageLoader label="Checking your access…" />
           ) : me.error ? (

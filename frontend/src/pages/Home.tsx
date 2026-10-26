@@ -42,24 +42,27 @@ export function HomePage() {
 
   return (
     <div className="space-y-5">
-      <header className="relative overflow-hidden rounded-3xl border border-line bg-surface px-5 py-6 shadow-card sm:px-7 sm:py-7">
-        <span aria-hidden="true" className="eth-hero-glow absolute inset-0" />
-        <span aria-hidden="true" className="tilet-strip absolute inset-y-0 right-0 w-16 opacity-35 sm:w-40" />
+      <header className="panel px-5 py-6 sm:px-7 sm:py-7">
+        <span aria-hidden="true" className="app-grid absolute inset-0 opacity-50" />
         <div className="relative flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-xl">
-            <p className="flex flex-wrap items-baseline gap-x-2 text-sm font-semibold text-brand-700 dark:text-brand-300">
-              <span lang="am" className="font-ethiopic text-base">
+            <p className="flex flex-wrap items-center gap-x-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-500 opacity-60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-600" />
+              </span>
+              <span lang="am" className="font-ethiopic text-[13px] normal-case tracking-normal text-brand-800 dark:text-brand-300">
                 {greeting}
                 {user ? "," : ""}
               </span>
-              {user && <span className="text-muted">{user.displayName.split(" ")[0]}</span>}
-              <span className="text-muted/50">·</span>
-              <span className="text-[11px] uppercase tracking-[0.18em] text-muted">Addis Gebeta</span>
+              {user && <span className="normal-case tracking-normal text-ink">{user.displayName.split(" ")[0]}</span>}
+              <span className="text-muted/40">·</span>
+              <span>Addis Gebeta</span>
             </p>
-            <h1 className="mt-2 font-display text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-[1.75rem]">
+            <h1 className="mt-2.5 font-display text-[1.65rem] font-semibold leading-tight tracking-tight text-ink sm:text-[1.9rem]">
               እንኳን ደህና መጡ — pull up a chair.
             </h1>
-            <p className="mt-1.5 text-sm leading-6 text-muted">
+            <p className="mt-1.5 max-w-lg text-sm leading-6 text-muted">
               Coffee-table talk, cinema, books, trails and the stories happening across the
               community today.
             </p>
@@ -75,7 +78,7 @@ export function HomePage() {
             </Link>
           </div>
         </div>
-        <span className="eth-band absolute inset-x-0 bottom-0 h-[3px]" />
+        <span aria-hidden="true" className="eth-band absolute inset-x-0 bottom-0 h-0.5 opacity-70" />
       </header>
 
       {categories.length > 0 && (
@@ -96,12 +99,10 @@ export function HomePage() {
               return (
                 <Link
                   key={category.id}
-                  to={categoryPath(category)}
-                  className="group inline-flex shrink-0 items-center gap-2.5 rounded-2xl border border-line bg-surface px-3.5 py-2.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-brand-400/50 hover:shadow-card"
-                >
+                  to={categoryPath(category)}              className="group inline-flex shrink-0 items-center gap-2.5 rounded-xl border border-line bg-surface px-3.5 py-2.5 text-left shadow-[0_1px_2px_rgba(16,24,20,0.04)] transition hover:-translate-y-0.5 hover:border-brand-500/35 hover:shadow-soft">
                   <span
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: `${category.color}18`, color: category.color }}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg"
+                    style={{ backgroundColor: `${category.color}14`, color: category.color }}
                   >
                     <Icon className="h-4 w-4" />
                   </span>
@@ -123,8 +124,12 @@ export function HomePage() {
 
       <PostComposer onCreated={feed.refetch} />
 
-      <div className="flex items-center justify-between gap-3 border-b border-line">
-        <div className="no-scrollbar flex gap-1 overflow-x-auto" role="tablist" aria-label="Feed sorting">
+      <div className="flex items-center justify-between gap-3">
+        <div
+          className="no-scrollbar inline-flex min-w-0 max-w-full gap-1 overflow-x-auto rounded-xl border border-line bg-surface p-1 shadow-[0_1px_2px_rgba(16,24,20,0.04)]"
+          role="tablist"
+          aria-label="Feed sorting"
+        >
           {TABS.map((item) => (
             <button
               key={item.id}
@@ -133,10 +138,10 @@ export function HomePage() {
               aria-selected={tab === item.id}
               onClick={() => setTab(item.id)}
               className={cn(
-                "relative shrink-0 px-3 py-2.5 text-sm font-medium transition",
+                "shrink-0 rounded-lg px-3 py-1.5 text-[13px] font-medium transition",
                 tab === item.id
-                  ? "text-ink after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-full after:bg-brand-700"
-                  : "text-muted hover:text-ink",
+                  ? "bg-raised text-ink shadow-[0_1px_2px_rgba(16,24,20,0.06),inset_0_0_0_1px_rgba(16,24,20,0.04)]"
+                  : "text-muted hover:bg-raised/60 hover:text-ink",
               )}
             >
               {item.label}
@@ -146,7 +151,7 @@ export function HomePage() {
             </button>
           ))}
         </div>
-        <Badge tone="brand" className="hidden sm:inline-flex">
+        <Badge tone="brand" className="hidden shrink-0 sm:inline-flex">
           <span className="mr-1 inline-flex h-1.5 w-1.5 rounded-full bg-brand-500" />
           Live
         </Badge>

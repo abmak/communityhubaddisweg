@@ -41,12 +41,13 @@ function AuthShell({
   footer: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-canvas lg:grid lg:grid-cols-[1.05fr_1fr]">
-      <aside className="relative hidden overflow-hidden bg-brand-900 p-12 text-white lg:flex lg:flex-col">
+    <div className="min-h-screen lg:grid lg:grid-cols-[1.05fr_1fr]">
+      <aside className="relative hidden overflow-hidden bg-brand-950 p-12 text-white lg:flex lg:flex-col">
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(120%_120%_at_10%_0%,rgba(45,212,191,0.28),transparent_55%),radial-gradient(90%_90%_at_100%_100%,rgba(245,158,11,0.22),transparent_60%)]"
+          className="absolute inset-0 bg-[radial-gradient(120%_120%_at_10%_0%,rgba(31,163,87,0.32),transparent_55%),radial-gradient(90%_90%_at_100%_100%,rgba(233,185,73,0.18),transparent_60%)]"
         />
+        <span aria-hidden="true" className="app-grid absolute inset-0 opacity-[0.14]" />
         <div
           aria-hidden="true"
           className="absolute -right-20 top-1/3 h-72 w-72 rounded-full border border-white/10"
@@ -62,30 +63,37 @@ function AuthShell({
             <Wordmark subtitle="Addis Gebeta · Addis Ababa" />
           </span>
         </Link>
-        <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 h-2 opacity-40" />
+        <span aria-hidden="true" className="tilet-strip absolute inset-x-0 top-0 h-1.5 opacity-35" />
 
         <div className="relative my-auto max-w-lg">
-          <Sparkles className="mb-6 h-6 w-6 text-accent-300" />
-          <p lang="am" className="font-ethiopic text-2xl leading-relaxed text-accent-200">
-            “ቡና ሲጠጡ ወዳጅ ይሆናሉ።”
-          </p>
-          <p className="mt-3 font-display text-[2.1rem] font-medium leading-[1.15] tracking-tight">
-            “Share a cup, and strangers become friends.” The best conversations stay with you on the
-            walk home.
-          </p>
-          <p className="mt-6 text-sm text-white/60">
-            Films, books, trails, football, coffee — and the people who love them.
-          </p>
+          <span className="mb-6 inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] backdrop-blur">
+            <Sparkles className="h-4 w-4 text-accent-300" />
+          </span>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm">
+            <p lang="am" className="font-ethiopic text-2xl leading-relaxed text-accent-200">
+              “ቡና ሲጠጡ ወዳጅ ይሆናሉ።”
+            </p>
+            <p className="mt-3 font-display text-[1.75rem] font-medium leading-[1.2] tracking-tight">
+              “Share a cup, and strangers become friends.” The best conversations stay with you on
+              the walk home.
+            </p>
+            <p className="mt-5 text-sm text-white/55">
+              Films, books, trails, football, coffee — and the people who love them.
+            </p>
+          </div>
 
-          <div className="mt-8 flex flex-wrap gap-2 text-xs text-white/70">
+          <div className="mt-6 flex flex-wrap gap-2 text-xs text-white/70">
             {["Ethiopian cinema", "Book reviews", "Hiking logs", "Coffee talk", "Sports"].map((tag) => (
-              <span key={tag} className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">
+              <span
+                key={tag}
+                className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 backdrop-blur"
+              >
                 {tag}
               </span>
             ))}
           </div>
 
-          <figure className="relative mt-8 overflow-hidden rounded-2xl border border-white/10 shadow-lift">
+          <figure className="relative mt-7 overflow-hidden rounded-xl border border-white/10 shadow-lift">
             <div className="grid grid-cols-3 gap-px bg-white/10">
               {SIDEBAR_TILES.map((tile) => (
                 <img
@@ -119,17 +127,22 @@ function AuthShell({
       </aside>
 
       <main className="flex min-h-screen flex-col justify-center px-5 py-10 sm:px-10">
-        <div className="mx-auto w-full max-w-md">
+        <div className="mx-auto w-full max-w-[26rem]">
           <Link to="/" className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <BrandMark className="h-10 w-10" />
+            <BrandMark className="h-9 w-9" />
             <Wordmark />
           </Link>
 
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">{title}</h1>
+          <p className="kicker">Addis Gebeta · Community</p>
+          <h1 className="mt-2 font-display text-[2rem] font-semibold leading-tight tracking-tight text-ink">
+            {title}
+          </h1>
           <p className="mt-2 text-sm leading-6 text-muted">{subtitle}</p>
 
-          <div className="mt-7">{children}</div>
-          <div className="mt-6 text-sm text-muted">{footer}</div>
+          <div className="mt-7 rounded-2xl border border-line bg-surface p-5 shadow-soft sm:p-7">
+            {children}
+          </div>
+          <div className="mt-5 text-sm text-muted">{footer}</div>
         </div>
       </main>
     </div>

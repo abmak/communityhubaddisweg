@@ -17,6 +17,7 @@ import { adminRouter } from "./admin";
 import { placesRouter } from "./places";
 import { eventsRouter } from "./events";
 import { quizRouter } from "./quiz";
+import { placeQuizRouter } from "./place-quiz";
 import { jokesRouter } from "./jokes";
 
 export const apiRouter = Router();
@@ -35,6 +36,7 @@ apiRouter.use("/explore", exploreRouter);
 apiRouter.use("/places", placesRouter);
 apiRouter.use("/events", eventsRouter);
 apiRouter.use("/quiz", quizRouter);
+apiRouter.use("/place-quiz", placeQuizRouter);
 apiRouter.use("/jokes", jokesRouter);
 apiRouter.use("/bookmarks", bookmarksRouter);
 apiRouter.use("/notifications", notificationsRouter);

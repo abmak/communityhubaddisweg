@@ -612,5 +612,81 @@ export interface QuizSubmitResponse {
   }>;
 }
 
+// "Guess the Place" — daily photo challenge.
+export interface PlaceQuizQuestionItem {
+  id: string;
+  prompt: string;
+  imageUrl: string;
+  imageCredit: string;
+  imageLicense: string;
+  imagePageUrl: string | null;
+  options: string[];
+  category: string;
+  region: string;
+  kind: "PLACE" | "CULTURE";
+  correctIndex?: number;
+  answer?: string;
+  explanation?: string | null;
+  userAnswer?: number | null;
+  isCorrect?: boolean;
+}
+
+export interface PlaceQuizTodayResponse {
+  day: string;
+  alreadyCompleted: boolean;
+  timeLimitSeconds: number;
+  totalParticipants: number;
+  score?: number;
+  durationMs?: number;
+  rank?: number | null;
+  userAnswers?: number[];
+  questions: PlaceQuizQuestionItem[];
+}
+
+export interface PlaceQuizLeaderboardItem {
+  rank: number;
+  id: string;
+  score: number;
+  durationMs: number;
+  durationSeconds: number;
+  completedAt: string | null;
+  user: {
+    id: string;
+    username: string;
+    displayName: string;
+    avatarUrl: string | null;
+  };
+}
+
+export interface PlaceQuizWinner {
+  day: string;
+  user: {
+    id: string;
+    username: string;
+    displayName: string;
+    avatarUrl: string | null;
+  };
+  score: number;
+  durationSeconds: number;
+}
+
+export interface PlaceQuizLeaderboardResponse {
+  day: string;
+  leaderboard: PlaceQuizLeaderboardItem[];
+  total: number;
+  winners: PlaceQuizWinner[];
+  today: string;
+}
+
+export interface PlaceQuizSubmitResponse {
+  success: boolean;
+  score: number;
+  durationMs: number;
+  timeLimitSeconds: number;
+  rank: number;
+  totalParticipants: number;
+  review: PlaceQuizQuestionItem[];
+}
+
 
 

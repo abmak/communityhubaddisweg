@@ -125,6 +125,7 @@ model User {
   adminActions          AdminAction[]      @relation("AdminActionActor")
   quizAttempts          QuizAttempt[]
   quizSeen              QuizSeen[]
+  placeQuizAttempts     PlaceQuizAttempt[]
   pollVotes             PollVote[]
   jokeSessionsCreated   JokeSession[]      @relation("JokeSessionCreator")
   jokes                 Joke[]
@@ -841,4 +842,46 @@ model QuizSeen {
 
   @@id([userId, questionId])
   @@index([userId, seenAt(sort: Desc)])
+}
+
+// "Guess the Place" picture pool: Ethiopian heritage sites, landscapes and
+// cultural treasures, each with a freely licensed Wikimedia Commons photo.
+model PlaceQuizQuestion {
+  id           String   @id @default(cuid())
+  key          String   @unique
+  prompt       String   @db.Text
+  imageUrl     String   @db.Text
+  imageCredit  String   @default("")
+  imageLicense String   @default("")
+  imagePageUrl String?  @db.Text
+  answer       String
+  options      String[]
+  correctIndex Int
+  explanation  String?  @db.Text
+  category     String
+  region       String   @default("")
+  kind         String   @default("PLACE")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  @@index([category, active])
+}
+
+// One picture-quiz attempt per member per Ethiopian calendar day.
+model PlaceQuizAttempt {
+  id          String    @id @default(cuid())
+  userId      String
+  day         String
+  questionIds String[]
+  answers     Int[]     @default([])
+  score       Int?
+  durationMs  Int?
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
+  @@index([day, score(sort: Desc), durationMs])
+  @@index([userId, completedAt(sort: Desc)])
 }

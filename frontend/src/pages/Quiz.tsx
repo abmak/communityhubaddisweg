@@ -16,6 +16,7 @@ import {
   Share2,
   Medal,
   AlertTriangle,
+  Camera,
 } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { useUI } from "../store/ui";
@@ -30,6 +31,7 @@ import type {
 } from "../types";
 import { Avatar, Spinner } from "../components/ui";
 import { cn } from "../lib/utils";
+import { GuessThePlace } from "./GuessThePlace";
 
 const TOTAL_TIME_SECONDS = 150; // 150 seconds for 10 questions
 
@@ -38,6 +40,7 @@ export function QuizPage() {
   const user = useAuth((state) => state.user);
   const pushToast = useUI((state) => state.pushToast);
   const navigate = useNavigate();
+  const [game, setGame] = useState<"TRIVIA" | "PLACE">("TRIVIA");
 
   // Mode: "LOBBY" | "PLAYING" | "REVIEW"
   const [mode, setMode] = useState<"LOBBY" | "PLAYING" | "REVIEW">("LOBBY");
@@ -195,6 +198,43 @@ export function QuizPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 pb-20">
+      {/* The two daily challenges share this page. */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="inline-flex rounded-2xl border border-line bg-surface p-1">
+          <button
+            type="button"
+            onClick={() => setGame("TRIVIA")}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition",
+              game === "TRIVIA"
+                ? "bg-amber-500/15 text-amber-700 shadow-sm dark:text-amber-300"
+                : "text-muted hover:text-ink",
+            )}
+          >
+            <Award className="h-4 w-4" />
+            <span>Knowledge Q&amp;A</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setGame("PLACE")}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition",
+              game === "PLACE"
+                ? "bg-emerald-500/15 text-emerald-700 shadow-sm dark:text-emerald-300"
+                : "text-muted hover:text-ink",
+            )}
+          >
+            <Camera className="h-4 w-4" />
+            <span>Guess the Place</span>
+          </button>
+        </div>
+        <p className="text-[11px] font-medium text-muted">Two daily challenges · 10 questions each</p>
+      </div>
+
+      {game === "PLACE" ? (
+        <GuessThePlace />
+      ) : (
+        <>
       {/* Top Banner */}
       <div className="relative overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-amber-950 via-zinc-950 to-emerald-950 p-6 text-white shadow-lift sm:p-8">
         <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-amber-500/15 blur-3xl" />
@@ -712,6 +752,8 @@ export function QuizPage() {
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

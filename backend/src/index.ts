@@ -11,6 +11,7 @@ import { ensureSeedPlaces } from "./lib/seed-places";
 import { startEventIngest } from "./lib/events/ingest";
 import { ensureBuiltinRoles } from "./lib/roles";
 import { ensureSeedQuizQuestions } from "./lib/seed-quiz";
+import { ensureSeedPlaceQuiz } from "./lib/seed-place-quiz";
 
 async function main(): Promise<void> {
   await ensureUploadDir();
@@ -31,6 +32,9 @@ async function main(): Promise<void> {
   });
   await ensureSeedQuizQuestions().catch((err) => {
     logger.warn({ err }, "Could not seed quiz questions");
+  });
+  await ensureSeedPlaceQuiz().catch((err) => {
+    logger.warn({ err }, "Could not seed the Guess the Place questions");
   });
 
   const app = createApp();

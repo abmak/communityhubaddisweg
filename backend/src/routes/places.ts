@@ -10,6 +10,16 @@ export const placesRouter = Router();
 
 const EARTH_RADIUS_KM = 6371;
 
+/** The practical stops shown by the navigation screen's "Nearby" panel. */
+const SERVICE_KINDS: PlaceKind[] = [
+  PlaceKind.PUBLIC_TOILET,
+  PlaceKind.PARKING,
+  PlaceKind.EV_CHARGING,
+  PlaceKind.TRANSIT_STOP,
+  PlaceKind.BANK,
+  PlaceKind.ATM,
+];
+
 /** Great-circle distance, the only maths a "near me" list needs. */
 export function distanceKm(
   from: { lat: number; lng: number },
@@ -161,6 +171,61 @@ placesRouter.get(
       .slice(0, 60);
 
     res.json({ areas });
+  }),
+);
+
+const nearbyServicesQuery = z.object({
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180),
+  radiusKm: z.coerce.number().min(0.2).max(30).default(8),
+  perKind: z.coerce.number().int().min(1).max(4).default(2),
+});
+
+// GET /api/places/nearby-services?lat=9.01&lng=38.75&radiusKm=5
+// The closest toilets, parking, chargers, transit stops, banks and ATMs around
+// a pin. Deliberately separate from the browsing list: a driver wants the two
+// nearest of each, not the top-rated café in the city.
+placesRouter.get(
+  "/nearby-services",
+  validate(nearbyServicesQuery, "query"),
+  asyncHandler(async (req, res) => {
+    const { lat, lng, radiusKm, perKind } = req.query as unknown as {
+      lat: number;
+      lng: number;
+      radiusKm: number;
+      perKind: number;
+    };
+
+    const rows = await prisma.place.findMany({
+      where: { kind: { in: SERVICE_KINDS } },
+      orderBy: [{ featured: "desc" }, { rating: "desc" }],
+    });
+
+    const origin = { lat, lng };
+    const ranked = rows
+      .map((place) => ({
+        ...place,
+        distanceKm: Number(distanceKm(origin, place).toFixed(2)),
+      }))
+      .filter((place) => (place.distanceKm ?? Number.POSITIVE_INFINITY) <= radiusKm)
+      .sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
+
+    const groups = SERVICE_KINDS.map((kind) => {
+      const places = ranked.filter((place) => place.kind === kind).slice(0, perKind);
+      return {
+        kind,
+        places,
+        nearestKm: places[0]?.distanceKm ?? null,
+      };
+    });
+
+    res.setHeader("Cache-Control", "private, max-age=30");
+    res.json({
+      origin,
+      radiusKm,
+      groups,
+      total: groups.reduce((sum, group) => sum + group.places.length, 0),
+    });
   }),
 );
 

@@ -9,6 +9,8 @@ interface NotifyInput {
   actorId?: string | null;
   type: NotificationType;
   body: string;
+  /** In-app destination; the push payload sets its own URL. */
+  url?: string | null;
   postId?: string | null;
   conversationId?: string | null;
 }
@@ -29,6 +31,7 @@ export async function createNotification(input: NotifyInput) {
         actorId: input.actorId ?? null,
         type: input.type,
         body: input.body,
+        url: input.url ?? null,
         postId: input.postId ?? null,
         conversationId: input.conversationId ?? null,
       },

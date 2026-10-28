@@ -5,6 +5,7 @@ import {
   CalendarDays,
   Clock,
   MapPin,
+  Navigation,
   Plus,
   Search,
   Users,
@@ -48,6 +49,7 @@ import type {
 import { Avatar, Badge, Spinner } from "../components/ui";
 import { cn } from "../lib/utils";
 import { formatEthiopianDate, toEthiopianDate } from "../lib/ethiopian";
+import { eventNavigationPath } from "../lib/navigation";
 
 const TOPIC_META: Record<EventTopic, { label: string; icon: typeof Film; className: string }> = {
   CINEMA: { label: "Cinema", icon: Film, className: "bg-rose-600" },
@@ -981,6 +983,7 @@ export function EventsPage({
             const canManage = isCreator || user?.role === "ADMIN" || user?.role === "MODERATOR";
             const topicMeta = TOPIC_META[item.topic];
             const TopicIcon = topicMeta.icon;
+            const navigateHref = eventNavigationPath(item);
 
             return (
               <div
@@ -1104,7 +1107,16 @@ export function EventsPage({
 
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-                      <span className="line-clamp-1">{item.location}</span>
+                      <span className="line-clamp-1 min-w-0 flex-1">{item.location}</span>
+                      {navigateHref && (
+                        <Link
+                          to={navigateHref}
+                          className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-line px-2 py-1 text-[11px] font-semibold text-brand-700 transition hover:border-brand-400 hover:bg-brand-50 dark:text-brand-300 dark:hover:bg-brand-500/10"
+                        >
+                          <Navigation className="h-3 w-3" />
+                          <span>Navigate</span>
+                        </Link>
+                      )}
                     </div>
                   </div>
 

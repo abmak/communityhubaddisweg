@@ -1,14 +1,20 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import {
+  AlarmClock,
   ArrowLeft,
+  ArrowRight,
   CalendarDays,
+  Car,
   Clock,
+  Footprints,
+  LocateFixed,
   MapPin,
   Users,
   CheckCircle2,
   Star,
   ExternalLink,
+  RefreshCw,
   Trash2,
   Edit3,
   X,
@@ -20,10 +26,24 @@ import { useAuth } from "../store/auth";
 import { useUI } from "../store/ui";
 import { useTranslation } from "../store/i18n";
 import { api, apiError, mediaSrc } from "../lib/api";
-import type { EventDetail, EventDetailResponse, Category, Place, RsvpStatus } from "../types";
+import type {
+  EventDetail,
+  EventDetailResponse,
+  Category,
+  LeaveByPlan,
+  Place,
+  RsvpStatus,
+} from "../types";
 import { Avatar, Spinner } from "../components/ui";
 import { cn } from "../lib/utils";
 import { formatEthiopianDate, toEthiopianDate } from "../lib/ethiopian";
+import { eventNavigationPath, formatRouteDistance, formatRouteDuration } from "../lib/navigation";
+import {
+  locationBlock,
+  requestPosition,
+  type LocationBlock,
+  type LocationFailure,
+} from "../lib/geo";
 
 const TOPIC_LABEL: Record<string, string> = {
   CINEMA: "Cinema",
@@ -98,6 +118,22 @@ function formatEventDate(startStr: string, endStr?: string | null): string {
   }
 }
 
+/** Leave-by needs a precise pin, so its copy cannot offer the area picker. */
+function leaveByLocationMessage(problem: LocationBlock | LocationFailure): string {
+  switch (problem) {
+    case "insecure":
+      return "Location sharing needs HTTPS. Open this site over a secure connection to work out a leave time.";
+    case "unsupported":
+      return "This browser cannot share a location. Try another browser to use leave-by reminders.";
+    case "denied":
+      return "Location is blocked for this site. Allow it in your browser settings and try again.";
+    case "timeout":
+      return "Your device took too long to find a fix. Try again outdoors or near a window.";
+    default:
+      return "We couldn't get a location fix. Try again in a moment.";
+  }
+}
+
 function getEventBadgeDate(startStr: string) {
   try {
     const d = new Date(startStr);
@@ -123,6 +159,8 @@ export function EventDetailPage() {
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [leaveBy, setLeaveBy] = useState<LeaveByPlan | null>(null);
+  const [leaveByBusy, setLeaveByBusy] = useState(false);
 
   const [activeTab, setActiveTab] = useState<"GOING" | "INTERESTED">("GOING");
 
@@ -150,6 +188,7 @@ export function EventDetailPage() {
       setError(null);
       const res = await api.get<EventDetailResponse>(`/api/events/${slug}`);
       setEvent(res.data.event);
+      setLeaveBy(res.data.event.leaveBy ?? null);
     } catch (err) {
       setError(apiError(err));
     } finally {
@@ -210,6 +249,9 @@ export function EventDetailPage() {
       });
 
       setEvent((prev) => (prev ? { ...prev, ...res.data.event } : null));
+      // The API clears departure plans when an event is edited, because a
+      // moved start or venue would make the old one wrong.
+      setLeaveBy(null);
       setIsEditModalOpen(false);
       pushToast(event.kind === "EVENT" ? "Event details updated!" : "Meetup details updated!");
     } catch (err) {
@@ -297,6 +339,62 @@ export function EventDetailPage() {
     }
   };
 
+  const handleLeaveBy = async () => {
+    if (!user) {
+      pushToast("Please sign in to set a leave-by reminder.");
+      navigate("/login");
+      return;
+    }
+    if (!event) return;
+
+    const blocked = locationBlock();
+    if (blocked) {
+      pushToast(leaveByLocationMessage(blocked), { tone: "error" });
+      return;
+    }
+
+    setLeaveByBusy(true);
+    try {
+      const origin = await requestPosition();
+      const res = await api.post<{ leaveBy: LeaveByPlan }>(
+        `/api/events/${event.id}/leave-by`,
+        {
+          origin,
+          originLabel: "Your location",
+          mode: "driving",
+        },
+      );
+      setLeaveBy(res.data.leaveBy);
+      pushToast("Leave time saved. We'll send a reminder 5 minutes before you need to go.", {
+        tone: "success",
+      });
+    } catch (err) {
+      const failure = typeof err === "string" ? (err as LocationFailure) : null;
+      pushToast(
+        failure
+          ? leaveByLocationMessage(failure)
+          : apiError(err, "We couldn't work out a leave time for this gathering."),
+        { tone: "error" },
+      );
+    } finally {
+      setLeaveByBusy(false);
+    }
+  };
+
+  const handleRemoveLeaveBy = async () => {
+    if (!event) return;
+    setLeaveByBusy(true);
+    try {
+      await api.delete(`/api/events/${event.id}/leave-by`);
+      setLeaveBy(null);
+      pushToast("Leave-by reminder removed.");
+    } catch (err) {
+      pushToast(apiError(err), { tone: "error" });
+    } finally {
+      setLeaveByBusy(false);
+    }
+  };
+
   const handleShare = () => {
     if (navigator.share) {
       void navigator.share({
@@ -339,6 +437,23 @@ export function EventDetailPage() {
   const badgeDate = getEventBadgeDate(event.startDate);
   const isCreator = user?.id === event.creator.id;
   const canManage = isCreator || user?.role === "ADMIN" || user?.role === "MODERATOR";
+  // Linked venues and stored pins go straight to in-app navigation; a venue we
+  // only know by name is pinned by the address geocoder on the navigate page.
+  const navigateHref = eventNavigationPath(event);
+  // A saved departure plan knows the member's starting pin, so its navigation
+  // link can start from there instead of asking the device again.
+  const venueLat = event.lat ?? event.place?.lat ?? null;
+  const venueLng = event.lng ?? event.place?.lng ?? null;
+  const leaveNavigationHref =
+    leaveBy && venueLat !== null && venueLng !== null
+      ? `/navigate?from=${leaveBy.origin.lat},${leaveBy.origin.lng}&to=${venueLat},${venueLng}&name=${encodeURIComponent(
+          event.place?.name ?? event.location,
+        )}`
+      : navigateHref;
+  const eventUpcoming = new Date(event.startDate).getTime() > Date.now();
+  const blockedLocation = locationBlock();
+  const leaveAt = leaveBy ? new Date(leaveBy.leaveAt) : null;
+  const leaveNow = leaveAt ? leaveAt.getTime() <= Date.now() : false;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 pb-20">
@@ -480,19 +595,33 @@ export function EventDetailPage() {
             </div>
 
             {/* Directions Action */}
-            <div className="pt-2">
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                  event.place ? `${event.place.name}, ${event.location}` : event.location,
-                )}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl border border-line bg-surface-raised/50 px-4 py-2.5 text-xs font-semibold text-ink transition hover:border-brand-500 hover:text-brand-600"
-              >
-                <Navigation className="h-3.5 w-3.5 text-brand-600 dark:text-brand-400" />
-                <span>Open Location in Google Maps</span>
-                <ExternalLink className="h-3 w-3 opacity-60" />
-              </a>
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              {navigateHref ? (
+                <Link
+                  to={navigateHref}
+                  className="inline-flex items-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-brand-600"
+                >
+                  <Navigation className="h-3.5 w-3.5" />
+                  <span>Navigate to the venue</span>
+                  <ArrowRight className="h-3 w-3 opacity-80" />
+                </Link>
+              ) : (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    event.place ? `${event.place.name}, ${event.location}` : event.location,
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-line bg-surface-raised/50 px-4 py-2.5 text-xs font-semibold text-ink transition hover:border-brand-500 hover:text-brand-600"
+                >
+                  <Navigation className="h-3.5 w-3.5 text-brand-600 dark:text-brand-400" />
+                  <span>Find the venue on Google Maps</span>
+                  <ExternalLink className="h-3 w-3 opacity-60" />
+                </a>
+              )}
+              <span className="text-[11px] text-muted">
+                Turn-by-turn directions inside Addis Gebeta, no app switch.
+              </span>
             </div>
           </div>
 
@@ -623,6 +752,118 @@ export function EventDetailPage() {
               </button>
             </div>
           </div>
+
+          {eventUpcoming && user && venueLat !== null && venueLng !== null && (
+            <div className="rounded-3xl border border-line bg-surface p-6 shadow-lift">
+              <div className="flex items-start gap-3">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-500/10 text-brand-700 dark:text-brand-300">
+                  <AlarmClock className="h-4 w-4" />
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold text-ink">Leave-by reminder</h3>
+                  <p className="mt-0.5 text-[11px] leading-5 text-muted">
+                    A nudge when it is time to go, based on the drive and this hour's traffic.
+                  </p>
+                </div>
+              </div>
+
+              {leaveBy && leaveAt ? (
+                <div className="mt-4">
+                  <div className="rounded-2xl border border-brand-500/20 bg-brand-500/5 p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
+                      {leaveNow ? "Time to go" : "Leave by"}
+                    </p>
+                    <p className="mt-0.5 font-display text-2xl font-semibold text-ink">
+                      {leaveNow
+                        ? "Now"
+                        : leaveAt.toLocaleTimeString(undefined, {
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                    </p>
+                    <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted">
+                      <span className="inline-flex items-center gap-1">
+                        {leaveBy.mode === "walking" ? (
+                          <Footprints className="h-3 w-3" />
+                        ) : (
+                          <Car className="h-3 w-3" />
+                        )}
+                        {formatRouteDuration(leaveBy.travelSeconds)}
+                      </span>
+                      <span aria-hidden="true">·</span>
+                      <span>{formatRouteDistance(leaveBy.distanceMeters)}</span>
+                      <span aria-hidden="true">·</span>
+                      <span>arrive 10 min early</span>
+                    </p>
+                  </div>
+
+                  <p className="mt-2.5 text-[11px] leading-5 text-muted">
+                    {leaveBy.notifiedAt
+                      ? "Reminder sent — check your notifications. Open navigation to head out."
+                      : `We'll notify you at ${new Date(leaveBy.notifyAt).toLocaleTimeString(
+                          undefined,
+                          { hour: "numeric", minute: "2-digit" },
+                        )}, five minutes before you need to leave.`}
+                  </p>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {leaveNavigationHref && (
+                      <Link
+                        to={leaveNavigationHref}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-brand-700 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-brand-600"
+                      >
+                        <Navigation className="h-3.5 w-3.5" /> Start route
+                      </Link>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => void handleLeaveBy()}
+                      disabled={leaveByBusy}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-[11px] font-semibold text-ink transition hover:bg-raised disabled:opacity-50"
+                    >
+                      <RefreshCw className={cn("h-3.5 w-3.5", leaveByBusy && "animate-spin")} />
+                      Recalculate
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleRemoveLeaveBy()}
+                      disabled={leaveByBusy}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-[11px] font-semibold text-muted transition hover:border-rose-300 hover:text-rose-600 disabled:opacity-50"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <p className="mt-3 text-[11px] leading-5 text-muted">
+                    Share your current location and we'll work out the drive using the road
+                    route and the traffic expected at that hour. We'll save an alert five
+                    minutes before you need to go; enable browser notifications in Settings
+                    for a push when the tab is closed.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void handleLeaveBy()}
+                    disabled={leaveByBusy || Boolean(blockedLocation)}
+                    className="btn-primary btn-sm mt-3 w-full disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {leaveByBusy ? (
+                      <Spinner className="h-3.5 w-3.5" />
+                    ) : (
+                      <LocateFixed className="h-3.5 w-3.5" />
+                    )}
+                    {leaveByBusy ? "Working out your leave time…" : "Use my location"}
+                  </button>
+                  {blockedLocation && (
+                    <p className="mt-2 text-[10px] leading-4 text-amber-700 dark:text-amber-300">
+                      {leaveByLocationMessage(blockedLocation)}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          )}
 
           {/* Source card for imported listings, organiser card for curated ones. */}
           {event.source ? (

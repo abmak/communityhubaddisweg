@@ -87,6 +87,36 @@ export const OSM_KIND_CONFIG: Record<PlaceKind, OsmPlaceKindConfig> = {
     tags: ["school", "education", "students", "live-osm"],
     defaultDescription: "School and academy discovered live on OpenStreetMap.",
   },
+  PUBLIC_TOILET: {
+    queries: ["public toilet", "toilets"],
+    tags: ["public-toilet", "toilet", "washroom", "live-osm"],
+    defaultDescription: "Public toilet discovered live on OpenStreetMap.",
+  },
+  PARKING: {
+    queries: ["parking", "parking lot"],
+    tags: ["parking", "car-park", "live-osm"],
+    defaultDescription: "Parking area discovered live on OpenStreetMap.",
+  },
+  EV_CHARGING: {
+    queries: ["electric vehicle charging station", "ev charging"],
+    tags: ["ev-charging", "electric-vehicle", "charging", "live-osm"],
+    defaultDescription: "Electric vehicle charging point discovered live on OpenStreetMap.",
+  },
+  TRANSIT_STOP: {
+    queries: ["bus stop", "bus station", "light rail station"],
+    tags: ["transit", "bus-stop", "public-transport", "live-osm"],
+    defaultDescription: "Public transport stop discovered live on OpenStreetMap.",
+  },
+  BANK: {
+    queries: ["bank", "commercial bank"],
+    tags: ["bank", "finance", "cash", "live-osm"],
+    defaultDescription: "Bank branch discovered live on OpenStreetMap.",
+  },
+  ATM: {
+    queries: ["atm", "cash machine"],
+    tags: ["atm", "cash", "cash-machine", "live-osm"],
+    defaultDescription: "Cash machine discovered live on OpenStreetMap.",
+  },
 };
 
 function slugify(text: string): string {

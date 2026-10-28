@@ -12,6 +12,9 @@ import { EVENT_TOPIC_VALUES } from "../lib/event-topics";
 import { syncAllSources, syncSource } from "../lib/events/ingest";
 import { emitToAll } from "../lib/realtime";
 import { pushNewEvent } from "../lib/push";
+import { serializeLeaveBy } from "../lib/leave-by";
+import { getDirections } from "../services/directions";
+import { estimateCongestion } from "../services/traffic";
 import { aiKeySnapshot, geminiKeyCount, geminiModel, geminiModels } from "../lib/ai/gemini";
 
 export const eventsRouter = Router();
@@ -69,6 +72,20 @@ const updateEventSchema = z.object({
 const rsvpSchema = z.object({
   status: z.enum(["GOING", "INTERESTED", "NONE"]),
 });
+
+const leaveBySchema = z.object({
+  origin: z.object({
+    lat: z.coerce.number().min(-90).max(90),
+    lng: z.coerce.number().min(-180).max(180),
+  }),
+  originLabel: z.string().trim().max(120).optional(),
+  mode: z.enum(["driving", "walking"]).default("driving"),
+});
+
+/** Aim to reach the venue this long before the listed start. */
+const LEAVE_BY_ARRIVAL_BUFFER_SECONDS = 10 * 60;
+/** How much warning the member gets before the calculated departure. */
+const LEAVE_BY_NOTICE_SECONDS = 5 * 60;
 
 const userSelect = {
   id: true,
@@ -689,6 +706,12 @@ eventsRouter.get(
 
     if (!event) throw ApiError.notFound("We couldn't find that gathering.");
 
+    const leaveBy = currentUserId
+      ? await prisma.leaveByReminder.findUnique({
+          where: { userId_eventId: { userId: currentUserId, eventId: event.id } },
+        })
+      : null;
+
     const going = event.rsvps.filter((r) => r.status === RsvpStatus.GOING).map((r) => r.user);
     const interested = event.rsvps.filter((r) => r.status === RsvpStatus.INTERESTED).map((r) => r.user);
     const myRsvp = currentUserId
@@ -724,6 +747,7 @@ eventsRouter.get(
         },
         attendees: { going, interested },
         myRsvp,
+        leaveBy: leaveBy ? serializeLeaveBy(leaveBy) : null,
         createdAt: event.createdAt.toISOString(),
       },
     });
@@ -858,6 +882,134 @@ eventsRouter.post(
   }),
 );
 
+// GET /api/events/:id/leave-by
+// The member's saved departure plan, if they have one.
+eventsRouter.get(
+  "/:id/leave-by",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const reminder = await prisma.leaveByReminder.findUnique({
+      where: {
+        userId_eventId: {
+          userId: req.userId!,
+          eventId: String(req.params.id),
+        },
+      },
+    });
+
+    res.setHeader("Cache-Control", "no-store");
+    res.json({ leaveBy: reminder ? serializeLeaveBy(reminder) : null });
+  }),
+);
+
+// POST /api/events/:id/leave-by
+// Works out when to leave from the member's current pin, using the same
+// router and time-of-day traffic estimate as the trip planner.
+eventsRouter.post(
+  "/:id/leave-by",
+  requireAuth,
+  validate(leaveBySchema, "body"),
+  asyncHandler(async (req, res) => {
+    const { origin, originLabel, mode } = req.body as z.infer<typeof leaveBySchema>;
+    const event = await prisma.event.findUnique({
+      where: { id: String(req.params.id) },
+      include: { place: true },
+    });
+    if (!event) throw ApiError.notFound("Event not found.");
+
+    const lat = event.lat ?? event.place?.lat ?? null;
+    const lng = event.lng ?? event.place?.lng ?? null;
+    if (lat === null || lng === null) {
+      throw new ApiError(
+        422,
+        "This gathering has no map pin yet, so we can't work out a travel time.",
+        "NO_VENUE_PIN",
+      );
+    }
+
+    const now = new Date();
+    if (event.startDate.getTime() <= now.getTime()) {
+      throw new ApiError(
+        422,
+        "This gathering has already started. Pick an upcoming one to plan for.",
+        "EVENT_STARTED",
+      );
+    }
+
+    const route = await getDirections(origin, { lat, lng }, mode);
+    // Congestion has to be read at the hour the member will actually drive,
+    // not at the moment they press the button. The first pass is enough to
+    // find that hour; the second adds its delay to the travel time.
+    const firstPassLeaveAt =
+      event.startDate.getTime() -
+      (route.durationSeconds + LEAVE_BY_ARRIVAL_BUFFER_SECONDS) * 1000;
+    const traffic =
+      mode === "driving" ? estimateCongestion(route, new Date(firstPassLeaveAt)) : null;
+    const travelSeconds = Math.max(
+      60,
+      Math.round(route.durationSeconds + (traffic?.delaySeconds ?? 0)),
+    );
+    const leaveAt = new Date(
+      event.startDate.getTime() -
+        (travelSeconds + LEAVE_BY_ARRIVAL_BUFFER_SECONDS) * 1000,
+    );
+    const notifyAt = new Date(
+      Math.max(now.getTime(), leaveAt.getTime() - LEAVE_BY_NOTICE_SECONDS * 1000),
+    );
+
+    const reminder = await prisma.leaveByReminder.upsert({
+      where: {
+        userId_eventId: { userId: req.userId!, eventId: event.id },
+      },
+      update: {
+        originLat: origin.lat,
+        originLng: origin.lng,
+        originLabel: originLabel || null,
+        mode,
+        leaveAt,
+        notifyAt,
+        travelSeconds,
+        distanceMeters: Math.round(route.distanceMeters),
+        notifiedAt: null,
+      },
+      create: {
+        userId: req.userId!,
+        eventId: event.id,
+        originLat: origin.lat,
+        originLng: origin.lng,
+        originLabel: originLabel || null,
+        mode,
+        leaveAt,
+        notifyAt,
+        travelSeconds,
+        distanceMeters: Math.round(route.distanceMeters),
+      },
+    });
+
+    res.setHeader("Cache-Control", "no-store");
+    res.json({
+      leaveBy: serializeLeaveBy(reminder),
+      estimate: {
+        arrivalBufferSeconds: LEAVE_BY_ARRIVAL_BUFFER_SECONDS,
+        noticeSeconds: LEAVE_BY_NOTICE_SECONDS,
+        traffic: traffic ? { level: traffic.level, label: traffic.label } : null,
+      },
+    });
+  }),
+);
+
+// DELETE /api/events/:id/leave-by
+eventsRouter.delete(
+  "/:id/leave-by",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    await prisma.leaveByReminder.deleteMany({
+      where: { userId: req.userId!, eventId: String(req.params.id) },
+    });
+    res.status(204).end();
+  }),
+);
+
 // PATCH /api/events/:id
 eventsRouter.patch(
   "/:id",
@@ -913,6 +1065,18 @@ eventsRouter.patch(
         },
       },
     });
+
+    // A moved start or venue invalidates everyone's departure plan. Clearing
+    // is safer than firing an alert for the old pin; members can set it again.
+    if (
+      data.startDate !== undefined ||
+      data.location !== undefined ||
+      data.lat !== undefined ||
+      data.lng !== undefined ||
+      data.placeId !== undefined
+    ) {
+      await prisma.leaveByReminder.deleteMany({ where: { eventId: event.id } });
+    }
 
     res.json({ event: updated });
   }),

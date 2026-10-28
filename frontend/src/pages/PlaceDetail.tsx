@@ -18,13 +18,8 @@ import { useQuery } from "../hooks/useApi";
 import { Badge, EmptyState, Spinner } from "../components/ui";
 import { KindMedia } from "../components/KindMedia";
 import { useUI } from "../store/ui";
-import {
-  KIND_META,
-  directionsHref,
-  formatDistance,
-  mapsHref,
-  placePath,
-} from "../lib/places";
+import { KIND_META, formatDistance, mapsHref, placePath } from "../lib/places";
+import { navigationPath } from "../lib/navigation";
 import { useSavedPlaces } from "../lib/savedPlaces";
 import { cn } from "../lib/utils";
 
@@ -156,9 +151,18 @@ export function PlaceDetailPage() {
 
       {/* Actions */}
       <div className="flex flex-wrap items-center gap-2">
-        <a href={directionsHref(place)} target="_blank" rel="noreferrer noopener" className="btn-primary">
+        <Link
+          to={navigationPath({
+            name: place.name,
+            lat: place.lat,
+            lng: place.lng,
+            placeSlug: place.slug,
+            address: place.address,
+          })}
+          className="btn-primary"
+        >
           <Navigation className="h-4 w-4" /> Get directions
-        </a>
+        </Link>
         <button
           type="button"
           onClick={() => toggle(place.slug)}

@@ -59,7 +59,7 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     // Nearby / Places page
     "places.badge": "Nearby",
     "places.title": "Places worth leaving the house for.",
-    "places.subtitle": "Cinemas, stages, hotels, trailheads, gyms, galleries and coffee worth the detour — plus the hospitals, pharmacies, fuel stations and schools you actually need — sorted by what is closest to you.",
+    "places.subtitle": "Cinemas, stages, hotels, trailheads, gyms, galleries and coffee worth the detour — plus the hospitals, pharmacies, fuel stations, schools, public toilets, parking, EV chargers, transit stops, banks and ATMs you actually need — sorted by what is closest to you.",
     "places.everything": "Everything",
     "places.saved": "Saved",
     "places.liveOpenMap": "Live OpenMap",
@@ -194,7 +194,7 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     // Nearby / Places page
     "places.badge": "አቅራቢያ",
     "places.title": "ከቤት ወጥቶ ለመጎብኘት የሚገቡ ቦታዎች።",
-    "places.subtitle": "ሲኒማ ቤቶች፣ ቲያትሮች፣ ሆቴሎች፣ ጂሞች፣ ጋለሪዎች እና ማኪያቶ የሚጠጡባቸው ምርጥ ቦታዎች — እንዲሁም ሆስፒታሎች፣ ፋርማሲዎች፣ የነዳጅ ማደያዎች እና ትምህርት ቤቶች — በአቅራቢያዎ ተለይተው የቀረቡ።",
+    "places.subtitle": "ሲኒማ ቤቶች፣ ቲያትሮች፣ ሆቴሎች፣ ጂሞች፣ ጋለሪዎች እና ማኪያቶ የሚጠጡባቸው ምርጥ ቦታዎች — እንዲሁም ሆስፒታሎች፣ ፋርማሲዎች፣ የነዳጅ ማደያዎች፣ ትምህርት ቤቶች፣ ሕዝባዊ ሽንት ቤቶች፣ የመኪና ማቆሚያዎች፣ የኤሌክትሪክ መኪና መሙያዎች፣ የሕዝብ ማመላለሻ ማቆሚያዎች፣ ባንኮች እና ኤቲኤም — በአቅራቢያዎ ተለይተው የቀረቡ።",
     "places.everything": "ሁሉንም",
     "places.saved": "የተቀመጡ",
     "places.liveOpenMap": "የቀጥታ ካርታ",
@@ -329,7 +329,7 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     // Nearby / Places page
     "places.badge": "Dhiyoo",
     "places.title": "Bakkeewwan manaa ba'anii daawwatamuu qaban.",
-    "places.subtitle": "Sinimaa, tiyaatira, hoteelota, jimmota, gaaleeriifi buna mi'aawaa — akkasumas hospitaalota, faramaasii, buufata boba'aa fi mana barumsaa — dhiyeenya keessan irratti hundaa'ee qophaa'e.",
+    "places.subtitle": "Sinimaa, tiyaatira, hoteelota, jimmota, gaaleeriifi buna mi'aawaa — akkasumas hospitaalota, faramaasii, buufata boba'aa, mana barumsaa, mana fincaanii uummataa, bakka konkolaataa dhaabuu, bakka baatirii elektrifikii, bakka konkolaataa uummataa, baankii fi ATM — dhiyeenya keessan irratti hundaa'ee qophaa'e.",
     "places.everything": "Hundumaa",
     "places.saved": "Kan Olkaa'aman",
     "places.liveOpenMap": "Kaartaa Kallattii",

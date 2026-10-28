@@ -12,6 +12,7 @@ import { startEventIngest } from "./lib/events/ingest";
 import { ensureBuiltinRoles } from "./lib/roles";
 import { ensureSeedQuizQuestions } from "./lib/seed-quiz";
 import { ensureSeedPlaceQuiz } from "./lib/seed-place-quiz";
+import { startLeaveByScheduler } from "./lib/leave-by";
 
 async function main(): Promise<void> {
   await ensureUploadDir();
@@ -49,6 +50,7 @@ async function main(): Promise<void> {
     // Fire-and-forget: the first import pulls fixtures and listings in without
     // delaying the API coming up, then the timer keeps them fresh.
     startEventIngest(env.EVENTS_SYNC_MINUTES);
+    startLeaveByScheduler();
   });
 
   const shutdown = async (signal: string) => {

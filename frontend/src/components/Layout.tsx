@@ -18,6 +18,7 @@ import {
   Menu as MenuIcon,
   Monitor,
   Moon,
+  Navigation,
   PenSquare,
   Plus,
   Search,
@@ -284,6 +285,14 @@ function Sidebar() {
           {lang === "en" && (
             <span lang="am" className="ml-auto font-ethiopic text-[9px] text-muted/60">
               ስብሰባዎች
+            </span>
+          )}
+        </NavLink>
+        <NavLink to="/travel" className={navItemClass}>
+          <Navigation className="h-[18px] w-[18px]" /> {t("nav.travel", "Let's Travel")}
+          {lang === "en" && (
+            <span lang="am" className="ml-auto font-ethiopic text-[9px] text-muted/60">
+              ጉዞ
             </span>
           )}
         </NavLink>
@@ -760,6 +769,7 @@ function MobileNav() {
     { to: "/places", label: t("nav.places", "Nearby Places"), hint: "አቅራቢያ", icon: MapPin },
     { to: "/events", label: t("nav.events", "Events"), hint: "ዝግጅቶች", icon: CalendarDays },
     { to: "/meetups", label: t("nav.meetups", "Meetups"), hint: "ስብሰባዎች", icon: Users },
+    { to: "/travel", label: t("nav.travel", "Let's Travel"), hint: "ጉዞ", icon: Navigation },
     { to: "/jokes", label: "Joke Time", hint: "የቀልድ ሰዓት", icon: Laugh, tone: "text-amber-500" },
     { to: "/quiz", label: t("nav.quiz", "Lets Know Ethiopia"), hint: "ኢትዮጵያን እናውቃት", icon: Award },
     { to: "/categories", label: t("nav.categories", "Categories"), hint: "ምድቦች", icon: LayoutGrid },

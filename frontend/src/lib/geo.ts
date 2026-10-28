@@ -18,7 +18,7 @@ export function locationBlock(): LocationBlock | null {
   return null;
 }
 
-function toFailure(error: GeolocationPositionError): LocationFailure {
+export function locationFailure(error: GeolocationPositionError): LocationFailure {
   if (error.code === error.PERMISSION_DENIED) return "denied";
   if (error.code === error.TIMEOUT) return "timeout";
   return "unavailable";
@@ -43,7 +43,7 @@ function ask(options: PositionOptions, budgetMs: number): Promise<Coords> {
     navigator.geolocation.getCurrentPosition(
       (position) =>
         finish(() => resolve({ lat: position.coords.latitude, lng: position.coords.longitude })),
-      (error) => finish(() => reject(toFailure(error))),
+      (error) => finish(() => reject(locationFailure(error))),
       options,
     );
   });

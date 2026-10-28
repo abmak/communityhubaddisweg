@@ -15,7 +15,13 @@ export type PlaceKind =
   | "HOSPITAL"
   | "PHARMACY"
   | "GAS_STATION"
-  | "SCHOOL";
+  | "SCHOOL"
+  | "PUBLIC_TOILET"
+  | "PARKING"
+  | "EV_CHARGING"
+  | "TRANSIT_STOP"
+  | "BANK"
+  | "ATM";
 
 export interface Place {
   id: string;
@@ -63,6 +69,20 @@ export interface PlaceArea {
 
 export interface PlaceAreasResponse {
   areas: PlaceArea[];
+}
+
+/** Closest practical stops around a pin, grouped by service kind. */
+export interface NearbyServiceGroup {
+  kind: PlaceKind;
+  places: Place[];
+  nearestKm: number | null;
+}
+
+export interface NearbyServicesResponse {
+  origin: { lat: number; lng: number };
+  radiusKm: number;
+  groups: NearbyServiceGroup[];
+  total: number;
 }
 
 export interface User {
@@ -288,8 +308,10 @@ export interface AppNotification {
     | "MESSAGE"
     | "ANNOUNCEMENT"
     | "MOVIE_REVIEW"
-    | "BOOK_REVIEW";
+    | "BOOK_REVIEW"
+    | "EVENT_REMINDER";
   body: string;
+  url?: string | null;
   postId: string | null;
   conversationId: string | null;
   readAt: string | null;
@@ -536,11 +558,26 @@ export interface CinemasResponse {
   window: { days: number };
 }
 
+/** The departure plan a member saved for one gathering. */
+export interface LeaveByPlan {
+  id: string;
+  eventId: string;
+  origin: { lat: number; lng: number };
+  originLabel: string | null;
+  mode: "driving" | "walking";
+  leaveAt: string;
+  notifyAt: string;
+  travelSeconds: number;
+  distanceMeters: number;
+  notifiedAt: string | null;
+}
+
 export interface EventDetail extends Omit<CommunityEvent, "attendeesPreview"> {
   attendees: {
     going: EventAttendee[];
     interested: EventAttendee[];
   };
+  leaveBy: LeaveByPlan | null;
 }
 
 export interface EventDetailResponse {
@@ -686,6 +723,101 @@ export interface PlaceQuizSubmitResponse {
   rank: number;
   totalParticipants: number;
   review: PlaceQuizQuestionItem[];
+}
+
+// In-app navigation — routes come from the OpenStreetMap routing profile.
+export type TravelMode = "driving" | "walking";
+
+export interface RoutePoint {
+  lat: number;
+  lng: number;
+}
+
+export interface RouteStep {
+  /** OSRM maneuver type: depart, turn, continue, merge, roundabout, arrive… */
+  type: string;
+  modifier: string | null;
+  exit: number | null;
+  name: string;
+  distanceMeters: number;
+  durationSeconds: number;
+  location: RoutePoint;
+}
+
+export interface DirectionsRoute {
+  mode: TravelMode;
+  distanceMeters: number;
+  durationSeconds: number;
+  path: RoutePoint[];
+  steps: RouteStep[];
+  bounds: { south: number; west: number; north: number; east: number };
+}
+
+export interface DirectionsResponse {
+  route: DirectionsRoute;
+  /** Present when alternatives were requested; navigation honours a pick. */
+  routes?: DirectionsRoute[];
+}
+
+// "Let's Travel" — the trip planner compares transport options.
+export type PlanMode = "taxi" | "bus" | "walking";
+export type CongestionLevel = "LIGHT" | "MODERATE" | "HEAVY";
+
+export interface TrafficReport {
+  level: CongestionLevel;
+  label: string;
+  /** 0–100, higher means busier roads. */
+  score: number;
+  delaySeconds: number;
+  note: string;
+  source: "estimated";
+}
+
+export interface TrafficContext {
+  day: string;
+  localTime: string;
+  period: "morning peak" | "midday" | "evening peak" | "off-peak" | "weekend";
+  label: string;
+  summary: string;
+  source: "estimated";
+}
+
+export interface PlannedRoute {
+  index: number;
+  label: string;
+  mode: PlanMode;
+  distanceMeters: number;
+  baseDurationSeconds: number;
+  durationSeconds: number;
+  path: RoutePoint[];
+  traffic: TrafficReport;
+  recommended: boolean;
+  reason: string | null;
+}
+
+export interface TravelPlan {
+  from: RoutePoint;
+  to: RoutePoint;
+  mode: PlanMode;
+  routes: PlannedRoute[];
+  recommendedIndex: number;
+  traffic: TrafficReport;
+  context: TrafficContext;
+  disclaimer: string;
+}
+
+export interface TravelPlanResponse {
+  plan: TravelPlan;
+}
+
+/** A venue address resolved to a pin by the API's cached geocoder. */
+export interface GeocodeResponse {
+  location: {
+    lat: number;
+    lng: number;
+    displayName: string;
+    query: string;
+  };
 }
 
 

@@ -144,6 +144,8 @@ export const difficultyStyles: Record<Difficulty, string> = {
 };
 
 export function notificationLink(notification: AppNotification): string {
+  // Leave-by reminders and other newer notifications carry their own target.
+  if (notification.url) return notification.url;
   if (notification.type === "FOLLOW" && notification.actor) return `/u/${notification.actor.username}`;
   if (notification.type === "MESSAGE" && notification.conversationId) {
     return `/messages/${notification.conversationId}`;

@@ -44,6 +44,12 @@ enum PlaceKind {
   PHARMACY
   GAS_STATION
   SCHOOL
+  PUBLIC_TOILET
+  PARKING
+  EV_CHARGING
+  TRANSIT_STOP
+  BANK
+  ATM
 }
 
 enum ReportTargetType {
@@ -68,6 +74,7 @@ enum NotificationType {
   ANNOUNCEMENT
   MOVIE_REVIEW
   BOOK_REVIEW
+  EVENT_REMINDER
 }
 
 enum VerificationType {
@@ -122,6 +129,7 @@ model User {
   pushSubscriptions     PushSubscription[]
   eventsCreated         Event[]            @relation("EventCreator")
   eventRsvps            EventRsvp[]
+  leaveByReminders      LeaveByReminder[]
   adminActions          AdminAction[]      @relation("AdminActionActor")
   quizAttempts          QuizAttempt[]
   quizSeen              QuizSeen[]
@@ -500,6 +508,9 @@ model Notification {
   actorId        String?
   type           NotificationType
   body           String
+  // Where the notification should take the member. Feature-specific columns
+  // (postId, conversationId) stay for older clients; url is the general case.
+  url            String?
   postId         String?
   conversationId String?
   readAt         DateTime?
@@ -686,6 +697,7 @@ model Event {
   creator      User        @relation("EventCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   maxAttendees Int?
   rsvps        EventRsvp[]
+  leaveByReminders LeaveByReminder[]
   kind         EventKind   @default(MEETUP)
   topic        EventTopic  @default(COMMUNITY)
   // The competition a fixture belongs to ("English Premier League"), so the
@@ -759,6 +771,32 @@ model AiKeyUsage {
   updatedAt     DateTime  @updatedAt
 
   @@index([lastUsedAt])
+}
+
+// A member's own departure plan for one event: the origin they shared, the
+// travel time the router found, and when to nudge them. One row per member per
+// event, replaced when they recalculate.
+model LeaveByReminder {
+  id             String   @id @default(cuid())
+  userId         String
+  eventId        String
+  originLat      Float
+  originLng      Float
+  originLabel    String?
+  mode           String   @default("driving")
+  leaveAt        DateTime
+  notifyAt       DateTime
+  travelSeconds  Int
+  distanceMeters Int
+  notifiedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([notifyAt, notifiedAt])
 }
 
 model EventRsvp {

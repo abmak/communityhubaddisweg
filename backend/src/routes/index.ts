@@ -19,6 +19,9 @@ import { eventsRouter } from "./events";
 import { quizRouter } from "./quiz";
 import { placeQuizRouter } from "./place-quiz";
 import { jokesRouter } from "./jokes";
+import { directionsRouter } from "./directions";
+import { geocodeRouter } from "./geocode";
+import { travelRouter } from "./travel";
 
 export const apiRouter = Router();
 
@@ -34,6 +37,9 @@ apiRouter.use("/hikes", hikesRouter);
 apiRouter.use("/search", searchRouter);
 apiRouter.use("/explore", exploreRouter);
 apiRouter.use("/places", placesRouter);
+apiRouter.use("/directions", directionsRouter);
+apiRouter.use("/geocode", geocodeRouter);
+apiRouter.use("/travel", travelRouter);
 apiRouter.use("/events", eventsRouter);
 apiRouter.use("/quiz", quizRouter);
 apiRouter.use("/place-quiz", placeQuizRouter);

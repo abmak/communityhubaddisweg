@@ -1,17 +1,23 @@
 import {
+  Banknote,
   BedDouble,
   BookMarked,
+  Bus,
   Clapperboard,
   Coffee,
   Dumbbell,
   Frame,
   Fuel,
   Hospital,
+  Landmark,
   MapPin,
   Mountain,
   Pill,
+  PlugZap,
   School,
+  SquareParking,
   Theater,
+  Toilet,
   Trophy,
   UtensilsCrossed,
   type LucideIcon,
@@ -201,6 +207,78 @@ export const KIND_META: Record<PlaceKind, KindMeta> = {
     photoAlt: "School",
     tile: "from-sky-600 via-indigo-700 to-brand-950",
   },
+  PUBLIC_TOILET: {
+    label: "Public toilet",
+    plural: "public toilets",
+    am: "ሕዝባዊ ሽንት ቤት",
+    icon: Toilet,
+    wash: "from-cyan-500/15 via-sky-400/10 to-transparent",
+    text: "text-cyan-700 dark:text-cyan-300",
+    iconTone: "text-cyan-600 dark:text-cyan-300",
+    photo: null,
+    photoAlt: "Public toilet",
+    tile: "from-cyan-600 via-sky-700 to-brand-950",
+  },
+  PARKING: {
+    label: "Parking",
+    plural: "parking areas",
+    am: "የመኪና ማቆሚያ",
+    icon: SquareParking,
+    wash: "from-indigo-500/15 via-sky-400/10 to-transparent",
+    text: "text-indigo-700 dark:text-indigo-300",
+    iconTone: "text-indigo-600 dark:text-indigo-300",
+    photo: null,
+    photoAlt: "Parking area",
+    tile: "from-indigo-600 via-blue-700 to-brand-950",
+  },
+  EV_CHARGING: {
+    label: "EV charging",
+    plural: "EV chargers",
+    am: "የኤሌክትሪክ መኪና መሙያ",
+    icon: PlugZap,
+    wash: "from-emerald-500/15 via-lime-400/10 to-transparent",
+    text: "text-emerald-700 dark:text-emerald-300",
+    iconTone: "text-emerald-600 dark:text-emerald-300",
+    photo: null,
+    photoAlt: "Electric vehicle charging point",
+    tile: "from-emerald-600 via-teal-700 to-brand-950",
+  },
+  TRANSIT_STOP: {
+    label: "Transit stop",
+    plural: "transit stops",
+    am: "የሕዝብ ማመላለሻ ማቆሚያ",
+    icon: Bus,
+    wash: "from-teal-500/15 via-cyan-400/10 to-transparent",
+    text: "text-teal-700 dark:text-teal-300",
+    iconTone: "text-teal-600 dark:text-teal-300",
+    photo: null,
+    photoAlt: "Public transport stop",
+    tile: "from-teal-600 via-emerald-700 to-brand-950",
+  },
+  BANK: {
+    label: "Bank",
+    plural: "banks",
+    am: "ባንክ",
+    icon: Landmark,
+    wash: "from-amber-500/15 via-yellow-400/10 to-transparent",
+    text: "text-amber-700 dark:text-amber-300",
+    iconTone: "text-amber-600 dark:text-amber-300",
+    photo: null,
+    photoAlt: "Bank branch",
+    tile: "from-amber-500 via-yellow-700 to-brand-950",
+  },
+  ATM: {
+    label: "ATM",
+    plural: "ATMs",
+    am: "ኤቲኤም",
+    icon: Banknote,
+    wash: "from-lime-500/15 via-amber-400/10 to-transparent",
+    text: "text-lime-700 dark:text-lime-300",
+    iconTone: "text-lime-600 dark:text-lime-300",
+    photo: null,
+    photoAlt: "Cash machine",
+    tile: "from-lime-600 via-amber-700 to-brand-950",
+  },
 };
 
 export const PLACE_KINDS = Object.keys(KIND_META) as PlaceKind[];
@@ -247,10 +325,6 @@ export function formatDistance(km: number | null): string | null {
 
 export function mapsHref(place: Pick<Place, "lat" | "lng"> | { lat: number; lng: number }): string {
   return `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`;
-}
-
-export function directionsHref(place: Place): string {
-  return `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
 }
 
 export function placePath(place: Pick<Place, "slug">): string {

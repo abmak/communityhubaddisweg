@@ -8,6 +8,7 @@ import {
   Heart,
   LocateFixed,
   MapPin,
+  Navigation,
   RefreshCw,
   Search,
   Sparkles,
@@ -20,7 +21,8 @@ import { locationBlock, locationMessage, requestPosition, type LocationFailure }
 import { Badge, EmptyState } from "../components/ui";
 import { KindMedia } from "../components/KindMedia";
 import { useUI } from "../store/ui";
-import { KIND_META, PLACE_KINDS, formatDistance, mapsHref, placePath } from "../lib/places";
+import { KIND_META, PLACE_KINDS, formatDistance, placePath } from "../lib/places";
+import { navigationPath } from "../lib/navigation";
 import { useSavedPlaces } from "../lib/savedPlaces";
 import { useTranslation } from "../store/i18n";
 import { cn } from "../lib/utils";
@@ -136,14 +138,18 @@ function PlaceCard({ place }: { place: Place }) {
         </div>
 
         <div className="mt-auto flex items-center justify-between gap-2 border-t border-line/70 pt-3">
-          <a
-            href={mapsHref(place)}
-            target="_blank"
-            rel="noreferrer noopener"
+          <Link
+            to={navigationPath({
+              name: place.name,
+              lat: place.lat,
+              lng: place.lng,
+              placeSlug: place.slug,
+              address: place.address,
+            })}
             className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-[11px] font-semibold text-muted transition hover:text-brand-700 dark:hover:text-brand-300"
           >
-            <MapPin className="h-3.5 w-3.5" /> {t("places.directions", "Directions")}
-          </a>
+            <Navigation className="h-3.5 w-3.5" /> {t("places.directions", "Directions")}
+          </Link>
           <Link
             to={placePath(place)}
             className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-[11px] font-semibold text-brand-700 transition hover:gap-1.5 dark:text-brand-300"

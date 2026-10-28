@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  AlarmClock,
   AtSign,
   Bell,
   BellOff,
@@ -38,6 +39,7 @@ const ICONS: Record<AppNotification["type"], typeof Heart> = {
   ANNOUNCEMENT: Megaphone,
   MOVIE_REVIEW: Clapperboard,
   BOOK_REVIEW: BookOpen,
+  EVENT_REMINDER: AlarmClock,
 };
 
 export function NotificationsPage() {

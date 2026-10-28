@@ -43,3 +43,13 @@ export const uploadLimiter = rateLimit({
   legacyHeaders: false,
   handler,
 });
+
+// Nominatim asks clients to keep lookups rare; the service also caches and
+// serialises them, so this only guards against a loop in a broken client.
+export const geocodeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 20,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  handler,
+});

@@ -409,3 +409,131 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* In-app navigation: Leaflet map skinning and the GPS markers. */
+.nav-map {
+  background: rgb(var(--surface-2));
+}
+
+.nav-map .leaflet-container {
+  background: rgb(var(--surface-2));
+  font-family: inherit;
+}
+
+.nav-map .leaflet-control-attribution {
+  font-size: 10px;
+  padding: 1px 6px;
+  background: rgba(255, 255, 255, 0.78);
+  color: rgb(var(--muted));
+}
+
+.nav-map .leaflet-control-attribution a {
+  color: rgb(var(--muted));
+  text-decoration: underline;
+}
+
+.dark .nav-map .leaflet-control-attribution {
+  background: rgba(9, 13, 11, 0.72);
+}
+
+/* The classic inverted-tile trick: roads stay readable on a night canvas. */
+.dark .nav-map .leaflet-tile {
+  filter: invert(1) hue-rotate(180deg) brightness(0.86) contrast(0.9) saturate(0.65);
+}
+
+.dark .nav-map .leaflet-bar a {
+  background: rgb(var(--surface));
+  color: rgb(var(--ink));
+  border-bottom-color: rgb(var(--line));
+}
+
+.dark .nav-map .leaflet-bar a:hover,
+.dark .nav-map .leaflet-bar a:focus {
+  background: rgb(var(--surface-2));
+}
+
+.nav-marker {
+  background: transparent;
+  border: 0;
+}
+
+.nav-pin {
+  position: relative;
+  display: block;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #15803d;
+  border: 3px solid #fff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.nav-pin::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  height: 0;
+  width: 0;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 9px solid #fff;
+}
+
+.nav-pin::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 999px;
+  background: #fff;
+}
+
+.nav-origin {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #fff;
+  border: 5px solid #14532d;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.nav-me {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #2563eb;
+  border: 3px solid #fff;
+  box-sizing: border-box;
+  animation: nav-ping 2.4s ease-out infinite;
+}
+
+@keyframes nav-ping {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 16px rgba(37, 99, 235, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+  }
+}
+
+.nav-tooltip {
+  background: #14532d;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.nav-tooltip::before {
+  border-top-color: #14532d;
+}

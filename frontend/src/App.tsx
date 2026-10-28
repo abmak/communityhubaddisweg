@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import {
   BrowserRouter,
   Navigate,
@@ -34,6 +34,7 @@ import { PlaceDetailPage } from "./pages/PlaceDetail";
 import { EventsPage } from "./pages/Events";
 import { EventDetailPage } from "./pages/EventDetail";
 import { SportsPage } from "./pages/Sports";
+import { TravelPage } from "./pages/Travel";
 import { QuizPage } from "./pages/Quiz";
 import { JokesPage } from "./pages/Jokes";
 import { SearchPage } from "./pages/Search";
@@ -52,6 +53,10 @@ import { AdminJokes } from "./pages/admin/AdminJokes";
 import { AdminEvents } from "./pages/admin/AdminEvents";
 import { AdminEventSources } from "./pages/admin/AdminEventSources";
 import { NotFound } from "./pages/NotFound";
+
+const LazyNavigatePage = lazy(() =>
+  import("./pages/Navigate").then((module) => ({ default: module.NavigatePage })),
+);
 
 function requireAuthNode(children: ReactNode) {
   return <RequireAuth>{children}</RequireAuth>;
@@ -186,6 +191,23 @@ export default function App() {
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/places" element={<PlacesPage />} />
             <Route path="/places/:slug" element={<PlaceDetailPage />} />
+            {/* Leaflet and the routing UI are only needed on this screen, so
+                they load on demand instead of in the main bundle. */}
+            <Route
+              path="/navigate"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="flex min-h-[50vh] items-center justify-center">
+                      <Spinner className="h-7 w-7" />
+                    </div>
+                  }
+                >
+                  <LazyNavigatePage />
+                </Suspense>
+              }
+            />
+            <Route path="/travel" element={<TravelPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/events/:slug" element={<EventDetailPage />} />
             <Route path="/meetups" element={<EventsPage view="meetups" />} />

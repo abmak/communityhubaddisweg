@@ -246,7 +246,13 @@ function Sidebar() {
       <div className="no-scrollbar -mr-1 min-h-0 flex-1 overflow-y-auto pr-1">
         <nav className="space-y-1" aria-label="Main navigation">
           <p lang="am" className="mb-1 px-3 font-ethiopic text-[10px] uppercase tracking-[0.14em] text-muted/50">
-          {lang === "am" ? "ዋና ገጾች" : lang === "om" ? "Kutaalee Ijoo" : "Navigation"}
+          {lang === "am"
+            ? "ዋና ገጾች"
+            : lang === "om"
+              ? "Kutaalee Ijoo"
+              : lang === "ti"
+                ? "መምርሒ"
+                : "Navigation"}
         </p>
         <NavLink to="/home" className={navItemClass}>
           <Home className="h-[18px] w-[18px]" /> {t("nav.home", "Home")}
@@ -510,7 +516,11 @@ function TopBar() {
               <Link
                 to="/notifications"
                 className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted transition hover:bg-raised hover:text-ink"
-                aria-label={`Notifications${unread.notifications ? `, ${unread.notifications} unread` : ""}`}
+                aria-label={
+                  unread.notifications
+                    ? `${t("nav.notifications", "Notifications")} · ${unread.notifications}`
+                    : t("nav.notifications", "Notifications")
+                }
               >
                 <Bell className="h-5 w-5" />
                 {unread.notifications > 0 && (
@@ -770,7 +780,7 @@ function MobileNav() {
     { to: "/events", label: t("nav.events", "Events"), hint: "ዝግጅቶች", icon: CalendarDays },
     { to: "/meetups", label: t("nav.meetups", "Meetups"), hint: "ስብሰባዎች", icon: Users },
     { to: "/travel", label: t("nav.travel", "Let's Travel"), hint: "ጉዞ", icon: Navigation },
-    { to: "/jokes", label: "Joke Time", hint: "የቀልድ ሰዓት", icon: Laugh, tone: "text-amber-500" },
+    { to: "/jokes", label: t("nav.jokes", "Joke Time"), hint: "የቀልድ ሰዓት", icon: Laugh, tone: "text-amber-500" },
     { to: "/quiz", label: t("nav.quiz", "Lets Know Ethiopia"), hint: "ኢትዮጵያን እናውቃት", icon: Award },
     { to: "/categories", label: t("nav.categories", "Categories"), hint: "ምድቦች", icon: LayoutGrid },
   ];

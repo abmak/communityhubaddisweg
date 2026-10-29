@@ -45,6 +45,20 @@ const CATEGORY_OROMO: Record<string, string> = {
   "life-stories": "Muuxannoo Jireenyaa",
 };
 
+const CATEGORY_TIGRINYA: Record<string, string> = {
+  "coffee-talk": "ቤት ቡን",
+  "sports-talk": "ስፖርት",
+  "whats-new": "ሓድሽ ዜና",
+  "ethiopian-cinema": "ኢትዮጵያዊ ፊልም",
+  "book-reviews": "ገምጋም መጻሕፍቲ",
+  "hiking-experiences": "ናይ እግሪ ጉዕዞ",
+  music: "ሙዚቃ",
+  "physical-exercise": "ናይ ኣካል ምንቅስቓስ",
+  painting: "ስእሊ",
+  travel: "ጉዕዞ",
+  "life-stories": "ተመክሮ ህይወት",
+};
+
 export function categoryAmharic(slug?: string | null): string | null {
   if (!slug) return null;
   return CATEGORY_AMHARIC[slug] ?? null;
@@ -55,12 +69,18 @@ export function categoryOromo(slug?: string | null): string | null {
   return CATEGORY_OROMO[slug] ?? null;
 }
 
+export function categoryTigrinya(slug?: string | null): string | null {
+  if (!slug) return null;
+  return CATEGORY_TIGRINYA[slug] ?? null;
+}
+
 export function localizedCategoryName(
   category: { slug: string; name: string },
-  lang: "en" | "am" | "om" = "en",
+  lang: "en" | "am" | "om" | "ti" = "en",
 ): string {
   if (lang === "am") return categoryAmharic(category.slug) || category.name;
   if (lang === "om") return categoryOromo(category.slug) || category.name;
+  if (lang === "ti") return categoryTigrinya(category.slug) || category.name;
   return category.name;
 }
 
@@ -77,4 +97,11 @@ export function oromoGreeting(date = new Date()): string {
   if (hour < 12) return "Akkam bultan";
   if (hour < 17) return "Akkam ooltan";
   return "Akkam bultan";
+}
+
+export function tigrinyaGreeting(date = new Date()): string {
+  const hour = date.getHours();
+  if (hour < 12) return "ከመይ ሓዲርኩም";
+  if (hour < 17) return "ከመይ ዋልኩም";
+  return "ከመይ ኣምሲኹም";
 }

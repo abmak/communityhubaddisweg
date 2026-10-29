@@ -27,6 +27,7 @@ import { useUI } from "../../store/ui";
 import type { EventTopic } from "../../types";
 import type { AdminEvent, AdminEventsResponse } from "../../lib/adminTypes";
 import { Badge, ConfirmDialog, EmptyState, PageLoader } from "../../components/ui";
+import { tt } from "../../lib/i18n";
 import { useAdminAccess } from "./AdminLayout";
 import { AdminPageHeader } from "./parts";
 import { cn, formatDateTime } from "../../lib/utils";
@@ -275,7 +276,7 @@ export function AdminEvents() {
                         )}
                       >
                         <Icon className="h-3.5 w-3.5 shrink-0" />
-                        <span>{topic.label}</span>
+                        <span>{tt(topic.label)}</span>
                       </button>
                     );
                   })}
@@ -467,7 +468,7 @@ export function AdminEvents() {
               <option value="ALL">All categories</option>
               {TOPICS.map((topic) => (
                 <option key={topic.value} value={topic.value}>
-                  {topic.label}
+                  {tt(topic.label)}
                 </option>
               ))}
             </select>
@@ -520,7 +521,7 @@ export function AdminEvents() {
                       </p>
                       <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted">
                         <span className="inline-flex items-center gap-1 font-semibold text-ink/70">
-                          <Icon className="h-3 w-3" /> {meta.label}
+                          <Icon className="h-3 w-3" /> {tt(meta.label)}
                         </span>
                         <span>{formatDateTime(event.startDate)}</span>
                         {event.location && (

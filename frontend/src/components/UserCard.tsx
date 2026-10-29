@@ -6,6 +6,7 @@ import { api, apiError } from "../lib/api";
 import { useAuth } from "../store/auth";
 import { useUI } from "../store/ui";
 import { cn, formatCount } from "../lib/utils";
+import { tt } from "../lib/i18n";
 import { Avatar } from "./ui";
 
 export function FollowButton({
@@ -65,7 +66,7 @@ export function FollowButton({
       aria-pressed={following}
     >
       {following ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-      {following ? "Following" : "Follow"}
+      {tt(following ? "Following" : "Follow")}
     </button>
   );
 }

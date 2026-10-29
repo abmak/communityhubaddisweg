@@ -18,6 +18,7 @@ import { useAuth } from "../store/auth";
 import { useUI } from "../store/ui";
 import { api, apiError } from "../lib/api";
 import { cn } from "../lib/utils";
+import { tt } from "../lib/i18n";
 import { BrandMark, Wordmark } from "../components/Brand";
 import coffeeTalkTile from "../assets/rooms/coffee-talk.webp";
 import booksTile from "../assets/rooms/books.webp";
@@ -261,7 +262,7 @@ export function LoginPage() {
             type="button"
             onClick={() => setShowPassword((value) => !value)}
             className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-muted transition hover:text-ink"
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={tt(showPassword ? "Hide password" : "Show password")}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -558,7 +559,7 @@ export function RegisterPage() {
             type="button"
             onClick={() => setShowPassword((value) => !value)}
             className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-muted transition hover:text-ink"
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={tt(showPassword ? "Hide password" : "Show password")}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>

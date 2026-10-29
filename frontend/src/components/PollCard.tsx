@@ -7,6 +7,7 @@ import { connectSocket } from "../lib/socket";
 import { useAuth } from "../store/auth";
 import { useUI } from "../store/ui";
 import { cn } from "../lib/utils";
+import { tt } from "../lib/i18n";
 
 interface PollCardProps {
   postId: string;
@@ -190,8 +191,8 @@ export function PollCard({ postId, poll, onChange }: PollCardProps) {
 
       <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted">
         <span className="tabular-nums">
-          {data.totalVotes} {data.totalVotes === 1 ? "vote" : "votes"}
-          {!showResults && " · pick one to see results"}
+          {data.totalVotes} {tt(data.totalVotes === 1 ? "vote" : "votes")}
+          {!showResults && ` · ${tt("pick one to see results")}`}
         </span>
         {closed ? (
           <span className="inline-flex items-center gap-1 font-medium">

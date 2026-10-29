@@ -1,4 +1,10 @@
-export type SupportedLang = "en" | "am" | "om";
+import phraseAm from "./locales/am.json";
+import phraseOm from "./locales/om.json";
+import phraseTi from "./locales/ti.json";
+import keyTranslationsTi from "./locales/keys-ti.json";
+import extraPhrases from "./locales/extra.json";
+
+export type SupportedLang = "en" | "am" | "om" | "ti";
 
 export interface LanguageInfo {
   code: SupportedLang;
@@ -28,6 +34,13 @@ export const LANGUAGES: LanguageInfo[] = [
     nativeName: "Afaan Oromoo",
     flag: "🇪🇹",
   },
+  {
+    code: "ti",
+    name: "Tigrinya",
+    nativeName: "ትግርኛ",
+    flag: "🇪🇹",
+    fontClass: "font-ethiopic",
+  },
 ];
 
 export const translations: Record<SupportedLang, Record<string, string>> = {
@@ -43,6 +56,7 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     "nav.cinema": "Cinema",
     "nav.theatre": "Theatre",
     "nav.quiz": "Lets Know Ethiopia",
+    "nav.jokes": "Joke Time",
     "nav.messages": "Messages",
     "nav.notifications": "Notifications",
     "nav.bookmarks": "Bookmarks",
@@ -178,6 +192,7 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     "nav.cinema": "ሲኒማ",
     "nav.theatre": "ቲያትር",
     "nav.quiz": "ኢትዮጵያን እናውቃት",
+    "nav.jokes": "የቀልድ ሰዓት",
     "nav.messages": "መልዕክቶች",
     "nav.notifications": "ማሳወቂያዎች",
     "nav.bookmarks": "የተቀመጡ",
@@ -313,6 +328,7 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     "nav.cinema": "Siinimaa",
     "nav.theatre": "Tiyaatirii",
     "nav.quiz": "Itoophiyaa Haabarru",
+    "nav.jokes": "Yeroo Qoosaa",
     "nav.messages": "Ergaawwan",
     "nav.notifications": "Beeksisa",
     "nav.bookmarks": "Kan Olkaa'aman",
@@ -436,9 +452,53 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     "common.bunaTetu": "Buna dhugaa",
     "common.joinCommunity": "Hawaasa waa'ee fiilmii, kitaaba, imalaafi jireenya guyyuu mari'atuutti dabalamaa.",
   },
+
+  // Tigrinya shares the Ge'ez script with Amharic. The interface copy is kept
+  // in a separate file so translators can work on it without touching code.
+  ti: keyTranslationsTi as Record<string, string>,
 };
+
+/**
+ * Phrase catalog, keyed by the English copy itself. Static JSX text and UI
+ * attributes are wrapped in tt() at build time (frontend/i18n), so a screen
+ * needs no hand-written key per sentence and user content is never touched:
+ * anything rendered from the API arrives as an expression, not a literal.
+ *
+ * Regenerate with:
+ *   node frontend/i18n/extract-phrases.cjs
+ *   node frontend/i18n/translate-phrases.mjs
+ */
+const extra = extraPhrases as Record<Exclude<SupportedLang, "en">, Record<string, string>>;
+
+// extra.json holds hand-written strings that never reach the extractor (ARIA
+// labels, pluralised counts) and overrides a few machine translations.
+const phrases: Record<Exclude<SupportedLang, "en">, Record<string, string>> = {
+  am: { ...(phraseAm as Record<string, string>), ...extra.am },
+  om: { ...(phraseOm as Record<string, string>), ...extra.om },
+  ti: { ...(phraseTi as Record<string, string>), ...extra.ti },
+};
+
+let activeLang: SupportedLang = "en";
+
+/** Kept in sync by the i18n store so tt() can run outside React. */
+export function setActiveLang(lang: SupportedLang): void {
+  activeLang = lang;
+}
+
+export function getActiveLang(): SupportedLang {
+  return activeLang;
+}
+
+/** Translate one static UI phrase into the language currently selected. */
+export function tt(phrase: string): string {
+  if (activeLang === "en") return phrase;
+  return phrases[activeLang]?.[phrase] ?? phrase;
+}
 
 export function translate(key: string, lang: SupportedLang = "en", fallback?: string): string {
   const dictionary = translations[lang] || translations.en;
-  return dictionary[key] ?? translations.en[key] ?? fallback ?? key;
+  const english = translations.en[key] ?? fallback ?? key;
+  if (dictionary[key]) return dictionary[key];
+  if (lang === "en") return english;
+  return phrases[lang][english] ?? english;
 }

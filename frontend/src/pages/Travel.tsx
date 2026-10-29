@@ -39,6 +39,7 @@ import {
 import { KIND_META } from "../lib/places";
 import { useUI } from "../store/ui";
 import { Spinner } from "../components/ui";
+import { tt } from "../lib/i18n";
 import { cn } from "../lib/utils";
 
 interface Destination {
@@ -108,7 +109,7 @@ function TrafficPill({ report }: { report: TrafficReport }) {
       )}
     >
       <span className={cn("h-1.5 w-1.5 rounded-full", tone.dot)} />
-      {report.label}
+      {tt(report.label)}
     </span>
   );
 }
@@ -139,7 +140,7 @@ function RouteOption({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-bold text-ink">{route.label}</span>
+            <span className="text-sm font-bold text-ink">{tt(route.label)}</span>
             {route.recommended && (
               <span className="inline-flex items-center gap-1 rounded-full bg-brand-700 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
                 <Sparkles className="h-2.5 w-2.5" /> Recommended
@@ -498,7 +499,11 @@ export function TravelPage() {
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">From</p>
             <p className="mt-0.5 truncate text-sm font-semibold text-ink">
-              {origin ? originLabel : locating ? "Finding your location…" : "Starting point needed"}
+              {origin
+                ? originLabel
+                : locating
+                  ? tt("Finding your location…")
+                  : tt("Starting point needed")}
             </p>
             {origin && (
               <p className="mt-0.5 text-[11px] text-muted">
@@ -632,7 +637,7 @@ export function TravelPage() {
                             {place.name}
                           </span>
                           <span className="block truncate text-[11px] text-muted">
-                            {meta.label} · {[place.area, place.city].filter(Boolean).join(", ")}
+                            {tt(meta.label)} · {[place.area, place.city].filter(Boolean).join(", ")}
                           </span>
                         </span>
                         <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted" />
@@ -716,8 +721,8 @@ export function TravelPage() {
                     <Icon className="h-4 w-4" />
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-[13px] font-semibold text-ink">{option.label}</span>
-                    <span className="block text-[10px] leading-4 text-muted">{option.hint}</span>
+                    <span className="block text-[13px] font-semibold text-ink">{tt(option.label)}</span>
+                    <span className="block text-[10px] leading-4 text-muted">{tt(option.hint)}</span>
                   </span>
                 </button>
               );

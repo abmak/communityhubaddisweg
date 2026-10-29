@@ -18,6 +18,7 @@ import { useQuery } from "../../hooks/useApi";
 import { api, apiError } from "../../lib/api";
 import { useUI } from "../../store/ui";
 import { cn, formatCount } from "../../lib/utils";
+import { tt } from "../../lib/i18n";
 import {
   PERMISSION_GROUPS,
   type Permission,
@@ -293,14 +294,14 @@ export function AdminRoles() {
                           colSpan={roles.length + 1}
                           className="pb-1 pt-5 text-[10px] font-bold uppercase tracking-[0.14em] text-brand-700 dark:text-brand-300"
                         >
-                          {group.label}
+                          {tt(group.label)}
                         </td>
                       </tr>
                       {group.permissions.map((perm) => (
                         <tr key={perm.id} className="border-b border-line/50 last:border-0 hover:bg-raised/40">
                           <td className="py-2.5 pr-4">
-                            <p className="text-xs font-semibold text-ink">{perm.label}</p>
-                            <p className="text-[10px] leading-4 text-muted">{perm.description}</p>
+                            <p className="text-xs font-semibold text-ink">{tt(perm.label)}</p>
+                            <p className="text-[10px] leading-4 text-muted">{tt(perm.description)}</p>
                           </td>
                           {roles.map((r) => {
                             const allowed = r.permissions.includes(perm.id);
@@ -420,7 +421,7 @@ export function AdminRoles() {
                   {PERMISSION_GROUPS.map((group) => (
                     <div key={group.label} className="rounded-2xl border border-line/60 bg-surface-raised/30 p-3">
                       <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted">
-                        {group.label}
+                        {tt(group.label)}
                       </p>
                       <div className="grid gap-2 sm:grid-cols-2">
                         {group.permissions.map((p) => {
@@ -442,7 +443,7 @@ export function AdminRoles() {
                                 className="mt-0.5 rounded border-line text-brand-600 focus:ring-brand-500"
                               />
                               <div className="min-w-0">
-                                <p className="font-semibold text-[11px] text-ink">{p.label}</p>
+                                <p className="font-semibold text-[11px] text-ink">{tt(p.label)}</p>
                                 <p className="text-[9px] text-muted line-clamp-1">{p.description}</p>
                               </div>
                             </label>
@@ -549,7 +550,7 @@ export function AdminRoles() {
                   {PERMISSION_GROUPS.map((group) => (
                     <div key={group.label} className="rounded-2xl border border-line/60 bg-surface-raised/30 p-3">
                       <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted">
-                        {group.label}
+                        {tt(group.label)}
                       </p>
                       <div className="grid gap-2 sm:grid-cols-2">
                         {group.permissions.map((p) => {
@@ -571,7 +572,7 @@ export function AdminRoles() {
                                 className="mt-0.5 rounded border-line text-brand-600 focus:ring-brand-500"
                               />
                               <div className="min-w-0">
-                                <p className="font-semibold text-[11px] text-ink">{p.label}</p>
+                                <p className="font-semibold text-[11px] text-ink">{tt(p.label)}</p>
                                 <p className="text-[9px] text-muted line-clamp-1">{p.description}</p>
                               </div>
                             </label>

@@ -6,6 +6,7 @@ import { CategoryCard } from "../components/CategoryCard";
 import { EmptyState } from "../components/ui";
 import { formatCount } from "../lib/utils";
 import { useTranslation } from "../store/i18n";
+import { tt } from "../lib/i18n";
 
 export function CategoriesPage() {
   const { t, lang } = useTranslation();
@@ -39,10 +40,12 @@ export function CategoriesPage() {
               ? "እያንዳንዱ ፍላጎት በጠረጴዛችን ዙሪያ መቀመጫ አለው።"
               : lang === "om"
                 ? "Fedhiin hundi teessuma qaba."
-                : "Every interest has a seat at the table."}
+                : lang === "ti"
+                  ? "ነፍሲ ወከፍ ተገዳስነት ኣብ ጣውላና መቐመጢ ኣለዎ።"
+                  : "Every interest has a seat at the table."}
           </h1>
           <p className="mt-2 text-sm leading-6 text-white/65">
-            {categories.length} {t("nav.categories", "rooms")}, {formatCount(totalPosts)} {t("places.matches", "stories")}.
+            {categories.length} {tt("rooms")}, {formatCount(totalPosts)} {tt("stories")}.
           </p>
         </div>
         <span className="eth-band absolute inset-x-0 bottom-0 h-[3px]" />

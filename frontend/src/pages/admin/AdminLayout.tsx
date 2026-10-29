@@ -18,6 +18,7 @@ import {
   Sun,
   Users,
 } from "lucide-react";
+import { tt } from "../../lib/i18n";
 import { useAuth } from "../../store/auth";
 import { useUI } from "../../store/ui";
 import { useQuery } from "../../hooks/useApi";
@@ -143,7 +144,7 @@ export function AdminLayout() {
         <div className="mx-3 mb-4 flex items-center gap-2 rounded-lg border border-brand-600/10 bg-brand-50/60 px-3 py-2 dark:border-brand-400/15 dark:bg-brand-500/5">
           <Shield className="h-3.5 w-3.5 text-brand-700 dark:text-brand-300" />
           <span className="text-[11px] font-semibold text-brand-800 dark:text-brand-200">
-            {ROLE_LABELS[user.role]} workspace
+            {tt(ROLE_LABELS[user.role])} {tt("workspace")}
           </span>
         </div>
 
@@ -157,7 +158,7 @@ export function AdminLayout() {
                 {section.items.map((item) => (
                   <NavLink key={item.to} to={item.to} className={navLinkClass}>
                     <item.icon className="h-4 w-4 shrink-0" />
-                    {item.label}
+                    {tt(item.label)}
                   </NavLink>
                 ))}
               </div>
@@ -216,7 +217,7 @@ export function AdminLayout() {
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
             <span className="hidden rounded-full bg-raised px-2.5 py-1 text-[10px] font-semibold text-muted sm:inline">
-              {ROLE_LABELS[user.role]}
+              {tt(ROLE_LABELS[user.role])}
             </span>
             <Avatar name={user.displayName} username={user.username} src={user.avatarUrl} size="xs" className="ml-1" />
           </div>
@@ -235,7 +236,7 @@ export function AdminLayout() {
                   )
                 }
               >
-                <item.icon className="h-3.5 w-3.5" /> {item.label}
+                <item.icon className="h-3.5 w-3.5" /> {tt(item.label)}
               </NavLink>
             )),
           )}
@@ -255,7 +256,7 @@ export function AdminLayout() {
               <Shield className="mx-auto mb-3 h-8 w-8 text-muted" />
               <p className="font-display text-lg font-semibold text-ink">Not available to your role</p>
               <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-muted">
-                {current.label} is limited to higher roles. Ask an administrator if you need access;
+                {tt(current.label)} is limited to higher roles. Ask an administrator if you need access;
                 every grant is a deliberate role change, never a hidden switch.
               </p>
               <Link to="/admin/overview" className="btn-secondary btn-sm mt-4">

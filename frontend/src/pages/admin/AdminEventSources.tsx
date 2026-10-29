@@ -20,6 +20,7 @@ import { useQuery } from "../../hooks/useApi";
 import { useUI } from "../../store/ui";
 import type { AiUsageResponse, EventSourcesResponse, EventSourceSummary, EventTopic } from "../../types";
 import { Badge, ConfirmDialog, EmptyState, PageLoader } from "../../components/ui";
+import { tt } from "../../lib/i18n";
 import { useAdminAccess } from "./AdminLayout";
 import { AdminPageHeader } from "./parts";
 import { cn, formatDateTime } from "../../lib/utils";
@@ -438,7 +439,7 @@ export function AdminEventSources() {
                   >
                     {TOPICS.map((topic) => (
                       <option key={topic.value} value={topic.value}>
-                        {topic.label}
+                        {tt(topic.label)}
                       </option>
                     ))}
                   </select>
@@ -463,7 +464,7 @@ export function AdminEventSources() {
                         }`}
                       >
                         <span className="flex items-center gap-1.5 text-xs font-semibold text-ink">
-                          <Icon className="h-3.5 w-3.5" /> {adapter.label}
+                          <Icon className="h-3.5 w-3.5" /> {tt(adapter.label)}
                         </span>
                         <span className="mt-1 block text-[11px] leading-snug text-muted">
                           {adapter.hint}
@@ -651,7 +652,7 @@ export function AdminEventSources() {
                         <Badge tone="accent">{source.topic.toLowerCase()}</Badge>
                       </p>
                       <p className="mt-0.5 text-[11px] text-muted">
-                        {ADAPTERS.find((entry) => entry.value === source.adapter)?.label} ·{" "}
+                        {tt(ADAPTERS.find((entry) => entry.value === source.adapter)?.label ?? "")} ·{" "}
                         {source.eventCount} {source.eventCount === 1 ? "listing" : "listings"} ·{" "}
                         {source.lastSyncAt
                           ? `last sync ${formatDateTime(source.lastSyncAt)}`

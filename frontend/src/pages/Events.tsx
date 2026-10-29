@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { useUI } from "../store/ui";
+import { tt } from "../lib/i18n";
 import { useTranslation } from "../store/i18n";
 import { api, apiError, mediaSrc } from "../lib/api";
 import { useQuery } from "../hooks/useApi";
@@ -270,6 +271,7 @@ function HubCard({
   href: string;
   emptyLabel: string;
 }) {
+  const { lang } = useTranslation();
   const palette = HUB_TONES[tone];
 
   return (
@@ -285,7 +287,10 @@ function HubCard({
         </span>
         <span className="min-w-0 flex-1">
           <span className={cn("text-[10px] font-bold uppercase tracking-[0.16em]", palette.text)}>
-            {kicker} <span lang="am" className="font-ethiopic tracking-normal">· {amharic}</span>
+            {kicker}{" "}
+            {lang === "en" && (
+              <span lang="am" className="font-ethiopic tracking-normal">· {amharic}</span>
+            )}
           </span>
           <span className="mt-1 block text-sm font-bold text-ink">
             {count} {unit}
@@ -675,27 +680,33 @@ export function EventsPage({
               ) : (
                 <CalendarDays className="h-3 w-3 text-accent-300" />
               )}
-              <span>{tab === "EVENT" ? "Events · city calendar" : "Meetups · hosted by members"}</span>
-              <span lang="am" className="font-ethiopic text-[11px] text-accent-200">
-                {tab === "EVENT" ? "· ዝግጅቶች" : "· ስብሰባዎች"}
+              <span>
+                {tab === "EVENT"
+                  ? tt("Events · city calendar")
+                  : tt("Meetups · hosted by members")}
               </span>
+              {lang === "en" && (
+                <span lang="am" className="font-ethiopic text-[11px] text-accent-200">
+                  {tab === "EVENT" ? "· ዝግጅቶች" : "· ስብሰባዎች"}
+                </span>
+              )}
             </div>
 
             <h1 className="font-display text-[1.75rem] font-semibold leading-tight tracking-tight text-white sm:text-[2.1rem] md:text-[2.35rem]">
               {tab === "EVENT"
                 ? activeCategory
                   ? activeCategory.key === "SPORT"
-                    ? "Sport — the next three weeks, league by league."
-                    : `${activeCategory.label} — every listing in one place.`
-                  : "Sport, cinema, music and more — all in one place."
+                    ? tt("Sport — the next three weeks, league by league.")
+                    : `${tt(activeCategory.label)} — ${tt("every listing in one place.")}`
+                  : tt("Sport, cinema, music and more — all in one place.")
                 : t("events.title", "Real-world meetups, cinema nights & trail hikes.")}
             </h1>
 
             <p className="max-w-xl text-sm leading-relaxed text-white/60">
               {tab === "EVENT"
-                ? `Updated automatically from ${sourceCount || 1} online ${
-                    sourceCount === 1 ? "source" : "sources"
-                  }, plus official listings from the community team. Jump straight into a league schedule, find a screening at a hall you like, or see what is on stage.`
+                ? `${tt("Updated automatically from")} ${sourceCount || 1} ${tt(
+                    sourceCount === 1 ? "online source" : "online sources",
+                  )}, ${tt("plus official listings from the community team. Jump straight into a league schedule, find a screening at a hall you like, or see what is on stage.")}`
                 : t(
                     "events.subtitle",
                     "Pick a time and a place, post it, and everyone can see the schedule and who is coming. Hikes, watch parties and coffee ceremonies across Addis Ababa.",
@@ -731,9 +742,9 @@ export function EventsPage({
             kicker="Sport"
             amharic="ስፖርት"
             count={hubFixtures.length}
-            unit={`${hubFixtures.length === 1 ? "fixture" : "fixtures"} coming up`}
+            unit={`${tt(hubFixtures.length === 1 ? "fixture" : "fixtures")} ${tt("coming up")}`}
             href="/sports"
-            emptyLabel="No fixtures in the next three weeks — check back after the next sync."
+            emptyLabel={tt("No fixtures in the next three weeks — check back after the next sync.")}
             items={hubFixtures.slice(0, 3).map((fixture) => ({
               key: fixture.id,
               day: dayLabel(fixture.startDate),
@@ -751,9 +762,9 @@ export function EventsPage({
             kicker="Cinema"
             amharic="ሲኒማ"
             count={hubScreenings.length}
-            unit={`${hubScreenings.length === 1 ? "screening" : "screenings"} scheduled`}
+            unit={`${tt(hubScreenings.length === 1 ? "screening" : "screenings")} ${tt("scheduled")}`}
             href="/cinema"
-            emptyLabel="No screenings listed right now — new showtimes arrive with each sync."
+            emptyLabel={tt("No screenings listed right now — new showtimes arrive with each sync.")}
             items={hubScreenings.slice(0, 3).map((screening) => ({
               key: screening.id,
               day: dayLabel(screening.startDate),
@@ -769,9 +780,9 @@ export function EventsPage({
             kicker="Theatre"
             amharic="ቲያትር"
             count={theatreListings.length}
-            unit={`${theatreListings.length === 1 ? "show" : "shows"} on stage`}
+            unit={`${tt(theatreListings.length === 1 ? "show" : "shows")} ${tt("on stage")}`}
             href="/theatre"
-            emptyLabel="Nothing on stage yet — theatre listings appear as venues publish."
+            emptyLabel={tt("Nothing on stage yet — theatre listings appear as venues publish.")}
             items={theatreListings.slice(0, 3).map((show) => ({
               key: show.id,
               day: dayLabel(show.startDate),
@@ -835,7 +846,7 @@ export function EventsPage({
                   >
                     <Icon className="h-3.5 w-3.5" />
                   </span>
-                  <span>{label}</span>
+                  <span>{tt(label)}</span>
                 </button>
               ))}
             </>
@@ -943,17 +954,17 @@ export function EventsPage({
           <h3 className="text-base font-bold text-ink">
             {tab === "EVENT"
               ? searchQuery.trim()
-                ? "No events match your search"
+                ? tt("No events match your search")
                 : activeCategory
-                  ? `Nothing in ${activeCategory.label} yet`
-                  : "No events to show yet"
+                  ? `${tt("Nothing in")} ${tt(activeCategory.label)} ${tt("yet")}`
+                  : tt("No events to show yet")
               : t("events.emptyTitle", "No upcoming meetups found")}
           </h3>
           <p className="mx-auto mt-1 max-w-sm text-xs text-muted">
             {tab === "EVENT"
               ? searchQuery.trim()
-                ? "Try another title, place or host."
-                : "Listings appear here as soon as the community team or a source publishes them."
+                ? tt("Try another title, place or host.")
+                : tt("Listings appear here as soon as the community team or a source publishes them.")
               : t("events.emptyDesc", "Be the first to schedule a coffee chat, film screening, or weekend hike!")}
           </p>
           {tab === "MEETUP" ? (
@@ -971,7 +982,7 @@ export function EventsPage({
               className="mt-5 inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2.5 text-xs font-semibold text-ink shadow-sm transition hover:border-brand-500"
             >
               <Users className="h-3.5 w-3.5" />
-              <span>Browse meetups instead</span>
+              <span>{tt("Browse meetups instead")}</span>
             </Link>
           )}
         </div>
@@ -1051,7 +1062,7 @@ export function EventsPage({
                         )}
                       >
                         <TopicIcon className="h-3 w-3" />
-                        <span>{topicMeta.label}</span>
+                        <span>{tt(topicMeta.label)}</span>
                       </span>
                     )}
                     {item.category && (

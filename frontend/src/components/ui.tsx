@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { Loader2, Star, X, type LucideIcon } from "lucide-react";
 import { cn, initials } from "../lib/utils";
 import { mediaSrc } from "../lib/api";
+import { tt } from "../lib/i18n";
 
 const AVATAR_SIZES = {
   xs: "h-7 w-7 text-[10px]",
@@ -43,7 +44,7 @@ interface AvatarProps {
 
 export function Avatar({ name, username, src, size = "md", className, online }: AvatarProps) {
   const [failed, setFailed] = useState(false);
-  const label = name || username || "Community member";
+  const label = name || username || tt("Community member");
   const hash = Array.from(username || label).reduce((sum, char) => sum + char.charCodeAt(0), 0);
   const gradient = avatarGradients[hash % avatarGradients.length];
 
@@ -81,7 +82,7 @@ export function Avatar({ name, username, src, size = "md", className, online }: 
             size === "xs" ? "h-2.5 w-2.5" : "h-3.5 w-3.5",
             online ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600",
           )}
-          title={online ? "Online" : "Offline"}
+          title={tt(online ? "Online" : "Offline")}
         />
       )}
     </span>
@@ -96,7 +97,7 @@ export function PageLoader({ label = "Loading the conversation…" }: { label?: 
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-20 text-sm text-muted">
       <Spinner className="h-7 w-7" />
-      {label}
+      {tt(label)}
     </div>
   );
 }
@@ -115,8 +116,8 @@ export function EmptyState({ icon: Icon, title, description, action, className }
       <span className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-raised text-brand-700 dark:text-brand-300">
         <Icon className="h-7 w-7" />
       </span>
-      <h3 className="font-display text-lg font-semibold text-ink">{title}</h3>
-      {description && <p className="mt-2 max-w-sm text-sm leading-6 text-muted">{description}</p>}
+      <h3 className="font-display text-lg font-semibold text-ink">{tt(title)}</h3>
+      {description && <p className="mt-2 max-w-sm text-sm leading-6 text-muted">{tt(description)}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   );
@@ -164,8 +165,8 @@ export function SectionHeading({
   return (
     <div className={cn("mb-4 flex items-end justify-between gap-4", className)}>
       <div>
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{title}</h2>
-        {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{tt(title)}</h2>
+        {subtitle && <p className="mt-1 text-sm text-muted">{tt(subtitle)}</p>}
       </div>
       {action}
     </div>
@@ -227,10 +228,10 @@ export function Modal({ open, onClose, title, description, children, className, 
             <div>
               {title && (
                 <h2 id={titleId} className="font-display text-xl font-semibold text-ink">
-                  {title}
+                  {tt(title)}
                 </h2>
               )}
-              {description && <p className="mt-1 text-sm leading-6 text-muted">{description}</p>}
+              {description && <p className="mt-1 text-sm leading-6 text-muted">{tt(description)}</p>}
             </div>
             <button
               type="button"

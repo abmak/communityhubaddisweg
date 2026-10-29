@@ -19,6 +19,7 @@ import { useUI } from "../../store/ui";
 import { cn, formatDate, formatDateTime, timeAgo } from "../../lib/utils";
 import { ROLE_LABELS } from "../../lib/rbac";
 import type { AdminMember, MemberDetailResponse, MembersResponse } from "../../lib/adminTypes";
+import { tt } from "../../lib/i18n";
 import { Avatar, Badge, ConfirmDialog, Dropdown, EmptyState, Modal, PageLoader, Spinner } from "../../components/ui";
 import { useAdminAccess } from "./AdminLayout";
 import { AdminPageHeader, MiniStat, Panel, StatCard } from "./parts";
@@ -167,7 +168,7 @@ export function AdminMembers() {
           <option value="">Every role</option>
           {ROLE_OPTIONS.map((option) => (
             <option key={option} value={option}>
-              {ROLE_LABELS[option]}s
+              {tt(option === "ADMIN" ? "Administrators" : option === "MODERATOR" ? "Moderators" : "Members")}
             </option>
           ))}
         </select>
@@ -179,7 +180,7 @@ export function AdminMembers() {
         >
           {STATUS_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
-              {option.label}
+              {tt(option.label)}
             </option>
           ))}
         </select>
@@ -191,7 +192,7 @@ export function AdminMembers() {
         >
           {SORT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
-              {option.label}
+              {tt(option.label)}
             </option>
           ))}
         </select>
@@ -242,7 +243,7 @@ export function AdminMembers() {
                       </div>
                     </td>
                     <td className="px-3 py-2.5">
-                      <Badge tone={roleTone(member.role)}>{ROLE_LABELS[member.role]}</Badge>
+                      <Badge tone={roleTone(member.role)}>{tt(ROLE_LABELS[member.role])}</Badge>
                     </td>
                     <td className="px-3 py-2.5">
                       {member.banned ? <Badge tone="danger">Suspended</Badge> : <Badge tone="brand">Active</Badge>}
@@ -376,7 +377,7 @@ export function AdminMembers() {
                   </Dropdown>
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                  <Badge tone={roleTone(member.role)}>{ROLE_LABELS[member.role]}</Badge>
+                  <Badge tone={roleTone(member.role)}>{tt(ROLE_LABELS[member.role])}</Badge>
                   {member.banned ? <Badge tone="danger">Suspended</Badge> : <Badge tone="brand">Active</Badge>}
                   <span className="text-[10px] text-muted">
                     {member.postCount} posts · {member.commentCount} comments
@@ -433,7 +434,7 @@ export function AdminMembers() {
                   className="mt-1"
                 />
                 <span>
-                  <span className="block text-sm font-semibold text-ink">{ROLE_LABELS[option]}</span>
+                  <span className="block text-sm font-semibold text-ink">{tt(ROLE_LABELS[option])}</span>
                   <span className="block text-[11px] leading-5 text-muted">
                     {option === "ADMIN"
                       ? "Full access: roles, deletions, rooms, announcements and the audit trail."
@@ -544,7 +545,7 @@ function MemberDetailModal({ id, onClose }: { id: string | null; onClose: () => 
             <Avatar name={detail.data.user.displayName} username={detail.data.user.username} src={detail.data.user.avatarUrl} size="lg" />
             <div>
               <div className="flex flex-wrap items-center gap-1.5">
-                <Badge tone={roleTone(detail.data.user.role)}>{ROLE_LABELS[detail.data.user.role]}</Badge>
+                <Badge tone={roleTone(detail.data.user.role)}>{tt(ROLE_LABELS[detail.data.user.role])}</Badge>
                 {detail.data.user.banned ? <Badge tone="danger">Suspended</Badge> : <Badge tone="brand">Active</Badge>}
               </div>
               <p className="mt-1 text-[11px] text-muted">

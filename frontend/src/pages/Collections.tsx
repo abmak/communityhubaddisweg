@@ -27,6 +27,7 @@ import {
 } from "../lib/utils";
 import { Badge, EmptyState, Spinner, Stars } from "../components/ui";
 import { SafeImage } from "../components/Media";
+import { tt } from "../lib/i18n";
 import { KIND_META, placePath } from "../lib/places";
 
 interface ListResponse {
@@ -101,7 +102,7 @@ function Filters({
           >
             {sort.options.map((option) => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {tt(option.label)}
               </option>
             ))}
           </select>

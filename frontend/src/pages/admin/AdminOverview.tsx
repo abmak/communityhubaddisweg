@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useQuery } from "../../hooks/useApi";
 import { cn, formatCount, timeAgo } from "../../lib/utils";
+import { tt } from "../../lib/i18n";
 import type { Analytics } from "../../lib/adminTypes";
 import { Avatar, PageLoader, Spinner } from "../../components/ui";
 import {
@@ -298,7 +299,7 @@ function OverviewBody({ data, refreshing }: { data: Analytics; refreshing: boole
             <div key={stat.label} className="rounded-xl border border-line bg-raised/40 p-3">
               <stat.icon className="h-4 w-4 text-muted" />
               <p className="mt-2 font-display text-lg font-semibold text-ink">{formatCount(stat.value)}</p>
-              <p className="text-[10px] font-medium text-muted">{stat.label}</p>
+              <p className="text-[10px] font-medium text-muted">{tt(stat.label)}</p>
             </div>
           ))}
         </div>

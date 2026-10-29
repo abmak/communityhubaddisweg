@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import type { Post } from "../types";
 import { api, apiError } from "../lib/api";
+import { tt } from "../lib/i18n";
 import { useAuth } from "../store/auth";
 import { useUI } from "../store/ui";
 import {
@@ -298,7 +299,7 @@ export function PostCard({ post, onChange, onRemove, detail }: PostCardProps) {
               data.likedByMe && "text-rose-600",
             )}
             aria-pressed={data.likedByMe}
-            aria-label={data.likedByMe ? "Unlike post" : "Like post"}
+            aria-label={tt(data.likedByMe ? "Unlike post" : "Like post")}
           >
             <Heart className={cn("h-[18px] w-[18px]", data.likedByMe && "fill-current")} />
             <span className="tabular-nums">{formatCount(data.likeCount)}</span>
@@ -337,7 +338,7 @@ export function PostCard({ post, onChange, onRemove, detail }: PostCardProps) {
               data.bookmarkedByMe && "text-amber-600",
             )}
             aria-pressed={data.bookmarkedByMe}
-            aria-label={data.bookmarkedByMe ? "Remove bookmark" : "Bookmark post"}
+            aria-label={tt(data.bookmarkedByMe ? "Remove bookmark" : "Bookmark post")}
           >
             {data.bookmarkedByMe ? (
               <BookmarkCheck className="h-[18px] w-[18px] fill-current" />

@@ -24,6 +24,7 @@ import type { Media, User } from "../types";
 import { useAuth } from "../store/auth";
 import { useUI } from "../store/ui";
 import { api, apiError } from "../lib/api";
+import { tt } from "../lib/i18n";
 import { cn, formatDate } from "../lib/utils";
 import { Avatar, Badge, Modal } from "../components/ui";
 import { ImageUploader } from "../components/ImageUploader";
@@ -384,7 +385,7 @@ export function SettingsPage() {
                     : "text-muted hover:bg-raised hover:text-ink",
                 )}
               >
-                <Icon className="h-4 w-4" /> {item.label}
+                <Icon className="h-4 w-4" /> {tt(item.label)}
               </button>
             );
           })}
@@ -690,7 +691,7 @@ export function SettingsPage() {
                         )}
                       >
                         <Icon className="h-5 w-5" />
-                        {option.label}
+                        {tt(option.label)}
                       </button>
                     );
                   })}
@@ -722,7 +723,7 @@ export function SettingsPage() {
                           : "border-line hover:border-brand-300",
                       )}
                     >
-                      <span className="block text-sm font-semibold text-ink">{option.label}</span>
+                      <span className="block text-sm font-semibold text-ink">{tt(option.label)}</span>
                       <span className="mt-0.5 block text-[11px] text-muted">{option.hint}</span>
                     </button>
                   ))}

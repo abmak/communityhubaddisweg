@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { SupportedLang, translate, LANGUAGES, LanguageInfo } from "../lib/i18n";
+import { SupportedLang, translate, LANGUAGES, LanguageInfo, setActiveLang } from "../lib/i18n";
 
 interface I18nState {
   lang: SupportedLang;
@@ -9,16 +9,23 @@ interface I18nState {
 
 const getInitialLang = (): SupportedLang => {
   const saved = localStorage.getItem("ch_lang");
-  if (saved === "am" || saved === "om" || saved === "en") return saved;
+  if (saved === "am" || saved === "om" || saved === "ti" || saved === "en") return saved;
   return "en";
 };
 
+// The build-time translator resolves copy through lib/i18n at render time, so
+// the store has to publish the chosen language before anything paints.
+const initialLang = getInitialLang();
+setActiveLang(initialLang);
+document.documentElement.lang = initialLang;
+
 export const useI18n = create<I18nState>((set) => ({
-  lang: getInitialLang(),
+  lang: initialLang,
   availableLanguages: LANGUAGES,
   setLang: (lang: SupportedLang) => {
     localStorage.setItem("ch_lang", lang);
     document.documentElement.lang = lang;
+    setActiveLang(lang);
     set({ lang });
   },
 }));

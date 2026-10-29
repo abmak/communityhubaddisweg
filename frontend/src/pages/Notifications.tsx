@@ -20,6 +20,7 @@ import { useAuth } from "../store/auth";
 import { useUI } from "../store/ui";
 import { api, apiError } from "../lib/api";
 import { notificationLink, timeAgo } from "../lib/utils";
+import { tt } from "../lib/i18n";
 import { Avatar, EmptyState, PageLoader } from "../components/ui";
 import { getSocket } from "../lib/socket";
 
@@ -141,7 +142,7 @@ export function NotificationsPage() {
             Everything that happened while you were away.
           </h1>
           <p className="mt-1 text-sm text-muted">
-            {unreadCount > 0 ? `${unreadCount} unread` : "You're all caught up."}
+            {unreadCount > 0 ? `${unreadCount} ${tt("unread")}` : tt("You're all caught up.")}
           </p>
         </div>
         {unreadCount > 0 && (
@@ -163,7 +164,7 @@ export function NotificationsPage() {
                 : "px-3 py-2.5 text-sm font-medium capitalize text-muted transition hover:text-ink"
             }
           >
-            {option}
+            {tt(option === "all" ? "All" : "Unread")}
             {option === "unread" && unreadCount > 0 && (
               <span className="ml-1.5 rounded-full bg-brand-700 px-1.5 py-0.5 text-[9px] font-bold text-white">
                 {unreadCount}

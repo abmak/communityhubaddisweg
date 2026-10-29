@@ -19,6 +19,7 @@ import { CategoryCard } from "../components/CategoryCard";
 import { PostCard } from "../components/PostCard";
 import { SafeImage } from "../components/Media";
 import { FollowButton } from "../components/UserCard";
+import { tt } from "../lib/i18n";
 import { cn, formatCount, postPath, timeAgo } from "../lib/utils";
 
 type SearchType = "all" | "posts" | "members" | "categories" | "movies" | "books" | "hikes";
@@ -162,7 +163,7 @@ export function SearchPage() {
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />
-                  {option.label}
+                  {tt(option.label)}
                 </button>
               );
             })}

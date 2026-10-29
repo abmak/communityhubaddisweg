@@ -7,7 +7,8 @@ import { useUI } from "../store/ui";
 import { useQuery } from "../hooks/useApi";
 import { api, apiError } from "../lib/api";
 import { categoryIcon, categoryPath, cn } from "../lib/utils";
-import { categoryAmharic } from "../lib/brand";
+import { categoryAmharic, localizedCategoryName } from "../lib/brand";
+import { useTranslation } from "../store/i18n";
 import { Avatar } from "./ui";
 import { ImageUploader } from "./ImageUploader";
 import { VoiceRecorder } from "./VoiceRecorder";
@@ -26,6 +27,7 @@ interface PostComposerProps {
  * Used on the home feed and inside every discussion room.
  */
 export function PostComposer({ onCreated, fixedCategory, className }: PostComposerProps) {
+  const { lang } = useTranslation();
   const user = useAuth((state) => state.user);
   const pushToast = useUI((state) => state.pushToast);
   const { data } = useQuery<{ categories: Category[] }>("/api/categories");
@@ -248,7 +250,7 @@ export function PostComposer({ onCreated, fixedCategory, className }: PostCompos
                 >
                   {rooms.map((category) => (
                     <option key={category.id} value={category.id}>
-                      {category.name}
+                      {localizedCategoryName(category, lang)}
                     </option>
                   ))}
                 </select>

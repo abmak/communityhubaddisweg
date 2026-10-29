@@ -39,6 +39,7 @@ import { CategoryCard } from "../components/CategoryCard";
 import { KindMedia } from "../components/KindMedia";
 import { locationBlock, requestPosition } from "../lib/geo";
 import { PostCard } from "../components/PostCard";
+import { tt } from "../lib/i18n";
 import { cn, formatCount } from "../lib/utils";
 import { KIND_META, PLACE_KINDS, formatDistance, placePath } from "../lib/places";
 import { BRAND } from "../lib/brand";
@@ -165,11 +166,11 @@ function GebetaScene({ members, posts, rooms }: { members: number; posts: number
                 />
                 <figcaption
                   className="absolute inset-x-2 bottom-1.5 flex min-w-0 items-center gap-1 text-white"
-                  title={`${tile.am} · ${tile.label}`}
+                  title={`${tile.am} · ${tt(tile.label)}`}
                 >
                   <Icon className="h-3 w-3 shrink-0 text-accent-300" />
                   <span className="truncate text-[9px] uppercase tracking-[0.1em] text-white/75">
-                    {tile.label}
+                    {tt(tile.label)}
                   </span>
                 </figcaption>
                 </figure>
@@ -203,7 +204,7 @@ function GebetaScene({ members, posts, rooms }: { members: number; posts: number
                   className="rounded-lg border border-white/10 bg-white/[0.06] px-2 py-2"
                 >
                   <p className="font-display text-lg font-semibold text-white">{stat.value}</p>
-                  <p className="text-[9px] uppercase tracking-[0.16em] text-white/60">{stat.label}</p>
+                  <p className="text-[9px] uppercase tracking-[0.16em] text-white/60">{tt(stat.label)}</p>
                 </div>
               ))}
             </div>
@@ -290,7 +291,7 @@ function NearbyPreview({ places }: { places: Place[] }) {
                 to={`/places?kind=${kind}`}
                 className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-[11px] font-semibold text-muted transition hover:border-brand-400/60 hover:text-ink"
               >
-                <Icon className={cn("h-3.5 w-3.5", meta.iconTone)} /> {meta.label}
+                <Icon className={cn("h-3.5 w-3.5", meta.iconTone)} /> {tt(meta.label)}
               </Link>
             );
           })}
@@ -321,7 +322,7 @@ function NearbyPreview({ places }: { places: Place[] }) {
                   <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-3.5 text-white">
                     <div className="min-w-0">
                       <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/25 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.16em] backdrop-blur-sm">
-                        <Icon className="h-3 w-3" /> {meta.label}
+                        <Icon className="h-3 w-3" /> {tt(meta.label)}
                       </span>
                       <h3 className="mt-1.5 truncate font-display text-[1.1rem] font-semibold leading-tight">
                         {place.name}

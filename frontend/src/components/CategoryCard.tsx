@@ -13,7 +13,9 @@ export function CategoryCard({ category, compact }: { category: Category; compac
   const amharic = categoryAmharic(category.slug);
   const art = roomArt(category.slug);
   const title = localizedCategoryName(category, lang);
-  const subtitle = lang === "en" ? amharic : category.name;
+  // English keeps the Amharic echo; the other languages show the English name
+  // once so members can still match a room to its English label.
+  const subtitle = lang === "en" ? amharic : lang === "am" ? category.name : (amharic ?? category.name);
 
   return (
     <Link

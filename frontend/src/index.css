@@ -66,8 +66,9 @@
     @apply outline-none ring-2 ring-brand-500/70 ring-offset-2 ring-offset-canvas;
   }
 
-  /* Amharic copy needs a little more breathing room than Latin text. */
+  /* Amharic and Tigrinya copy needs a little more breathing room than Latin text. */
   [lang="am"],
+  [lang="ti"],
   .font-ethiopic {
     font-feature-settings: "kern" 1;
     letter-spacing: 0;

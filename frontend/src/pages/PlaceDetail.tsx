@@ -18,6 +18,7 @@ import { useQuery } from "../hooks/useApi";
 import { Badge, EmptyState, Spinner } from "../components/ui";
 import { KindMedia } from "../components/KindMedia";
 import { useUI } from "../store/ui";
+import { tt } from "../lib/i18n";
 import { KIND_META, formatDistance, mapsHref, placePath } from "../lib/places";
 import { navigationPath } from "../lib/navigation";
 import { useSavedPlaces } from "../lib/savedPlaces";
@@ -115,7 +116,7 @@ export function PlaceDetailPage() {
         <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-7">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/25 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] backdrop-blur-sm">
-              <Icon className="h-3 w-3" /> {meta.label}
+              <Icon className="h-3 w-3" /> {tt(meta.label)}
             </span>
             <span
               lang="am"

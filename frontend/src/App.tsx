@@ -7,6 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useAuth } from "./store/auth";
+import { useI18n } from "./store/i18n";
 import { useUI } from "./store/ui";
 import { listenForPushMessages, syncPushSubscription } from "./lib/browserNotifications";
 import { AppLayout, ThemeManager } from "./components/Layout";
@@ -138,6 +139,9 @@ export default function App() {
   const calendarPreference = useAuth((state) => state.user?.calendarPreference);
   const calendar = useUI((state) => state.calendar);
   const setCalendar = useUI((state) => state.setCalendar);
+  // Static copy is resolved by the build-time translator during render, so the
+  // tree above every screen has to re-render when the language changes.
+  const lang = useI18n((state) => state.lang);
 
   useEffect(() => {
     void bootstrap();
@@ -156,6 +160,10 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.calendar = calendar;
   }, [calendar]);
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   if (status === "idle" || status === "loading") {
     return <Splash />;

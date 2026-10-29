@@ -5,7 +5,9 @@ import type { Category } from "../types";
 import { useAuth } from "../store/auth";
 import { usePaginatedPosts, useQuery } from "../hooks/useApi";
 import { categoryIcon, categoryPath, cn } from "../lib/utils";
-import { amharicGreeting, categoryAmharic } from "../lib/brand";
+import { amharicGreeting, categoryAmharic, localizedCategoryName, oromoGreeting, tigrinyaGreeting } from "../lib/brand";
+import { tt } from "../lib/i18n";
+import { useTranslation } from "../store/i18n";
 import { Badge } from "../components/ui";
 import { PostFeed } from "../components/PostFeed";
 import { PostComposer } from "../components/PostComposer";
@@ -37,8 +39,10 @@ export function HomePage() {
             : {};
 
   const feed = usePaginatedPosts("/api/posts", params);
+  const { lang, t } = useTranslation();
   const categories = categoryData?.categories ?? [];
-  const greeting = amharicGreeting();
+  const greeting =
+    lang === "ti" ? tigrinyaGreeting() : lang === "om" ? oromoGreeting() : amharicGreeting();
 
   return (
     <div className="space-y-5">
@@ -74,7 +78,7 @@ export function HomePage() {
               </Link>
             )}
             <Link to={user ? "/create" : "/register"} className="btn-primary btn-sm">
-              <PenSquare className="h-3.5 w-3.5" /> {user ? "Post" : "Join"}
+              <PenSquare className="h-3.5 w-3.5" /> {user ? tt("Post") : tt("Join")}
             </Link>
           </div>
         </div>
@@ -96,6 +100,7 @@ export function HomePage() {
             {categories.map((category) => {
               const Icon = categoryIcon(category.icon);
               const amharic = categoryAmharic(category.slug);
+              const roomName = localizedCategoryName(category, lang);
               return (
                 <Link
                   key={category.id}
@@ -108,7 +113,7 @@ export function HomePage() {
                   </span>
                   <span>
                     <span className="block text-xs font-semibold leading-tight text-ink">
-                      {category.name}
+                      {roomName}
                     </span>
                     <span className="block text-[10px] text-muted">
                       {amharic ? `${amharic} · ` : ""}
@@ -144,7 +149,7 @@ export function HomePage() {
                   : "text-muted hover:bg-raised/60 hover:text-ink",
               )}
             >
-              {item.label}
+              {tt(item.label)}
               <span lang="am" className="ml-1.5 hidden font-ethiopic text-[10px] text-muted/70 sm:inline">
                 {item.amharic}
               </span>

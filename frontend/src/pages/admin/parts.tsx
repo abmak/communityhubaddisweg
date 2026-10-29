@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ArrowDownRight, ArrowUpRight, Minus, type LucideIcon } from "lucide-react";
 import { cn, formatCount } from "../../lib/utils";
+import { tt } from "../../lib/i18n";
 import type { PeriodDelta, TrendPoint } from "../../lib/adminTypes";
 
 export function AdminPageHeader({
@@ -137,7 +138,7 @@ export function TrendChart({ points, lines }: { points: TrendPoint[]; lines: Cha
           {lines.map((line) => (
             <span key={line.key} className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted">
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: line.color }} />
-              {line.label}
+              {tt(line.label)}
               <span className="font-semibold text-ink">
                 {formatCount(points.reduce((sum, point) => sum + point[line.key], 0))}
               </span>
@@ -216,7 +217,7 @@ export function BarList({
       {rows.map((row) => (
         <div key={row.label}>
           <div className="mb-1 flex items-center justify-between gap-2 text-xs">
-            <span className="truncate text-muted">{row.label}</span>
+            <span className="truncate text-muted">{tt(row.label)}</span>
             <span className="shrink-0 font-semibold text-ink">{formatCount(row.value)}</span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-raised">
@@ -287,11 +288,13 @@ export function RoleDonut({
               className="h-2.5 w-2.5 rounded-full"
               style={{ backgroundColor: colors[row.role] ?? "#94a3b8" }}
             />
-            <span className="text-muted">{labels[row.role] ?? row.role}</span>
+            <span className="text-muted">{tt(labels[row.role] ?? row.role)}</span>
             <span className="ml-auto font-semibold text-ink">{formatCount(row.count)}</span>
           </div>
         ))}
-        <p className="pt-1 text-[10px] text-muted/80">{formatCount(total)} accounts</p>
+        <p className="pt-1 text-[10px] text-muted/80">
+          {formatCount(total)} {tt("accounts")}
+        </p>
       </div>
     </div>
   );

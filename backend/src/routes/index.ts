@@ -22,6 +22,7 @@ import { jokesRouter } from "./jokes";
 import { directionsRouter } from "./directions";
 import { geocodeRouter } from "./geocode";
 import { travelRouter } from "./travel";
+import { tripSharesRouter } from "./trip-shares";
 
 export const apiRouter = Router();
 
@@ -40,6 +41,7 @@ apiRouter.use("/places", placesRouter);
 apiRouter.use("/directions", directionsRouter);
 apiRouter.use("/geocode", geocodeRouter);
 apiRouter.use("/travel", travelRouter);
+apiRouter.use("/trip-shares", tripSharesRouter);
 apiRouter.use("/events", eventsRouter);
 apiRouter.use("/quiz", quizRouter);
 apiRouter.use("/place-quiz", placeQuizRouter);

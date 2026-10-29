@@ -130,6 +130,7 @@ model User {
   eventsCreated         Event[]            @relation("EventCreator")
   eventRsvps            EventRsvp[]
   leaveByReminders      LeaveByReminder[]
+  tripShares            TripShare[]
   adminActions          AdminAction[]      @relation("AdminActionActor")
   quizAttempts          QuizAttempt[]
   quizSeen              QuizSeen[]
@@ -641,6 +642,16 @@ enum RsvpStatus {
   INTERESTED
 }
 
+/// A public, expiring live-location link created from in-app navigation.
+/// The traveler's browser posts fixes while navigation is running; a trusted
+/// contact opens `/trip/<token>` without signing in.
+enum TripShareStatus {
+  ACTIVE
+  ARRIVED
+  ENDED
+  EXPIRED
+}
+
 /// Two kinds of listing share one table: EVENTS are listings pulled in from an
 /// online source (cinema, theatre, football, concerts), MEETUPS are hosted by
 /// members. `kind` is what splits the Events page into its two tabs.
@@ -797,6 +808,46 @@ model LeaveByReminder {
 
   @@unique([userId, eventId])
   @@index([notifyAt, notifiedAt])
+}
+
+/// One live trip link. The token is the secret in the URL; the route geometry
+/// is stored so the public page can draw the planned road even before the first
+/// GPS fix arrives. Only the owner can update or end a share.
+model TripShare {
+  id                   String          @id @default(cuid())
+  token                String          @unique
+  userId               String
+  originName           String?
+  originLat            Float
+  originLng            Float
+  destinationName      String
+  destinationAddress   String?
+  destinationLat       Float
+  destinationLng       Float
+  mode                 String          @default("driving")
+  routePath            Json?
+  routeDistanceMeters  Int?
+  routeDurationSeconds Int?
+  status               TripShareStatus @default(ACTIVE)
+  currentLat           Float?
+  currentLng           Float?
+  accuracyMeters       Float?
+  headingDegrees       Float?
+  lastFixAt            DateTime?
+  remainingMeters      Int?
+  remainingSeconds     Int?
+  delayMinutes         Int             @default(0)
+  note                 String?         @db.VarChar(200)
+  arrivedAt            DateTime?
+  endedAt              DateTime?
+  expiresAt            DateTime
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([expiresAt])
 }
 
 model EventRsvp {

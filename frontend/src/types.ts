@@ -820,5 +820,56 @@ export interface GeocodeResponse {
   };
 }
 
+/** A public live-trip link created from navigation. */
+export type TripShareStatus = "ACTIVE" | "ARRIVED" | "ENDED" | "EXPIRED";
+
+export interface TripShare {
+  id: string;
+  token: string;
+  status: TripShareStatus;
+  mode: string;
+  origin: { name: string | null; lat: number; lng: number };
+  destination: { name: string; address: string | null; lat: number; lng: number };
+  traveler: { username: string; displayName: string; avatarUrl: string | null };
+  current: { lat: number; lng: number; accuracy: number | null; heading: number | null } | null;
+  routePath: RoutePoint[] | null;
+  routeDistanceMeters: number | null;
+  routeDurationSeconds: number | null;
+  remainingMeters: number | null;
+  remainingSeconds: number | null;
+  delayMinutes: number;
+  note: string | null;
+  lastFixAt: string | null;
+  lastFixAgoSeconds: number | null;
+  live: boolean;
+  estimatedArrivalAt: string | null;
+  arrivedAt: string | null;
+  endedAt: string | null;
+  expiresAt: string;
+  createdAt: string;
+  isOwner: boolean;
+}
+
+export interface TripSafetyPlace {
+  name: string;
+  slug: string;
+  address: string | null;
+  area: string | null;
+  city: string;
+  lat: number;
+  lng: number;
+  kind: PlaceKind;
+  distanceKm: number;
+}
+
+export interface TripShareResponse {
+  trip: TripShare;
+  safety: {
+    hospital: TripSafetyPlace | null;
+    pharmacy: TripSafetyPlace | null;
+  };
+  serverTime: string;
+}
+
 
 

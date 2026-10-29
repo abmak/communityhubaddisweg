@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import axios from "axios";
 import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
   ArrowUp,
   Car,
+  Check,
   Clock,
+  Copy,
   CornerUpLeft,
   CornerUpRight,
   ExternalLink,
@@ -18,10 +21,19 @@ import {
   Navigation,
   RefreshCw,
   RotateCcw,
+  Share2,
+  ShieldCheck,
   Volume2,
   VolumeX,
+  XCircle,
 } from "lucide-react";
-import type { DirectionsResponse, DirectionsRoute, RoutePoint, TravelMode } from "../types";
+import type {
+  DirectionsResponse,
+  DirectionsRoute,
+  RoutePoint,
+  TravelMode,
+  TripShare,
+} from "../types";
 import { api, apiError } from "../lib/api";
 import {
   buildRouteMetrics,
@@ -52,7 +64,46 @@ interface LiveFix extends RoutePoint {
   heading: number | null;
 }
 
+interface SharedTripLink {
+  id: string;
+  token: string;
+  destinationName: string;
+  destinationLat: number;
+  destinationLng: number;
+}
+
 const VOICE_PREFERENCE_KEY = "ch_voice_guide";
+const TRIP_SHARE_KEY = "ch_live_trip_share";
+
+function readStoredShare(): SharedTripLink | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(TRIP_SHARE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<SharedTripLink>;
+    if (
+      typeof parsed.id !== "string" ||
+      typeof parsed.token !== "string" ||
+      typeof parsed.destinationName !== "string" ||
+      typeof parsed.destinationLat !== "number" ||
+      typeof parsed.destinationLng !== "number"
+    ) {
+      return null;
+    }
+    return parsed as SharedTripLink;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredShare(share: SharedTripLink | null): void {
+  try {
+    if (share) window.localStorage.setItem(TRIP_SHARE_KEY, JSON.stringify(share));
+    else window.localStorage.removeItem(TRIP_SHARE_KEY);
+  } catch {
+    // Storage can be blocked; the live link still works for this visit.
+  }
+}
 
 function readVoicePreference(): boolean {
   try {
@@ -218,8 +269,45 @@ export function NavigatePage() {
   const voiceAvailable = useMemo(() => speechSupported(), []);
   const voiceOnRef = useRef(voiceOn);
   voiceOnRef.current = voiceOn;
+  // A restored link is validated below; start empty so an expired token never
+  // flashes a live-sharing panel on a fresh visit.
+  const [share, setShare] = useState<SharedTripLink | null>(null);
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  const [shareTick, setShareTick] = useState(0);
+  const lastShareSentRef = useRef(0);
+  const sharedRouteRef = useRef<DirectionsRoute | null>(null);
   const spokenCuesRef = useRef<Set<string>>(new Set());
   const arrivalAnnouncedRef = useRef(false);
+
+  // Recover a link after a refresh. The API is the authority: a stored token
+  // that has expired or belongs to another account is dropped instead of shown.
+  useEffect(() => {
+    const stored = readStoredShare();
+    if (!stored) return;
+
+    let cancelled = false;
+    api
+      .get<{ trip: TripShare }>(`/api/trip-shares/${encodeURIComponent(stored.token)}`)
+      .then((response) => {
+        if (cancelled) return;
+        if (response.data.trip.status === "ACTIVE" && response.data.trip.isOwner) {
+          setShare(stored);
+        } else {
+          writeStoredShare(null);
+          setShare(null);
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        writeStoredShare(null);
+        setShare(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // The way back follows wherever the link came from: an event page wins over
   // the venue it is attached to, so the reader lands where they started.
@@ -401,6 +489,58 @@ export function NavigatePage() {
       seconds: remainingSecondsOf(route, location.traveledMeters),
     };
   }, [route, location]);
+
+  // Push a throttled fix to the live safety link while navigation is running.
+  // A link created for another destination is deliberately left alone, so a
+  // stale tab can never move someone else's shared trip.
+  useEffect(() => {
+    if (!share || !live || !position) return;
+    if (
+      target &&
+      (Math.abs(share.destinationLat - target.lat) > 0.0002 ||
+        Math.abs(share.destinationLng - target.lng) > 0.0002)
+    ) {
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastShareSentRef.current < 7000) return;
+    lastShareSentRef.current = now;
+
+    const body: Record<string, unknown> = {
+      fix: {
+        lat: position.lat,
+        lng: position.lng,
+        accuracy: position.accuracy,
+        heading: position.heading,
+      },
+      remainingMeters: remaining?.meters ?? null,
+      remainingSeconds: remaining?.seconds ?? null,
+    };
+
+    if (route && sharedRouteRef.current !== route) {
+      body.routePath = route.path;
+      body.routeDistanceMeters = route.distanceMeters;
+      body.routeDurationSeconds = route.durationSeconds;
+      sharedRouteRef.current = route;
+    }
+
+    void api.patch(`/api/trip-shares/${share.id}`, body).catch((error) => {
+      if (axios.isAxiosError(error) && [404, 409].includes(error.response?.status ?? 0)) {
+        writeStoredShare(null);
+        sharedRouteRef.current = null;
+        setShare(null);
+      }
+    });
+  }, [share, live, position, remaining?.meters, remaining?.seconds, route, target, shareTick]);
+
+  // Keep the watcher fresh even when the phone is stationary and the GPS
+  // watcher has no new fix to report.
+  useEffect(() => {
+    if (!share || !live) return;
+    const timer = window.setInterval(() => setShareTick((value) => value + 1), 8000);
+    return () => window.clearInterval(timer);
+  }, [share, live]);
 
   const nextStepIndex = useMemo(() => {
     if (!route) return 0;
@@ -629,6 +769,110 @@ export function NavigatePage() {
     target?.name,
   ]);
 
+  const forgetShare = useCallback(() => {
+    writeStoredShare(null);
+    sharedRouteRef.current = null;
+    setShare(null);
+  }, []);
+
+  const copyShareLink = useCallback(async () => {
+    if (!share) return;
+    const url = `${window.location.origin}/trip/${share.token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      pushToast("Live safety link copied.", { tone: "success" });
+      window.setTimeout(() => setShareCopied(false), 2000);
+    } catch {
+      window.prompt("Copy this live safety link", url);
+    }
+  }, [pushToast, share]);
+
+  const createShare = useCallback(async () => {
+    if (share) return;
+    if (!route || !origin || !target || !position) {
+      pushToast("Start navigation first so the link has a live position.", { tone: "error" });
+      return;
+    }
+
+    setShareBusy(true);
+    try {
+      const response = await api.post<{ share: TripShare }>("/api/trip-shares", {
+        origin: { lat: origin.lat, lng: origin.lng },
+        originName,
+        destination: { lat: target.lat, lng: target.lng },
+        destinationName: target.name,
+        destinationAddress: target.address ?? undefined,
+        mode,
+        routePath: route.path,
+        routeDistanceMeters: route.distanceMeters,
+        routeDurationSeconds: route.durationSeconds,
+        fix: {
+          lat: position.lat,
+          lng: position.lng,
+          accuracy: position.accuracy,
+          heading: position.heading,
+        },
+        remainingMeters: remaining?.meters,
+        remainingSeconds: remaining?.seconds,
+      });
+
+      const created = response.data.share;
+      const next: SharedTripLink = {
+        id: created.id,
+        token: created.token,
+        destinationName: created.destination.name,
+        destinationLat: created.destination.lat,
+        destinationLng: created.destination.lng,
+      };
+      writeStoredShare(next);
+      sharedRouteRef.current = route;
+      lastShareSentRef.current = Date.now();
+      setShare(next);
+      setShareCopied(false);
+
+      const url = `${window.location.origin}/trip/${next.token}`;
+      try {
+        await navigator.clipboard.writeText(url);
+        setShareCopied(true);
+        pushToast("Live safety link created and copied.", { tone: "success" });
+      } catch {
+        pushToast("Live safety link created. Copy it from Trip safety.", { tone: "success" });
+      }
+    } catch (error) {
+      pushToast(apiError(error), { tone: "error" });
+    } finally {
+      setShareBusy(false);
+    }
+  }, [mode, origin, originName, position, pushToast, remaining?.meters, remaining?.seconds, route, share, target]);
+
+  const stopShare = useCallback(
+    async (quiet = false) => {
+      if (!share) return;
+      setShareBusy(true);
+      try {
+        await api.post(`/api/trip-shares/${share.id}/end`);
+        forgetShare();
+        if (!quiet) pushToast("Live sharing stopped.", { tone: "success" });
+      } catch (error) {
+        if (axios.isAxiosError(error) && [404, 409].includes(error.response?.status ?? 0)) {
+          forgetShare();
+          if (!quiet) pushToast("This live link was already closed.", { tone: "success" });
+        } else if (!quiet) {
+          pushToast(apiError(error), { tone: "error" });
+        }
+      } finally {
+        setShareBusy(false);
+      }
+    },
+    [forgetShare, pushToast, share],
+  );
+
+  const stopNavigation = useCallback(() => {
+    if (share) void stopShare(true);
+    setLive(false);
+  }, [share, stopShare]);
+
   if (!target && resolving) {
     return (
       <div className="card flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
@@ -694,6 +938,12 @@ export function NavigatePage() {
   const googleHref = googleDirectionsHref(target, mode);
   const arrival = remaining ? arrivalClock(remaining.seconds) : null;
   const activeIndex = live ? nextStepIndex : -1;
+  const shareMatchesTrip = Boolean(
+    share &&
+      Math.abs(share.destinationLat - target.lat) < 0.0002 &&
+      Math.abs(share.destinationLng - target.lng) < 0.0002,
+  );
+  const shareUrl = share ? `${window.location.origin}/trip/${share.token}` : "";
 
   return (
     <div className="space-y-5">
@@ -786,7 +1036,7 @@ export function NavigatePage() {
           <div className="mt-5 flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={live ? () => setLive(false) : startNavigation}
+              onClick={live ? stopNavigation : startNavigation}
               disabled={!route || locating || Boolean(routeError)}
               className={cn(
                 "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50",
@@ -851,6 +1101,22 @@ export function NavigatePage() {
                 {voiceOn ? "Voice on" : "Voice off"}
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={share ? () => void copyShareLink() : () => void createShare()}
+              disabled={!share && (!live || !route || !position || shareBusy)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/5 px-3 py-1.5 text-[11px] font-semibold text-white/75 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {shareBusy ? (
+                <Spinner className="h-3.5 w-3.5" />
+              ) : share ? (
+                shareCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />
+              ) : (
+                <Share2 className="h-3.5 w-3.5" />
+              )}
+              {share ? (shareCopied ? "Copied" : "Copy live link") : "Share live"}
+            </button>
 
             <a
               href={googleHref}
@@ -933,7 +1199,7 @@ export function NavigatePage() {
           </button>
           <button
             type="button"
-            onClick={() => setLive(false)}
+            onClick={stopNavigation}
             className="shrink-0 rounded-lg border border-white/25 px-2.5 py-1.5 text-[11px] font-semibold text-white/85 transition hover:bg-white/10"
           >
             End
@@ -1156,6 +1422,103 @@ export function NavigatePage() {
               >
                 <MapPin className="h-3.5 w-3.5" /> Drop a different start
               </button>
+            </div>
+          </section>
+
+          <section className="card overflow-hidden">
+            <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3">
+              <h2 className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink">
+                <ShieldCheck className="h-3.5 w-3.5 text-brand-700 dark:text-brand-300" />
+                Trip safety
+              </h2>
+              <span
+                className={cn(
+                  "rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]",
+                  share
+                    ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                    : "bg-raised text-muted",
+                )}
+              >
+                {share ? "Live link on" : "Off"}
+              </span>
+            </div>
+
+            <div className="p-4">
+              {share ? (
+                <>
+                  <p className="text-[11px] leading-5 text-muted">
+                    {shareMatchesTrip
+                      ? "A trusted contact can follow this trip, see your ETA and find the nearest hospital without signing in."
+                      : `A live link to ${share.destinationName} is still active. It is not receiving updates from this trip.`}
+                  </p>
+
+                  <div className="mt-2.5 flex items-center gap-1.5">
+                    <input
+                      readOnly
+                      value={shareUrl}
+                      aria-label="Live safety link"
+                      onFocus={(event) => event.currentTarget.select()}
+                      className="input h-9 min-w-0 flex-1 text-[10px]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void copyShareLink()}
+                      className="btn-secondary btn-sm shrink-0 px-2.5"
+                    >
+                      {shareCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                      {shareCopied ? "Copied" : "Copy"}
+                    </button>
+                  </div>
+
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <a
+                      href={`/trip/${share.token}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-2.5 py-2 text-[11px] font-semibold text-ink transition hover:border-brand-500/40 hover:bg-raised"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" /> Open safety page
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => void stopShare()}
+                      disabled={shareBusy}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-[11px] font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/20"
+                    >
+                      {shareBusy ? <Spinner className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
+                      Stop sharing
+                    </button>
+                  </div>
+
+                  {shareMatchesTrip && live && (
+                    <p className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                      Updating from this device every few seconds.
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="text-[11px] leading-5 text-muted">
+                    Share a live link with someone you trust. They can follow your route, see your
+                    ETA and get the nearest hospital — no account needed.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void createShare()}
+                    disabled={!live || !route || !position || shareBusy}
+                    className="btn-primary btn-sm mt-3 w-full"
+                  >
+                    {shareBusy ? <Spinner className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
+                    Share live trip
+                  </button>
+                  <p className="mt-1.5 text-[10px] leading-4 text-muted">
+                    {live
+                      ? "The link is copied when it is created. It stops when you end navigation or press Stop sharing."
+                      : "Start navigation first — the link goes live with your position."}
+                  </p>
+                </>
+              )}
             </div>
           </section>
 

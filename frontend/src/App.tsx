@@ -58,6 +58,10 @@ const LazyNavigatePage = lazy(() =>
   import("./pages/Navigate").then((module) => ({ default: module.NavigatePage })),
 );
 
+const LazyTripSharePage = lazy(() =>
+  import("./pages/TripShare").then((module) => ({ default: module.TripSharePage })),
+);
+
 function requireAuthNode(children: ReactNode) {
   return <RequireAuth>{children}</RequireAuth>;
 }
@@ -170,6 +174,21 @@ export default function App() {
 
           {/* The admin workspace is intentionally its own shell, not a tab
               inside the community layout. AdminLayout enforces staff access. */}
+          <Route
+            path="/trip/:token"
+            element={
+              <Suspense
+                fallback={
+                  <div className="flex min-h-screen items-center justify-center bg-canvas">
+                    <Spinner className="h-7 w-7" />
+                  </div>
+                }
+              >
+                <LazyTripSharePage />
+              </Suspense>
+            }
+          />
+
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<AdminOverview />} />

@@ -219,6 +219,8 @@ export function TravelPage() {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [startQuery, setStartQuery] = useState("");
   const [startBusy, setStartBusy] = useState(false);
+  // A start the traveller typed outranks a GPS fix that arrives afterwards.
+  const manualStartRef = useRef(false);
 
   const [destination, setDestination] = useState<Destination | null>(
     requested.to
@@ -256,7 +258,7 @@ export function TravelPage() {
     let cancelled = false;
     requestPosition()
       .then((fix) => {
-        if (cancelled) return;
+        if (cancelled || manualStartRef.current) return;
         setOrigin(fix);
         setOriginLabel("Your current location");
       })
@@ -279,6 +281,7 @@ export function TravelPage() {
   const retryLocation = useCallback(async () => {
     setLocationError(null);
     setLocating(true);
+    manualStartRef.current = false;
     try {
       const fix = await requestPosition();
       setOrigin(fix);
@@ -290,8 +293,9 @@ export function TravelPage() {
     }
   }, []);
 
-  // GPS is blocked on plain-HTTP phones and in some desktop browsers, so the
-  // planner still lets people type where they are starting from.
+  // GPS is blocked on plain-HTTP phones and in some desktop browsers, and a
+  // traveller may be planning from somewhere they are not standing yet, so the
+  // planner always lets them type the starting point instead.
   const setManualStart = useCallback(async () => {
     const term = startQuery.trim();
     if (term.length < 3) return;
@@ -301,6 +305,7 @@ export function TravelPage() {
       const response = await api.get<GeocodeResponse>(
         `/api/geocode?${new URLSearchParams({ q: term }).toString()}`,
       );
+      manualStartRef.current = true;
       setOrigin({ lat: response.data.location.lat, lng: response.data.location.lng });
       setOriginLabel(term);
       setLocationError(null);
@@ -449,8 +454,10 @@ export function TravelPage() {
     if (destination.address && destination.address !== destination.name) {
       params.set("address", destination.address);
     }
+    // Name the pinned start so navigation can say where the route begins.
+    if (originLabel !== "Your current location") params.set("fromName", originLabel);
     return `/navigate?${params.toString()}`;
-  }, [plan, selectedRoute, origin, destination, mode]);
+  }, [plan, selectedRoute, origin, destination, mode, originLabel]);
 
   const fastest = routes.reduce<PlannedRoute | null>(
     (best, route) => (!best || route.durationSeconds < best.durationSeconds ? route : best),
@@ -515,31 +522,29 @@ export function TravelPage() {
                 {locationError}
               </p>
             )}
-            {!origin && !locating && (
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void setManualStart();
-                }}
-                className="mt-2 flex flex-wrap items-center gap-2"
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                void setManualStart();
+              }}
+              className="mt-2 flex flex-wrap items-center gap-2"
+            >
+              <input
+                value={startQuery}
+                onChange={(event) => setStartQuery(event.target.value)}
+                placeholder="Or type a starting point, e.g. Bole…"
+                className="input h-9 min-w-0 flex-1 text-xs"
+                aria-label="Starting point"
+              />
+              <button
+                type="submit"
+                disabled={startBusy || startQuery.trim().length < 3}
+                className="btn-secondary btn-sm shrink-0"
               >
-                <input
-                  value={startQuery}
-                  onChange={(event) => setStartQuery(event.target.value)}
-                  placeholder="Or type a starting point, e.g. Bole…"
-                  className="input h-9 min-w-0 flex-1 text-xs"
-                  aria-label="Starting point"
-                />
-                <button
-                  type="submit"
-                  disabled={startBusy || startQuery.trim().length < 3}
-                  className="btn-secondary btn-sm shrink-0"
-                >
-                  {startBusy ? <Spinner className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
-                  Set start
-                </button>
-              </form>
-            )}
+                {startBusy ? <Spinner className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
+                Set start
+              </button>
+            </form>
           </div>
           <button
             type="button"
@@ -800,7 +805,7 @@ export function TravelPage() {
               </p>
             </div>
             <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
-              OpenStreetMap · OSRM
+              Street map
             </span>
           </div>
 

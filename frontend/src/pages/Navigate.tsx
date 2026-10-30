@@ -231,6 +231,11 @@ export function NavigatePage() {
   const resolving = Boolean(venueQuery) && !target && !errorMessage;
 
   const initialFrom = useMemo(() => parsePoint(new URLSearchParams(search).get("from")), [search]);
+  // The planner names the start it pinned; a bare "from" stays generic.
+  const initialFromName = useMemo(() => {
+    const raw = new URLSearchParams(search).get("fromName")?.trim();
+    return raw && raw.length <= 80 ? raw : null;
+  }, [search]);
   const initialMode = useMemo<TravelMode>(
     () => (new URLSearchParams(search).get("mode") === "walking" ? "walking" : "driving"),
     [search],
@@ -249,7 +254,9 @@ export function NavigatePage() {
   }, [search]);
 
   const [origin, setOrigin] = useState<RoutePoint | null>(initialFrom);
-  const [originName, setOriginName] = useState(initialFrom ? "Pinned start" : "Your location");
+  const [originName, setOriginName] = useState(
+    initialFrom ? initialFromName ?? "Pinned start" : "Your location",
+  );
   const routeLoadedAtRef = useRef(0);
   const [locating, setLocating] = useState(!initialFrom);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -955,7 +962,7 @@ export function NavigatePage() {
           <ArrowLeft className="h-3.5 w-3.5" /> {backLabel}
         </Link>
         <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
-          OpenStreetMap · OSRM
+          Street map
         </span>
       </div>
 

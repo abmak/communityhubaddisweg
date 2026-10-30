@@ -1,6 +1,10 @@
 import { useEffect, useRef } from "react";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
+// Adds bearing support to Leaflet in place: twist, drag the compass or
+// shift-scroll to turn the map, and it converts taps back to coordinates
+// correctly at any angle.
+import "leaflet-rotate";
 import type { DirectionsRoute, RoutePoint } from "../types";
 
 export interface MapDestination extends RoutePoint {
@@ -83,12 +87,26 @@ export function RouteMap({
       minZoom: 3,
       zoomControl: false,
       worldCopyJump: true,
+      // Free 360° rotation: two-finger twist on a phone, shift-scroll or a
+      // sideways drag on the compass at a desk. Tapping the compass snaps the
+      // map back to north. Pitch stays off — this is a street map, not a
+      // horizon view.
+      rotate: true,
+      bearing: 0,
+      pitch: 0,
+      rotateControl: { position: "topleft", closeOnZeroBearing: false },
+      shiftKeyRotate: true,
+      touchRotate: true,
+      pitchDrag: false,
+      touchPitch: false,
     });
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
+      // Carrying the tile credit is a condition of using the tile service, so
+      // this stays even though the pages label the map plainly as "Street map".
       attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> · routing <a href="https://project-osrm.org" target="_blank" rel="noreferrer">OSRM</a>',
+        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors',
     }).addTo(map);
 
     L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -102,6 +120,9 @@ export function RouteMap({
     mapRef.current = map;
 
     return () => {
+      // The plugin binds shift-scroll on the container outside Leaflet's own
+      // teardown; drop it so a reused container cannot answer for a dead map.
+      map.shiftKeyRotate?.disable();
       map.remove();
       mapRef.current = null;
       routeLayerRef.current = null;
